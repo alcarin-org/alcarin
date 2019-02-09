@@ -1,0 +1,19 @@
+version: "3.7"
+
+services:
+  web:
+    build:
+      context: ./
+      dockerfile: ./setup/Dockerfile-electron
+    command: yarn start
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - ${HOME}/.Xauthority:/root/.Xauthority:rw
+    environment:
+      - NODE_ENV=development
+      - DISPLAY=${DISPLAY}
+    network_mode: host
+    ports:
+      - "3000:3000"
+
