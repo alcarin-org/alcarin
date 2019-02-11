@@ -5,14 +5,7 @@ import { Atmosphere } from '../utils/AtmosphereData';
 import { ipcRenderer } from '../electron-bridge';
 
 const WorldRadius = 17;
-const atmosphereSample: Atmosphere = {
-    worldRadius: WorldRadius,
-    data: new Array(2 * WorldRadius).fill(null).map(() =>
-        new Array(2 * WorldRadius).fill(null).map(() => ({
-            velocity: { x: 0, y: 0 },
-        }))
-    ),
-};
+const atmosphereSample: Atmosphere = new Atmosphere(WorldRadius);
 
 class App extends Component<{}, { number: number }> {
     public componentDidMount() {
@@ -22,7 +15,7 @@ class App extends Component<{}, { number: number }> {
     public render() {
         return (
             <div className="app">
-                <WeatherCanvas atmosphere={atmosphereSample} gapsPx={1} />
+                <WeatherCanvas atmosphere={atmosphereSample} />
             </div>
         );
     }
