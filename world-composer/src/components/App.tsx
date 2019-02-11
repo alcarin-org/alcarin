@@ -1,7 +1,18 @@
 import React, { Component } from 'react';
 import './App.scss';
-import Test from './Test';
+import WeatherCanvas from './canvas/WeatherCanvas';
+import { Atmosphere } from '../utils/AtmosphereData';
 import { ipcRenderer } from '../electron-bridge';
+
+const WorldRadius = 17;
+const atmosphereSample: Atmosphere = {
+    worldRadius: WorldRadius,
+    data: new Array(2 * WorldRadius).fill(null).map(() =>
+        new Array(2 * WorldRadius).fill(null).map(() => ({
+            velocity: { x: 0, y: 0 },
+        }))
+    ),
+};
 
 class App extends Component<{}, { number: number }> {
     public componentDidMount() {
@@ -11,25 +22,7 @@ class App extends Component<{}, { number: number }> {
     public render() {
         return (
             <div className="app">
-                <button onClick={() => ipcRenderer.send('test', 'show me')}>
-                    {' '}
-                    Test me{' '}
-                </button>
-                <header className="app__header">
-                    <img src={''} className="app__logo" alt="logo" />
-                    <p>
-                        Edit <code>src/App.tsx</code> and save to reload.
-                    </p>
-                    <Test />
-                    <a
-                        className="App__link"
-                        href="https://reactjs.org"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        Learn React
-                    </a>
-                </header>
+                <WeatherCanvas atmosphere={atmosphereSample} gapsPx={1} />
             </div>
         );
     }

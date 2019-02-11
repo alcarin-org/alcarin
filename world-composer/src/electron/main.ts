@@ -2,7 +2,6 @@ import { app, BrowserWindow, ipcMain, dialog, Event, IpcMain } from 'electron';
 import { join } from 'path';
 
 // TODO: add support for remembering window custum size and position: https://github.com/mawie81/electron-window-state
-
 // keep a global reference of the window object to prevent garbage collecting it
 let mainWindow: BrowserWindow | null = null;
 
@@ -14,6 +13,8 @@ function createMainWindow() {
         // if we want use ipcRenderer and general communication, we need to
         // intergrate window with node
         webPreferences: {
+            // TODO: change it if app will be public anytime
+            contextIsolation: false,
             nodeIntegration: false,
             preload: join(__dirname, 'preload.js'),
         },
