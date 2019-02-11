@@ -1,6 +1,7 @@
 import { Vector, Point } from './Math';
 
 interface AtmosphereNode {
+    // m/s^2
     velocity: Vector;
 }
 
