@@ -1,13 +1,44 @@
 import React, { useRef, useEffect, useState } from 'react';
 
 import { Atmosphere } from '../../utils/AtmosphereData';
-import { Point, distance } from '../../utils/Math';
+import {
+    Point,
+    Vector,
+    distance,
+    angle,
+    magnitude,
+    constraints,
+} from '../../utils/Math';
 
 interface Props {
     atmosphere: Atmosphere;
     fieldSizePx?: number;
     gapsPx?: number;
     circle?: boolean;
+}
+
+function drawVelocity(
+    ctx: CanvasRenderingContext2D,
+    // 0..1
+    velocity: Vector,
+    pos: Point,
+    fieldSizePx: number
+) {
+    const halfSize = fieldSizePx / 2 - 1;
+    const vPower = constraints(0.1, 1, magnitude(velocity));
+    const vAngle = angle(velocity);
+
+    ctx.translate(pos.x + fieldSizePx / 2, pos.y + fieldSizePx / 2);
+    ctx.rotate(vAngle);
+    ctx.fillStyle = 'black';
+
+    ctx.beginPath();
+    ctx.moveTo(-halfSize * vPower, -halfSize + 1);
+    ctx.lineTo(-halfSize * vPower, halfSize - 1);
+    ctx.lineTo(halfSize * vPower, 0);
+    ctx.fill();
+
+    ctx.restore();
 }
 
 export default function WeatherCanvas({
@@ -21,8 +52,13 @@ export default function WeatherCanvas({
     const [currentColor, setColor] = useState({ r: 0, g: 0, b: 0 });
 
     useEffect(() => {
+        requestAnimationFrame(renderAtmosphere);
+
         function renderAtmosphere() {
-            const ctx: CanvasRenderingContext2D = canvasRef.current!.getContext(
+            if (!canvasRef.current) {
+                return;
+            }
+            const ctx: CanvasRenderingContext2D = canvasRef.current.getContext(
                 '2d'
             )!;
             ctx.fillStyle = `rgb(${(currentColor.r % 512) -
@@ -51,14 +87,13 @@ export default function WeatherCanvas({
                     visibleCellSize
                 );
             });
-
+            drawVelocity(ctx, { x: -10, y: -5 }, { x: 0, y: 0 }, fieldSizePx);
             setColor({
                 r: currentColor.r + 3,
                 g: 0,
                 b: currentColor.b + 7,
             });
         }
-        requestAnimationFrame(renderAtmosphere);
     });
 
     return (
