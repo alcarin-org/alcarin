@@ -29,3 +29,11 @@ export function constraints(from: number, to: number, val: number) {
     const [rFrom, rTo] = [from, to].sort();
     return Math.min(Math.max(rFrom, val), rTo);
 }
+
+export function scale(scalar: number, v: Vector) {
+    return { x: v.x * scalar, y: v.y * scalar };
+}
+
+export function perpendicular(v: Vector) {
+    return { x: v.y, y: -v.x };
+}

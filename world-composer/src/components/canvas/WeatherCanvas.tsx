@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 
-import { Atmosphere } from '../../utils/AtmosphereData';
+import * as Atmo from '../../data/AtmosphereData';
 import {
     Point,
     Vector,
@@ -11,10 +11,12 @@ import {
 } from '../../utils/Math';
 
 interface Props {
-    atmosphere: Atmosphere;
+    atmosphere: Atmo.Atmosphere;
     fieldSizePx?: number;
     gapsPx?: number;
     circle?: boolean;
+    centrifugalMagnitudeMod: number;
+    coriolisMagnitudeMod: number;
 }
 
 function drawVelocity(
@@ -22,21 +24,32 @@ function drawVelocity(
     // 0..1
     velocity: Vector,
     pos: Point,
-    fieldSizePx: number
+    fieldSizePx: number,
+    color: string = 'black'
 ) {
     const halfSize = fieldSizePx / 2 - 1;
     const vPower = constraints(0.1, 1, magnitude(velocity));
     const vAngle = angle(velocity);
 
-    ctx.translate(pos.x + fieldSizePx / 2, pos.y + fieldSizePx / 2);
+    // console.log((vAngle * 180) / Math.PI);
+    ctx.save();
+
+    ctx.translate(
+        pos.x * fieldSizePx + fieldSizePx / 2,
+        pos.y * fieldSizePx + fieldSizePx / 2
+    );
     ctx.rotate(vAngle);
-    ctx.fillStyle = 'black';
+    ctx.fillStyle = color;
 
     ctx.beginPath();
     ctx.moveTo(-halfSize * vPower, -halfSize + 1);
     ctx.lineTo(-halfSize * vPower, halfSize - 1);
     ctx.lineTo(halfSize * vPower, 0);
+    ctx.closePath();
     ctx.fill();
+
+    ctx.fillStyle = 'red';
+    ctx.fillRect(halfSize * vPower - 1, -1, 2, 2);
 
     ctx.restore();
 }
@@ -46,10 +59,14 @@ export default function WeatherCanvas({
     fieldSizePx = 30,
     gapsPx = 0,
     circle = true,
+    centrifugalMagnitudeMod = 0,
+    coriolisMagnitudeMod = 0.1,
 }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
-    const canvasSizePx = (2 * atmosphere.worldRadius - 1) * fieldSizePx;
-    const [currentColor, setColor] = useState({ r: 0, g: 0, b: 0 });
+    const canvasSizePx = (2 * atmosphere.radius - 1) * fieldSizePx;
+    const worldColor = 'blue';
+    const bgColor = 'silver';
+    const [i, forceRerender] = useState(0);
 
     useEffect(() => {
         requestAnimationFrame(renderAtmosphere);
@@ -61,38 +78,35 @@ export default function WeatherCanvas({
             const ctx: CanvasRenderingContext2D = canvasRef.current.getContext(
                 '2d'
             )!;
-            ctx.fillStyle = `rgb(${(currentColor.r % 512) -
-                255}, ${(currentColor.g % 512) - 255}, ${Math.abs(
-                (currentColor.b % 512) - 255
-            )})`;
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.translate(
-                (atmosphere.worldRadius - 1) * fieldSizePx,
-                (atmosphere.worldRadius - 1) * fieldSizePx
+                (atmosphere.radius - 1) * fieldSizePx,
+                (atmosphere.radius - 1) * fieldSizePx
             );
             const visibleCellSize = fieldSizePx - 2 * gapsPx;
             const fieldHalfSizePx = fieldSizePx / 2;
             const center: Point = { x: 0, y: 0 };
 
-            atmosphere.forEach((node, pos) => {
+            Atmo.forEach(atmosphere, (node, pos) => {
                 // we render only cells inside circle.
                 // 0.5 is just for nicer graphic effect
-                if (distance(center, pos) > atmosphere.worldRadius - 1 + 0.5) {
-                    return;
-                }
+                const isOutside = !Atmo.isInRadius(atmosphere, pos);
+                ctx.fillStyle = isOutside ? bgColor : worldColor;
                 ctx.fillRect(
                     pos.x * fieldSizePx + gapsPx,
                     pos.y * fieldSizePx + gapsPx,
                     visibleCellSize,
                     visibleCellSize
                 );
+                drawVelocity(ctx, node.velocity, pos, fieldSizePx);
             });
-            drawVelocity(ctx, { x: -10, y: -5 }, { x: 0, y: 0 }, fieldSizePx);
-            setColor({
-                r: currentColor.r + 3,
-                g: 0,
-                b: currentColor.b + 7,
-            });
+            drawVelocity(
+                ctx,
+                Atmo.get(atmosphere, center).velocity,
+                center,
+                fieldSizePx,
+                'yellow'
+            );
         }
     });
 
