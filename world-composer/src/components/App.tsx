@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, MouseEvent } from 'react';
 import './App.scss';
 import WeatherCanvas from './canvas/WeatherCanvas';
 import * as Atmo from '../data/AtmosphereData';
 import { ipcRenderer } from '../electron-bridge';
 
 const WorldRadius = 14;
-const atmosphereSample = Atmo.randomizeVelocity(Atmo.create(WorldRadius));
+const atmosphereSample = Atmo.randomizeField(Atmo.create(WorldRadius));
 
 function App() {
     useEffect(() => ipcRenderer.send('main-window-ready'), []);
@@ -25,12 +25,27 @@ function App() {
         return () => clearTimeout(id);
     });
 
+    function onAtmoClick(ev: MouseEvent) {
+        const x = Math.floor(ev.nativeEvent.offsetX / 30) - atmo.radius + 1;
+        const y = Math.floor(ev.nativeEvent.offsetY / 30) - atmo.radius + 1;
+        const newAtmo = Atmo.set(
+            atmo,
+            { x, y },
+            {
+                pressure: 0,
+                velocity: {
+                    x: 1 - 2 * Math.random(),
+                    y: 1 - 2 * Math.random(),
+                },
+            }
+        );
+        setAtmo(newAtmo);
+    }
+
     return (
         <div className="app">
             <button
-                onClick={() =>
-                    setAtmo(Atmo.randomizeVelocity(atmosphereSample))
-                }
+                onClick={() => setAtmo(Atmo.randomizeField(atmosphereSample))}
             >
                 Randomize
             </button>
@@ -66,6 +81,7 @@ function App() {
             </label>
             <WeatherCanvas
                 atmosphere={atmo}
+                onClick={onAtmoClick}
                 centrifugalMagnitudeMod={centrifugalMagnitude}
                 coriolisMagnitudeMod={coriolisMagnitude}
             />

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, MouseEventHandler } from 'react';
 
 import * as Atmo from '../../data/AtmosphereData';
 import {
@@ -17,6 +17,7 @@ interface Props {
     circle?: boolean;
     centrifugalMagnitudeMod: number;
     coriolisMagnitudeMod: number;
+    onClick: MouseEventHandler<HTMLCanvasElement>;
 }
 
 function drawVelocity(
@@ -61,13 +62,13 @@ export default function WeatherCanvas({
     circle = true,
     centrifugalMagnitudeMod = 0,
     coriolisMagnitudeMod = 0.1,
+    onClick,
 }: Props) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const canvasSizePx = (2 * atmosphere.radius - 1) * fieldSizePx;
     const worldColor = 'blue';
     const bgColor = 'silver';
     const [i, forceRerender] = useState(0);
-
     useEffect(() => {
         requestAnimationFrame(renderAtmosphere);
 
@@ -111,6 +112,11 @@ export default function WeatherCanvas({
     });
 
     return (
-        <canvas ref={canvasRef} width={canvasSizePx} height={canvasSizePx} />
+        <canvas
+            onClick={onClick}
+            ref={canvasRef}
+            width={canvasSizePx}
+            height={canvasSizePx}
+        />
     );
 }

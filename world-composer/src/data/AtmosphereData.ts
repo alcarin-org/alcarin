@@ -10,18 +10,17 @@ import {
 export interface AtmosphereNode {
     // m/s^2
     velocity: Vector;
+    pressure: number;
 }
 
 export interface Atmosphere {
     radius: number;
-    data: AtmosphereNode[][];
+    data: AtmosphereNode[];
 }
 
-function coordsToArray(atmo: Atmosphere, pos: Point): Point {
-    return {
-        x: pos.x + atmo.radius - 1,
-        y: pos.y + atmo.radius - 1,
-    };
+function coordsToArray(atmo: Atmosphere, pos: Point): number {
+    const dim = 2 * atmo.radius - 1;
+    return dim * (pos.y + atmo.radius - 1) + (pos.x + atmo.radius - 1);
 }
 
 function isInConstraints(atmo: Atmosphere, pos: Point): boolean {
@@ -33,13 +32,10 @@ function isInConstraints(atmo: Atmosphere, pos: Point): boolean {
     );
 }
 
-export function create(radius: number, data?: AtmosphereNode[][]): Atmosphere {
+export function create(radius: number, data?: AtmosphereNode[]): Atmosphere {
+    const dim = 2 * radius - 1;
     const nodes =
-        data ||
-        new Array(2 * radius - 1).fill(null).map(() => {
-            const columnsArray = new Array(2 * radius - 1).fill(null);
-            return columnsArray.map(defaultAtmosphereNode);
-        });
+        data || new Array(dim ** 2).fill(null).map(defaultAtmosphereNode);
     return { radius, data: nodes };
 }
 
@@ -51,7 +47,7 @@ export function get(atmo: Atmosphere, pos: Point): AtmosphereNode {
     }
 
     const arrCoords = coordsToArray(atmo, pos);
-    return atmo.data[arrCoords.x][arrCoords.y];
+    return atmo.data[arrCoords];
 }
 
 export function set(
@@ -67,11 +63,9 @@ export function set(
 
     const arrCoords = coordsToArray(atmo, pos);
 
-    const newAtmoRows = atmo.data.slice(0);
-    const newAtmoColumn = newAtmoRows[arrCoords.x].slice(0);
-    newAtmoColumn[arrCoords.y] = value;
-    newAtmoRows[arrCoords.x] = newAtmoColumn;
-    return create(atmo.radius, newAtmoRows);
+    const newAtmoData = atmo.data.slice(0);
+    newAtmoData[arrCoords] = value;
+    return create(atmo.radius, newAtmoData);
 }
 
 export function isInRadius(atmo: Atmosphere, pos: Point): boolean {
@@ -91,9 +85,10 @@ export function forEach(
     }
 }
 
-export function randomizeVelocity(atmo: Atmosphere): Atmosphere {
+export function randomizeField(atmo: Atmosphere): Atmosphere {
     return map(atmo, (node, pos) => {
         return {
+            pressure: Math.random(),
             velocity: isInRadius(atmo, pos)
                 ? {
                       x: 1 - 2 * Math.random(),
@@ -107,9 +102,11 @@ export function randomizeVelocity(atmo: Atmosphere): Atmosphere {
     });
 }
 
-const defaultAtmosphereNode = () => ({
+const defaultAtmosphereNode: () => AtmosphereNode = () => ({
     velocity: { x: 0, y: 0 },
+    pressure: 0,
 });
+
 export function map(
     atmo: Atmosphere,
     callback: (
@@ -124,11 +121,7 @@ export function map(
         for (let y = cellsFrom; y <= cellsTo; y++) {
             const pos = { x, y };
             const arrCoords = coordsToArray(atmo, pos);
-            newAtmo.data[arrCoords.x][arrCoords.y] = callback(
-                get(atmo, pos),
-                pos,
-                atmo
-            );
+            newAtmo.data[arrCoords] = callback(get(atmo, pos), pos, atmo);
         }
     }
     return newAtmo;
@@ -156,7 +149,7 @@ export function evolve(
                     continue;
                 }
                 const arrCoords = coordsToArray(atmo, { x, y });
-                const closeNode = originalAtmo.data[arrCoords.x][arrCoords.y];
+                const closeNode = originalAtmo.data[arrCoords];
 
                 velocity.x += closeNode.velocity.x;
                 velocity.y += closeNode.velocity.y;
@@ -185,6 +178,6 @@ export function evolve(
             velocity = scale(velocityPower, normalize(velocity));
         }
 
-        return { velocity };
+        return { ...node, velocity };
     });
 }
