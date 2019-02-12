@@ -32,7 +32,6 @@ function drawVelocity(
     const vPower = constraints(0.1, 1, magnitude(velocity));
     const vAngle = angle(velocity);
 
-    // console.log((vAngle * 180) / Math.PI);
     ctx.save();
 
     ctx.translate(

@@ -4,25 +4,29 @@ import WeatherCanvas from './canvas/WeatherCanvas';
 import * as Atmo from '../data/AtmosphereData';
 import { ipcRenderer } from '../electron-bridge';
 
-const WorldRadius = 14;
+const WorldRadius = 20;
 const atmosphereSample = Atmo.randomizeField(Atmo.create(WorldRadius));
 
 function App() {
     useEffect(() => ipcRenderer.send('main-window-ready'), []);
-    const [coriolisMagnitude, setCoriolisMagnitude] = useState(0);
+    const [coriolisMagnitude, setCoriolisMagnitude] = useState(0.1);
     const [centrifugalMagnitude, setCentrifugalMagnitude] = useState(0);
     const [atmo, setAtmo] = useState(atmosphereSample);
+    const [play, setPlay] = useState(true);
 
+    function evolveAtmo() {
+        const newAtmo = Atmo.evolve(
+            atmo,
+            centrifugalMagnitude,
+            coriolisMagnitude
+        );
+        setAtmo(newAtmo);
+    }
     useEffect(() => {
-        const id = setTimeout(() => {
-            const newAtmo = Atmo.evolve(
-                atmo,
-                centrifugalMagnitude,
-                coriolisMagnitude
-            );
-            setAtmo(newAtmo);
-        }, 100);
-        return () => clearTimeout(id);
+        if (play) {
+            const id = setTimeout(evolveAtmo, 100);
+            return () => clearTimeout(id);
+        }
     });
 
     function onAtmoClick(ev: MouseEvent) {
@@ -49,12 +53,14 @@ function App() {
             >
                 Randomize
             </button>
+            <button onClick={evolveAtmo}>Next step</button>
+            <button onClick={() => setPlay(!play)}>Play/Pause</button>
             <label>
                 Centrifugal Force
                 <input
                     type="range"
                     min={0}
-                    max={100}
+                    max={50}
                     step={0}
                     value={centrifugalMagnitude * 100}
                     onChange={ev =>
@@ -69,7 +75,7 @@ function App() {
                 <input
                     type="range"
                     min={0}
-                    max={100}
+                    max={50}
                     step={1}
                     value={coriolisMagnitude * 100}
                     onChange={ev =>

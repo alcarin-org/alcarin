@@ -5,6 +5,8 @@ import {
     normalize,
     scale,
     perpendicular,
+    sum,
+    equals,
 } from '../utils/Math';
 
 export interface AtmosphereNode {
@@ -95,8 +97,8 @@ export function randomizeField(atmo: Atmosphere): Atmosphere {
                       y: 1 - 2 * Math.random(),
                   }
                 : {
-                      x: -pos.x,
-                      y: -pos.y,
+                      x: -0.02 * pos.x,
+                      y: -0.02 * pos.y,
                   },
         };
     });
@@ -138,18 +140,26 @@ export function evolve(
         }
         let velocity = { ...node.velocity };
         const velocityPower = magnitude(velocity);
-        for (let i = 1; i >= -1; i--) {
-            for (let j = 1; j >= -1; j--) {
-                const x = pos.x + i;
-                const y = pos.y + j;
+        const range = [-1, 0, 1];
+        for (const i of range) {
+            for (const j of range) {
                 if (i === 0 && j === 0) {
                     continue;
                 }
-                if (!isInConstraints(atmo, { x, y })) {
+                const closeNodePos = { x: pos.x + i, y: pos.y + j };
+                if (!isInConstraints(atmo, closeNodePos)) {
                     continue;
                 }
-                const arrCoords = coordsToArray(atmo, { x, y });
+                // const proneRows = velocity.x > 0 ? [0, 1] : [-1, 0];
+                // const proneColumns = velocity.y > 0 ? [0, 1] : [-1, 0];
+                const arrCoords = coordsToArray(atmo, closeNodePos);
                 const closeNode = originalAtmo.data[arrCoords];
+                if (i !== 0 && Math.sign(closeNode.velocity.x) === i) {
+                    continue;
+                }
+                if (j !== 0 && Math.sign(closeNode.velocity.y) === j) {
+                    continue;
+                }
 
                 velocity.x += closeNode.velocity.x;
                 velocity.y += closeNode.velocity.y;

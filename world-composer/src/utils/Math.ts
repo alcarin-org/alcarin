@@ -37,3 +37,11 @@ export function scale(scalar: number, v: Vector) {
 export function perpendicular(v: Vector) {
     return { x: v.y, y: -v.x };
 }
+
+export function sum(v: Vector, v2: Vector) {
+    return { x: v.x + v2.x, y: v.y + v2.y };
+}
+
+export function equals(p: Point, p2: Point) {
+    return p.x === p2.x && p.y === p2.y;
+}
