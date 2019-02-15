@@ -1,13 +1,6 @@
-import {
-    Vector,
-    Point,
-    magnitude,
-    normalize,
-    scale,
-    perpendicular,
-    sum,
-    equals,
-} from '../utils/Math';
+import math from 'mathjs';
+
+import { Vector, Point, normalize, perpendicular } from '../utils/Math';
 
 export interface AtmosphereNode {
     // m/s^2
@@ -20,17 +13,19 @@ export interface Atmosphere {
     data: AtmosphereNode[];
 }
 
+const Center: Point = [0, 0];
+
 function coordsToArray(atmo: Atmosphere, pos: Point): number {
     const dim = 2 * atmo.radius - 1;
-    return dim * (pos.y + atmo.radius - 1) + (pos.x + atmo.radius - 1);
+    return dim * (pos[1] + atmo.radius - 1) + (pos[0] + atmo.radius - 1);
 }
 
 function isInConstraints(atmo: Atmosphere, pos: Point): boolean {
     return (
-        pos.x > -atmo.radius &&
-        pos.x < atmo.radius &&
-        pos.y > -atmo.radius &&
-        pos.y < atmo.radius
+        pos[0] > -atmo.radius &&
+        pos[0] < atmo.radius &&
+        pos[1] > -atmo.radius &&
+        pos[1] < atmo.radius
     );
 }
 
@@ -44,7 +39,7 @@ export function create(radius: number, data?: AtmosphereNode[]): Atmosphere {
 export function get(atmo: Atmosphere, pos: Point): AtmosphereNode {
     if (!isInConstraints(atmo, pos)) {
         throw new Error(
-            `Invalid atmosphere node position: ${pos.x}, ${pos.y}".`
+            `Invalid atmosphere node position: ${pos[0]}, ${pos[1]}".`
         );
     }
 
@@ -59,7 +54,7 @@ export function set(
 ): Atmosphere {
     if (!isInConstraints(atmo, pos)) {
         throw new Error(
-            `Invalid atmosphere node position: ${pos.x}, ${pos.y}".`
+            `Invalid atmosphere node position: ${pos[0]}, ${pos[1]}".`
         );
     }
 
@@ -71,7 +66,7 @@ export function set(
 }
 
 export function isInRadius(atmo: Atmosphere, pos: Point): boolean {
-    return magnitude(pos) <= atmo.radius - 1 + 0.5;
+    return math.distance(pos, Center) <= atmo.radius - 1 + 0.5;
 }
 
 export function forEach(
@@ -81,7 +76,7 @@ export function forEach(
     const [cellsFrom, cellsTo] = [-atmo.radius + 1, atmo.radius - 1];
     for (let x = cellsFrom; x <= cellsTo; x++) {
         for (let y = cellsFrom; y <= cellsTo; y++) {
-            const pos = { x, y };
+            const pos: Point = [x, y];
             callback(get(atmo, pos), pos);
         }
     }
@@ -90,22 +85,16 @@ export function forEach(
 export function randomizeField(atmo: Atmosphere): Atmosphere {
     return map(atmo, (node, pos) => {
         return {
-            pressure: Math.random(),
+            pressure: math.random(),
             velocity: isInRadius(atmo, pos)
-                ? {
-                      x: 1 - 2 * Math.random(),
-                      y: 1 - 2 * Math.random(),
-                  }
-                : {
-                      x: -0.02 * pos.x,
-                      y: -0.02 * pos.y,
-                  },
+                ? [1 - 2 * math.random(), 1 - 2 * math.random()]
+                : [-0.02 * pos[0], -0.02 * pos[1]],
         };
     });
 }
 
 const defaultAtmosphereNode: () => AtmosphereNode = () => ({
-    velocity: { x: 0, y: 0 },
+    velocity: [0, 0],
     pressure: 0,
 });
 
@@ -121,7 +110,7 @@ export function map(
     const newAtmo: Atmosphere = create(atmo.radius);
     for (let x = cellsFrom; x <= cellsTo; x++) {
         for (let y = cellsFrom; y <= cellsTo; y++) {
-            const pos = { x, y };
+            const pos: Point = [x, y];
             const arrCoords = coordsToArray(atmo, pos);
             newAtmo.data[arrCoords] = callback(get(atmo, pos), pos, atmo);
         }
@@ -138,54 +127,60 @@ export function evolve(
         if (!isInRadius(atmo, pos)) {
             return node;
         }
-        let velocity = { ...node.velocity };
-        const velocityPower = magnitude(velocity);
+        let velocity = node.velocity.slice() as Vector;
+        const velocityPower = math.norm(velocity);
         const range = [-1, 0, 1];
         for (const i of range) {
             for (const j of range) {
                 if (i === 0 && j === 0) {
                     continue;
                 }
-                const closeNodePos = { x: pos.x + i, y: pos.y + j };
+                const closeNodePos: Point = [pos[0] + i, pos[1] + j];
                 if (!isInConstraints(atmo, closeNodePos)) {
                     continue;
                 }
-                // const proneRows = velocity.x > 0 ? [0, 1] : [-1, 0];
-                // const proneColumns = velocity.y > 0 ? [0, 1] : [-1, 0];
+                // const proneRows = velocity[0] > 0 ? [0, 1] : [-1, 0];
+                // const proneColumns = velocity[1] > 0 ? [0, 1] : [-1, 0];
                 const arrCoords = coordsToArray(atmo, closeNodePos);
                 const closeNode = originalAtmo.data[arrCoords];
-                if (i !== 0 && Math.sign(closeNode.velocity.x) === i) {
+                if (i !== 0 && math.sign(closeNode.velocity[0]) === i) {
                     continue;
                 }
-                if (j !== 0 && Math.sign(closeNode.velocity.y) === j) {
+                if (j !== 0 && math.sign(closeNode.velocity[1]) === j) {
                     continue;
                 }
 
-                velocity.x += closeNode.velocity.x;
-                velocity.y += closeNode.velocity.y;
+                velocity[0] += closeNode.velocity[0];
+                velocity[1] += closeNode.velocity[1];
             }
         }
-        velocity = scale(velocityPower, normalize(velocity));
+        velocity = math.multiply(velocityPower, normalize(velocity)) as Vector;
 
-        if (pos.x !== 0 || pos.y !== 0) {
-            const distanceFromCenter = magnitude(pos) / atmo.radius;
+        if (pos[0] !== 0 || pos[1] !== 0) {
+            const distanceFromCenter = math.distance(pos, Center) as number;
 
-            const centrifugalForce = scale(
+            const centrifugalForce = math.multiply(
                 centrifugalMagnitudeMod * distanceFromCenter,
                 normalize(pos)
-            );
-            velocity.x += centrifugalForce.x;
-            velocity.y += centrifugalForce.y;
-            velocity = scale(velocityPower, normalize(velocity));
+            ) as Vector;
+            velocity[0] += centrifugalForce[0];
+            velocity[1] += centrifugalForce[1];
+            velocity = math.multiply(
+                velocityPower,
+                normalize(velocity)
+            ) as Vector;
 
-            const coriolisForce = scale(
+            const coriolisForce = math.multiply(
                 distanceFromCenter * coriolisMagnitudeMod,
-                normalize(perpendicular(pos))
-            );
-            velocity.x += coriolisForce.x;
-            velocity.y += coriolisForce.y;
+                perpendicular(normalize(pos))
+            ) as Vector;
+            velocity[0] += coriolisForce[0];
+            velocity[1] += coriolisForce[1];
 
-            velocity = scale(velocityPower, normalize(velocity));
+            velocity = math.multiply(
+                velocityPower,
+                normalize(velocity)
+            ) as Vector;
         }
 
         return { ...node, velocity };

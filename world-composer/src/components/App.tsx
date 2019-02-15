@@ -11,7 +11,7 @@ function App() {
     useEffect(() => ipcRenderer.send('main-window-ready'), []);
     const [coriolisMagnitude, setCoriolisMagnitude] = useState(0.1);
     const [centrifugalMagnitude, setCentrifugalMagnitude] = useState(0);
-    const [atmo, setAtmo] = useState(atmosphereSample);
+    let [atmo, setAtmo] = useState(atmosphereSample);
     const [play, setPlay] = useState(true);
 
     function evolveAtmo() {
@@ -24,7 +24,7 @@ function App() {
     }
     useEffect(() => {
         if (play) {
-            const id = setTimeout(evolveAtmo, 100);
+            const id = setTimeout(evolveAtmo, 16);
             return () => clearTimeout(id);
         }
     });
@@ -32,24 +32,21 @@ function App() {
     function onAtmoClick(ev: MouseEvent) {
         const x = Math.floor(ev.nativeEvent.offsetX / 30) - atmo.radius + 1;
         const y = Math.floor(ev.nativeEvent.offsetY / 30) - atmo.radius + 1;
-        const newAtmo = Atmo.set(
-            atmo,
-            { x, y },
-            {
-                pressure: 0,
-                velocity: {
-                    x: 1 - 2 * Math.random(),
-                    y: 1 - 2 * Math.random(),
-                },
-            }
-        );
+        const newAtmo = Atmo.set(atmo, [x, y], {
+            pressure: 0,
+            velocity: [1 - 2 * Math.random(), 1 - 2 * Math.random()],
+        });
         setAtmo(newAtmo);
     }
 
     return (
         <div className="app">
             <button
-                onClick={() => setAtmo(Atmo.randomizeField(atmosphereSample))}
+                onClick={() => {
+                    const newAtmo = Atmo.randomizeField(atmosphereSample);
+                    atmo = newAtmo;
+                    setAtmo(newAtmo);
+                }}
             >
                 Randomize
             </button>

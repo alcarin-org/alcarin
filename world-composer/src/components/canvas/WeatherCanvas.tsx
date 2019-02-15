@@ -1,14 +1,8 @@
 import React, { useRef, useEffect, useState, MouseEventHandler } from 'react';
+import math from 'mathjs';
 
 import * as Atmo from '../../data/AtmosphereData';
-import {
-    Point,
-    Vector,
-    distance,
-    angle,
-    magnitude,
-    constraints,
-} from '../../utils/Math';
+import { Point, Vector, angle, constraints } from '../../utils/Math';
 
 interface Props {
     atmosphere: Atmo.Atmosphere;
@@ -29,14 +23,14 @@ function drawVelocity(
     color: string = 'black'
 ) {
     const halfSize = fieldSizePx / 2 - 1;
-    const vPower = constraints(0.1, 1, magnitude(velocity));
+    const vPower = constraints(0.1, 1, math.norm(velocity) as number);
     const vAngle = angle(velocity);
 
     ctx.save();
 
     ctx.translate(
-        pos.x * fieldSizePx + fieldSizePx / 2,
-        pos.y * fieldSizePx + fieldSizePx / 2
+        pos[0] * fieldSizePx + fieldSizePx / 2,
+        pos[1] * fieldSizePx + fieldSizePx / 2
     );
     ctx.rotate(vAngle);
     ctx.fillStyle = color;
@@ -85,7 +79,7 @@ export default function WeatherCanvas({
             );
             const visibleCellSize = fieldSizePx - 2 * gapsPx;
             const fieldHalfSizePx = fieldSizePx / 2;
-            const center: Point = { x: 0, y: 0 };
+            const center: Point = [0, 0];
 
             Atmo.forEach(atmosphere, (node, pos) => {
                 // we render only cells inside circle.
@@ -93,8 +87,8 @@ export default function WeatherCanvas({
                 const isOutside = !Atmo.isInRadius(atmosphere, pos);
                 ctx.fillStyle = isOutside ? bgColor : worldColor;
                 ctx.fillRect(
-                    pos.x * fieldSizePx + gapsPx,
-                    pos.y * fieldSizePx + gapsPx,
+                    pos[0] * fieldSizePx + gapsPx,
+                    pos[1] * fieldSizePx + gapsPx,
                     visibleCellSize,
                     visibleCellSize
                 );
