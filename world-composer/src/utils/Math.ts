@@ -5,6 +5,9 @@ export type Vector = [number, number];
 export type Point = Vector;
 
 export function normalize(v: Vector): Vector {
+    if (v[0] === 0 && v[1] === 0) {
+        return v;
+    }
     return math.divide(v, math.norm(v)) as Vector;
 }
 

@@ -67,3 +67,8 @@ ipcMain.on(
     (ev: Event, arg: string) =>
         mainWindow && dialog.showMessageBox(mainWindow, { message: arg })
 );
+
+process.on('uncaughtException', function t(error) {
+    console.log('wtf', error);
+    // Handle the error
+});

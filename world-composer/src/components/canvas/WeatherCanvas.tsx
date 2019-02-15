@@ -1,11 +1,11 @@
 import React, { useRef, useEffect, useState, MouseEventHandler } from 'react';
 import math from 'mathjs';
 
-import * as Atmo from '../../data/AtmosphereData';
+import { Atmosphere, NodeType } from '../../data/Atmosphere';
 import { Point, Vector, angle, constraints } from '../../utils/Math';
 
 interface Props {
-    atmosphere: Atmo.Atmosphere;
+    atmosphere: Atmosphere;
     fieldSizePx?: number;
     gapsPx?: number;
     circle?: boolean;
@@ -81,11 +81,12 @@ export default function WeatherCanvas({
             const fieldHalfSizePx = fieldSizePx / 2;
             const center: Point = [0, 0];
 
-            Atmo.forEach(atmosphere, (node, pos) => {
+            ctx.fillStyle = worldColor;
+            atmosphere.forEach((node, pos) => {
                 // we render only cells inside circle.
                 // 0.5 is just for nicer graphic effect
-                const isOutside = !Atmo.isInRadius(atmosphere, pos);
-                ctx.fillStyle = isOutside ? bgColor : worldColor;
+                ctx.fillStyle =
+                    node.type === NodeType.Solid ? 'red' : worldColor;
                 ctx.fillRect(
                     pos[0] * fieldSizePx + gapsPx,
                     pos[1] * fieldSizePx + gapsPx,
@@ -96,7 +97,7 @@ export default function WeatherCanvas({
             });
             drawVelocity(
                 ctx,
-                Atmo.get(atmosphere, center).velocity,
+                atmosphere.get(center).velocity,
                 center,
                 fieldSizePx,
                 'yellow'
