@@ -106,15 +106,14 @@ function applyPressureModel(atmo: Atmosphere, timePass: number) {
     });
 
     console.log('calculating lusolve');
-    const pressureMatrix: number[] = math.lusolve(
+    const pressureMatrix: number[][] = math.lusolve(
         coefficientMatrixA,
         divergenceVectorB
-    ) as number[];
-
+    ) as number[][];
     console.log('apply pressure to nodes');
     fluidIndexes.forEach((pos, fluidInd) => {
         const node = atmo.get(pos);
-        node.pressure = pressureMatrix[fluidInd++];
+        node.pressure = pressureMatrix[fluidInd++][0];
     });
 
     console.log('apply velocity from pressure gradient');

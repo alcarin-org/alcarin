@@ -89,7 +89,7 @@ export class Atmosphere {
                 ...node,
                 pressure: math.random(),
                 // velocity: [1 * math.random(), 1 * math.random()],
-                velocity: [1 - 1 * math.random(), 1 - 1 * math.random()],
+                velocity: [1 - 2 * math.random(), 1 - 2 * math.random()],
             };
         });
     }

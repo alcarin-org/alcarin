@@ -4,8 +4,9 @@ import WeatherCanvas from './canvas/WeatherCanvas';
 import { Atmosphere } from '../data/Atmosphere';
 import { interpolateVeloctyAt, evolve } from '../data/AtmoMotion';
 import { ipcRenderer } from '../electron-bridge';
+import Stats from './Stats';
 
-const WorldRadius = 14;
+const WorldRadius = 8;
 const atmosphereSample = new Atmosphere(WorldRadius);
 atmosphereSample.randomizeField();
 
@@ -41,6 +42,7 @@ function App() {
 
     return (
         <div className="app">
+            <Stats atmosphere={atmo} />
             <button onClick={() => setPause(!pause)}>Play/Pause</button>
             <label>
                 Centrifugal Force
@@ -119,7 +121,8 @@ function useEvolveEngine(
                     (now.getTime() - lastPlayDate.getTime()) / 1000;
                 const newAtmo = evolve(
                     atmosphereSample,
-                    timePass,
+                    // timePass,
+                    0.05,
                     centrifugalMagnitude,
                     coriolisMagnitude
                 );
