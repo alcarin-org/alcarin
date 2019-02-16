@@ -9,7 +9,7 @@ import { interpolateVelocityAt, evolve, divergence } from '../data/AtmoMotion';
 import { ipcRenderer } from '../electron-bridge';
 import Stats from './Stats';
 
-const WorldRadius = 6;
+const WorldRadius = 16;
 const atmosphereSample = new Atmosphere(WorldRadius);
 atmosphereSample.randomizeField();
 
@@ -19,7 +19,7 @@ function App() {
     const [centrifugalMagnitude, setCentrifugalMagnitude] = useState(0.05);
     const [clickedNodePos, setClickedNodePos] = useState([0, 0] as Point);
 
-    const [atmo, pause, setPause] = useEvolveEngine(
+    const [atmo, pause, setPause, fps] = useEvolveEngine(
         centrifugalMagnitude,
         coriolisMagnitude
     );
@@ -35,14 +35,14 @@ function App() {
 
     return (
         <div className="app">
-            <Stats atmosphere={atmo} mouseOver={clickedNodePos} />
+            <Stats atmosphere={atmo} mouseOver={clickedNodePos} fps={fps} />
             <button onClick={() => setPause(!pause)}>Play/Pause</button>
             <label>
                 Centrifugal Force
                 <input
                     type="range"
                     min={0}
-                    max={100}
+                    max={500}
                     step={2}
                     value={centrifugalMagnitude * 100}
                     onChange={ev =>
@@ -98,10 +98,13 @@ function usePause(
 function useEvolveEngine(
     centrifugalMagnitude: number,
     coriolisMagnitude: number
-): [Atmosphere, boolean, (val: boolean) => void] {
+): [Atmosphere, boolean, (val: boolean) => void, number] {
     const [pausedNow, setPaused, lastPlayDate, setLastPlayDate] = usePause(
         true
     );
+    const [fps, setFps] = useState(0);
+    const [fpsAcc, setFpsAcc] = useState(0);
+    const [fpsCounter, setFpsCounter] = useState(0);
 
     useEffect(
         () => {
@@ -112,7 +115,15 @@ function useEvolveEngine(
                 const now = new Date();
                 const timePass =
                     (now.getTime() - lastPlayDate.getTime()) / 1000;
-                const newAtmo = evolve(
+                if (fpsAcc + timePass >= 1) {
+                    setFpsAcc(fpsAcc + timePass - 1);
+                    setFps(fpsCounter);
+                    setFpsCounter(0);
+                } else {
+                    setFpsAcc(last => last + timePass);
+                    setFpsCounter(counter => counter + 1);
+                }
+                evolve(
                     atmosphereSample,
                     timePass,
                     centrifugalMagnitude,
@@ -120,13 +131,13 @@ function useEvolveEngine(
                 );
                 // setPaused(true);
                 setLastPlayDate(now);
-            }, 50);
+            }, 0);
             return () => clearTimeout(timeoutId);
         },
         [lastPlayDate]
     );
 
-    return [atmosphereSample, pausedNow, setPaused];
+    return [atmosphereSample, pausedNow, setPaused, fps];
 }
 
 export default App;

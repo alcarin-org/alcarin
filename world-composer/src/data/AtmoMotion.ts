@@ -29,26 +29,29 @@ export function evolve(
         const externalForces = math.add(
             math.multiply(
                 perpendicular(normalize(pos)),
-                coriolisMagnitudeMod * distanceFromCenter * timePass
+                coriolisMagnitudeMod * distanceFromCenter
             ),
             math.multiply(
                 normalize(pos),
-                distanceFromCenter * centrifugalMagnitudeMod * timePass
+                2 *
+                    (1 - distanceFromCenter) *
+                    centrifugalMagnitudeMod *
+                    timePass
             )
         ) as Vector;
 
         outputVelocity = math.add(newVelocity, externalForces) as Vector;
 
-        // // general leak of energy
-        // outputVelocity = math.multiply(
-        //     1 - 0.8 * timePass,
-        //     outputVelocity
-        // ) as Vector;
+        // general leak of energy
+        outputVelocity = math.multiply(
+            1 - 0.1 * timePass,
+            outputVelocity
+        ) as Vector;
 
         // temporary max vector size
-        // if (math.norm(outputVelocity) > 1) {
-        //     outputVelocity = normalize(outputVelocity);
-        // }
+        if (math.norm(outputVelocity) > 1) {
+            outputVelocity = normalize(outputVelocity);
+        }
 
         return {
             ...node,
@@ -80,47 +83,98 @@ function applyPressureModel(atmo: Atmosphere, timePass: number) {
     const fluidIndexes = atmo.fluidCoords;
     const fluidIndexesSize = fluidIndexes.length;
 
-    const coefficientBaseRow = new Array(fluidIndexesSize).fill(0);
-
-    const coefficientMatrixA: number[][] = new Array(fluidIndexesSize);
-    const divergenceVectorB = new Array(fluidIndexesSize);
+    const coefficientMatrixA: Float64Array = new Float64Array(
+        fluidIndexesSize ** 2
+    ).fill(0);
+    const divergenceVectorB = new Float64Array(fluidIndexesSize);
 
     fluidIndexes.forEach((nodePos, fluidIndex) => {
-        const fieldARow = coefficientBaseRow.slice(0);
+        const coefficientOffset = fluidIndexesSize * fluidIndex;
 
         let fluidNeightborsCount = 0;
         iterateNeighbors(atmo, nodePos, (neightNode, neightPos) => {
             if (neightNode.type === NodeType.Fluid) {
                 fluidNeightborsCount++;
 
-                fieldARow[neightNode.fluidIndex] = 1;
+                coefficientMatrixA[
+                    coefficientOffset + neightNode.fluidIndex
+                ] = 1;
             }
         });
-        fieldARow[fluidIndex] = fluidNeightborsCount;
-        coefficientMatrixA[fluidIndex] = fieldARow;
-        divergenceVectorB[fluidIndex] = -divergence(atmo, nodePos) / timePass;
+        coefficientMatrixA[
+            coefficientOffset + fluidIndex
+        ] = fluidNeightborsCount;
+        divergenceVectorB[fluidIndex] = divergence(atmo, nodePos) / timePass;
     });
 
-    const pressureMatrix: number[][] = math.lusolve(
+    const pressureMatrix = resolveLinearByJacobi(
         coefficientMatrixA,
         divergenceVectorB
-    ) as number[][];
+    );
 
     fluidIndexes.forEach((pos, fluidInd) => {
         const node = atmo.get(pos);
-        node.pressure = pressureMatrix[fluidInd++][0];
+        node.pressure = pressureMatrix[fluidInd++];
     });
 
     atmo.apply((node, pos) => {
         const pressureGradientValue = math.multiply(
-            -timePass,
+            timePass,
             pressureGradient(atmo, pos)
         ) as Vector;
         return {
             ...node,
-            velocity: math.add(node.velocity, pressureGradientValue) as Vector,
+            velocity: math.multiply(
+                -1,
+                math.add(node.velocity, pressureGradientValue)
+            ) as Vector,
         };
     });
+}
+
+// coefficientA main diagonal CAN NOT HAVE zeros. in our system
+// main diagonal represent neightbours of given cell. as we do not have
+// fully separated cell, there will be no 0s on main diagonal
+function resolveLinearByJacobi(
+    A: Float64Array, // coefficient matrix A
+    B: Float64Array // constants matrix B
+): Float64Array {
+    if (A.length !== B.length ** 2) {
+        throw new Error(
+            'Coefficient matrix A has different size that constant matrix B! Can not continue.'
+        );
+    }
+    const x = new Float64Array(B.length).fill(0); // resultsMatrix
+    let lastX: Float64Array;
+
+    // one step
+    for (let step = 0; step < 10; step++) {
+        lastX = x.slice(0);
+        for (let iUnknown = 0; iUnknown < B.length; iUnknown++) {
+            const iUnknownCoefficientOffset = iUnknown * B.length;
+
+            let iGuess = 0;
+            // iGuess = (eqA[i] * x[i] + ...) / eqA[iUnknown];
+            for (
+                let iCoefficient = 0;
+                iCoefficient < B.length;
+                iCoefficient++
+            ) {
+                if (iCoefficient === iUnknown) {
+                    continue;
+                }
+                iGuess -=
+                    A[iUnknownCoefficientOffset + iCoefficient] *
+                    x[iCoefficient];
+            }
+            iGuess =
+                (iGuess + B[iUnknown]) /
+                A[iUnknownCoefficientOffset + iUnknown];
+            x[iUnknown] = iGuess;
+        }
+    }
+
+    return x;
 }
 
 function pressureGradient(atmo: Atmosphere, pos: Point): Vector {

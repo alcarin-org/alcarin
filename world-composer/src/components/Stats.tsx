@@ -8,9 +8,10 @@ import { Vector, Point } from '../utils/Math';
 interface Props {
     atmosphere: Atmosphere;
     mouseOver: Point;
+    fps: number;
 }
 
-export default function Stats({ atmosphere, mouseOver }: Props) {
+export default function Stats({ atmosphere, mouseOver, fps }: Props) {
     const length = atmosphere.fluidFieldsCount;
     let pressure = 0;
     let totalVelocity: Vector = [0, 0];
@@ -30,7 +31,8 @@ export default function Stats({ atmosphere, mouseOver }: Props) {
             <dl>
                 <dt>Av. Velocity</dt>
                 <dd>
-                    ({avVelocity[0].toFixed(3)}, {avVelocity[1].toFixed(3)})
+                    ({avVelocity[0].toFixed(3)}, {avVelocity[1].toFixed(3)}) [
+                    {math.norm(avVelocity).toFixed(3)}]
                 </dd>
                 <dt>Av. Pressure</dt>
                 <dd>{avPressure.toFixed(3)}</dd>
@@ -45,6 +47,10 @@ export default function Stats({ atmosphere, mouseOver }: Props) {
                 <dd>{clickedNode.pressure.toFixed(3)}</dd>
                 <dt>Clicked divergence:</dt>
                 <dd>{divergence(atmosphere, mouseOver).toFixed(3)}</dd>
+                <dt>fps</dt>
+                <dd>{fps}</dd>
+                <dt>type</dt>
+                <dd>{clickedNode.type}</dd>
             </dl>
         </div>
     );
