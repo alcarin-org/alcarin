@@ -15,7 +15,7 @@ export function angle(v: Vector, v2: Vector = [1, 0]) {
     const normalizedV = normalize(v);
     const normalizedV2 = normalize(v2);
 
-    return math.atan2(v[1], v[0]) - math.atan2(v2[1], v2[0]);
+    return Math.atan2(v[1], v[0]) - Math.atan2(v2[1], v2[0]);
 }
 
 export function constraints(from: number, to: number, val: number) {

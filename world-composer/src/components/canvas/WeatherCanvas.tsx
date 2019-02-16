@@ -2,7 +2,14 @@ import React, { useRef, useEffect, useState, MouseEventHandler } from 'react';
 import math from 'mathjs';
 
 import { Atmosphere, AtmosphereNode, NodeType } from '../../data/Atmosphere';
-import { Point, Vector, angle, constraints } from '../../utils/Math';
+import {
+    Point,
+    Vector,
+    angle,
+    constraints,
+    normalize,
+    multiply,
+} from '../../utils/Math';
 
 interface Props {
     atmosphere: Atmosphere;
@@ -84,31 +91,23 @@ function drawVelocity(
     fieldSizePx: number,
     color: string = 'rgba(0,0,0, 0.25)'
 ) {
-    return;
     const halfSize = fieldSizePx / 2 - 1;
     const vPower = constraints(0.1, 1, math.norm(velocity) as number);
-    const vAngle = angle(velocity);
+    const v = multiply(normalize(velocity), 0.7 * fieldSizePx);
+    ctx.fillStyle = 'color';
+    ctx.strokeStyle = 'color';
 
-    ctx.save();
-
-    ctx.translate(
+    const off = [
         pos[0] * fieldSizePx + fieldSizePx / 2,
-        pos[1] * fieldSizePx + fieldSizePx / 2
-    );
-    ctx.rotate(vAngle);
-    ctx.fillStyle = color;
-
+        pos[1] * fieldSizePx + fieldSizePx / 2,
+    ];
     ctx.beginPath();
-    ctx.moveTo(-halfSize * vPower, -halfSize + 1);
-    ctx.lineTo(-halfSize * vPower, halfSize - 1);
-    ctx.lineTo(halfSize * vPower, 0);
-    ctx.closePath();
-    ctx.fill();
+    ctx.moveTo(off[0] - 0.5 * v[0], off[1] - 0.5 * v[1]);
+    ctx.lineTo(off[0] + 0.5 * v[0], off[1] + 0.5 * v[1]);
+    ctx.stroke();
 
-    ctx.fillStyle = 'red';
-    ctx.fillRect(halfSize * vPower - 1, -1, 2, 2);
-
-    ctx.restore();
+    ctx.fillStyle = 'yellow';
+    ctx.fillRect(-1 + off[0] + 0.5 * v[0], -1 + off[1] + 0.5 * v[1], 2, 2);
 }
 
 function drawCell(
@@ -118,7 +117,6 @@ function drawCell(
     fieldSizePx: number,
     gapsPx: number
 ) {
-    const range = fieldSizePx - 2 * gapsPx;
     ctx.fillStyle = cellColor(atmo.get(pos).pressure);
     ctx.fillRect(
         pos[0] * fieldSizePx + gapsPx,
@@ -126,17 +124,18 @@ function drawCell(
         fieldSizePx - 2 * gapsPx,
         fieldSizePx - 2 * gapsPx
     );
+    // const range = fieldSizePx - 2 * gapsPx;
     // for (let i = gapsPx; i < fieldSizePx - gapsPx; i++) {
     //     for (let j = gapsPx; j < fieldSizePx - gapsPx; j++) {
-    // const exactPoint: Point = [pos[0] + i / range, pos[1] + j / range];
-    // ctx.fillStyle = cellColor(atmo.interpolatePressure(exactPoint));
-    // ctx.fillRect(
-    //     pos[0] * fieldSizePx + i,
-    //     pos[1] * fieldSizePx + j,
-    //     1,
-    //     1
-    // );
-    // }
+    //         const exactPoint: Point = [pos[0] + i / range, pos[1] + j / range];
+    //         ctx.fillStyle = cellColor(atmo.interpolatePressure(exactPoint));
+    //         ctx.fillRect(
+    //             pos[0] * fieldSizePx + i,
+    //             pos[1] * fieldSizePx + j,
+    //             1,
+    //             1
+    //         );
+    //     }
     // }
 }
 

@@ -20,7 +20,7 @@ export class PressureDrivenAtmo {
 
     public constructor(atmo: Atmosphere) {
         this.atmo = atmo;
-        // this.precalcVelocityFromPressure();
+        this.precalcVelocityFromPressure();
 
         // this.neightboursMatrix = new Int8Array(atmo.dim2d ** 2).map(
         //     (_, ind) => this.getNeightboursCoords(this.atmo.coords(ind)).length
