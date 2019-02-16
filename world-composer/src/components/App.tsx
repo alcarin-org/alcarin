@@ -5,13 +5,15 @@ import './App.scss';
 import WeatherCanvas from './canvas/WeatherCanvas';
 import { Atmosphere } from '../data/Atmosphere';
 import { Vector, Point } from '../utils/Math';
-import { interpolateVelocityAt, evolve, divergence } from '../data/AtmoMotion';
+// import { interpolateVelocityAt, evolve, divergence } from '../data/AtmoMotion';
+import { PressureDrivenAtmo } from '../data/PressureDrivenAtmo';
 import { ipcRenderer } from '../electron-bridge';
 import Stats from './Stats';
 
-const WorldRadius = 16;
+const WorldRadius = 10;
 const atmosphereSample = new Atmosphere(WorldRadius);
 atmosphereSample.randomizeField();
+const pressureAtmoSystem = new PressureDrivenAtmo(atmosphereSample);
 
 function App() {
     useEffect(() => ipcRenderer.send('main-window-ready'), []);
@@ -35,6 +37,12 @@ function App() {
 
     return (
         <div className="app">
+            <WeatherCanvas
+                atmosphere={atmo}
+                onClick={onAtmoClick}
+                centrifugalMagnitudeMod={centrifugalMagnitude}
+                coriolisMagnitudeMod={coriolisMagnitude}
+            />
             <Stats atmosphere={atmo} mouseOver={clickedNodePos} fps={fps} />
             <button onClick={() => setPause(!pause)}>Play/Pause</button>
             <label>
@@ -67,12 +75,6 @@ function App() {
                     }
                 />
             </label>
-            <WeatherCanvas
-                atmosphere={atmo}
-                onClick={onAtmoClick}
-                centrifugalMagnitudeMod={centrifugalMagnitude}
-                coriolisMagnitudeMod={coriolisMagnitude}
-            />
         </div>
     );
 }
@@ -123,12 +125,8 @@ function useEvolveEngine(
                     setFpsAcc(last => last + timePass);
                     setFpsCounter(counter => counter + 1);
                 }
-                evolve(
-                    atmosphereSample,
-                    timePass,
-                    centrifugalMagnitude,
-                    coriolisMagnitude
-                );
+                console.log('evolve call');
+                pressureAtmoSystem.evolve(timePass);
                 // setPaused(true);
                 setLastPlayDate(now);
             }, 0);

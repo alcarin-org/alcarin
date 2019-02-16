@@ -2,7 +2,7 @@ import React from 'react';
 import math from 'mathjs';
 
 import { Atmosphere } from '../data/Atmosphere';
-import { divergence } from '../data/AtmoMotion';
+// import { divergence } from '../data/AtmoMotion';
 import { Vector, Point } from '../utils/Math';
 
 interface Props {
@@ -12,17 +12,17 @@ interface Props {
 }
 
 export default function Stats({ atmosphere, mouseOver, fps }: Props) {
-    const length = atmosphere.fluidFieldsCount;
+    const length = atmosphere.dim2d ** 2;
     let pressure = 0;
     let totalVelocity: Vector = [0, 0];
-    let totalDivergence = 0;
+    // let totalDivergence = 0;
     atmosphere.forEach((node, pos) => {
         totalVelocity = math.add(totalVelocity, node.velocity) as Vector;
         pressure += node.pressure;
-        totalDivergence += divergence(atmosphere, pos);
+        // totalDivergence += divergence(atmosphere, pos);
     });
     const avPressure = pressure / length;
-    const avDivergence = totalDivergence / length;
+    // const avDivergence = totalDivergence / length;
     const avVelocity = math.divide(totalVelocity, length) as Vector;
 
     const clickedNode = atmosphere.get(mouseOver);
@@ -36,8 +36,6 @@ export default function Stats({ atmosphere, mouseOver, fps }: Props) {
                 </dd>
                 <dt>Av. Pressure</dt>
                 <dd>{avPressure.toFixed(3)}</dd>
-                <dt>Av. Divergence</dt>
-                <dd>({avDivergence.toFixed(3)})</dd>
                 <dt>Clicked velocity:</dt>
                 <dd>
                     ({clickedNode.velocity[0].toFixed(3)},
@@ -45,8 +43,6 @@ export default function Stats({ atmosphere, mouseOver, fps }: Props) {
                 </dd>
                 <dt>Clicked pressure:</dt>
                 <dd>{clickedNode.pressure.toFixed(3)}</dd>
-                <dt>Clicked divergence:</dt>
-                <dd>{divergence(atmosphere, mouseOver).toFixed(3)}</dd>
                 <dt>fps</dt>
                 <dd>{fps}</dd>
                 <dt>type</dt>
@@ -54,4 +50,8 @@ export default function Stats({ atmosphere, mouseOver, fps }: Props) {
             </dl>
         </div>
     );
+    // <dt>Av. Divergence</dt>
+    // <dd>({avDivergence.toFixed(3)})</dd>
+    // <dt>Clicked divergence:</dt>
+    // <dd>{divergence(atmosphere, mouseOver).toFixed(3)}</dd>
 }

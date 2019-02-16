@@ -14,39 +14,7 @@ interface Props {
     onClick: MouseEventHandler<HTMLCanvasElement>;
 }
 
-function drawVelocity(
-    ctx: CanvasRenderingContext2D,
-    // 0..1
-    velocity: Vector,
-    pos: Point,
-    fieldSizePx: number,
-    color: string = 'black'
-) {
-    const halfSize = fieldSizePx / 2 - 1;
-    const vPower = constraints(0.1, 1, math.norm(velocity) as number);
-    const vAngle = angle(velocity);
-
-    ctx.save();
-
-    ctx.translate(
-        pos[0] * fieldSizePx + fieldSizePx / 2,
-        pos[1] * fieldSizePx + fieldSizePx / 2
-    );
-    ctx.rotate(vAngle);
-    ctx.fillStyle = color;
-
-    ctx.beginPath();
-    ctx.moveTo(-halfSize * vPower, -halfSize + 1);
-    ctx.lineTo(-halfSize * vPower, halfSize - 1);
-    ctx.lineTo(halfSize * vPower, 0);
-    ctx.closePath();
-    ctx.fill();
-
-    ctx.fillStyle = 'red';
-    ctx.fillRect(halfSize * vPower - 1, -1, 2, 2);
-
-    ctx.restore();
-}
+const PressureDrawRange = 1.4;
 
 export default function WeatherCanvas({
     atmosphere,
@@ -85,14 +53,7 @@ export default function WeatherCanvas({
             atmosphere.forEach((node, pos) => {
                 // we render only cells inside circle.
                 // 0.5 is just for nicer graphic effect
-                ctx.fillStyle =
-                    node.type === NodeType.Solid ? 'red' : cellColor(node, pos);
-                ctx.fillRect(
-                    pos[0] * fieldSizePx + gapsPx,
-                    pos[1] * fieldSizePx + gapsPx,
-                    visibleCellSize,
-                    visibleCellSize
-                );
+                drawCell(ctx, atmosphere, pos, fieldSizePx, gapsPx);
                 drawVelocity(ctx, node.velocity, pos, fieldSizePx);
             });
             drawVelocity(
@@ -115,8 +76,72 @@ export default function WeatherCanvas({
     );
 }
 
-function cellColor(node: AtmosphereNode, pos: Point) {
-    const factor = (node.pressure + 0.3) / 0.6;
+function drawVelocity(
+    ctx: CanvasRenderingContext2D,
+    // 0..1
+    velocity: Vector,
+    pos: Point,
+    fieldSizePx: number,
+    color: string = 'rgba(0,0,0, 0.25)'
+) {
+    return;
+    const halfSize = fieldSizePx / 2 - 1;
+    const vPower = constraints(0.1, 1, math.norm(velocity) as number);
+    const vAngle = angle(velocity);
+
+    ctx.save();
+
+    ctx.translate(
+        pos[0] * fieldSizePx + fieldSizePx / 2,
+        pos[1] * fieldSizePx + fieldSizePx / 2
+    );
+    ctx.rotate(vAngle);
+    ctx.fillStyle = color;
+
+    ctx.beginPath();
+    ctx.moveTo(-halfSize * vPower, -halfSize + 1);
+    ctx.lineTo(-halfSize * vPower, halfSize - 1);
+    ctx.lineTo(halfSize * vPower, 0);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = 'red';
+    ctx.fillRect(halfSize * vPower - 1, -1, 2, 2);
+
+    ctx.restore();
+}
+
+function drawCell(
+    ctx: CanvasRenderingContext2D,
+    atmo: Atmosphere,
+    pos: Point,
+    fieldSizePx: number,
+    gapsPx: number
+) {
+    const range = fieldSizePx - 2 * gapsPx;
+    ctx.fillStyle = cellColor(atmo.get(pos).pressure);
+    ctx.fillRect(
+        pos[0] * fieldSizePx + gapsPx,
+        pos[1] * fieldSizePx + gapsPx,
+        fieldSizePx - 2 * gapsPx,
+        fieldSizePx - 2 * gapsPx
+    );
+    // for (let i = gapsPx; i < fieldSizePx - gapsPx; i++) {
+    //     for (let j = gapsPx; j < fieldSizePx - gapsPx; j++) {
+    // const exactPoint: Point = [pos[0] + i / range, pos[1] + j / range];
+    // ctx.fillStyle = cellColor(atmo.interpolatePressure(exactPoint));
+    // ctx.fillRect(
+    //     pos[0] * fieldSizePx + i,
+    //     pos[1] * fieldSizePx + j,
+    //     1,
+    //     1
+    // );
+    // }
+    // }
+}
+
+function cellColor(pressure: number) {
+    const factor = (pressure + PressureDrawRange) / (2 * PressureDrawRange);
     const c = [255 * factor, 0, 255 * (1 - factor)];
     return `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
 }
