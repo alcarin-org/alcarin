@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState, MouseEventHandler } from 'react';
 import math from 'mathjs';
 
-import { Atmosphere, NodeType } from '../../data/Atmosphere';
+import { Atmosphere, AtmosphereNode, NodeType } from '../../data/Atmosphere';
 import { Point, Vector, angle, constraints } from '../../utils/Math';
 
 interface Props {
@@ -86,7 +86,7 @@ export default function WeatherCanvas({
                 // we render only cells inside circle.
                 // 0.5 is just for nicer graphic effect
                 ctx.fillStyle =
-                    node.type === NodeType.Solid ? 'red' : worldColor;
+                    node.type === NodeType.Solid ? 'red' : cellColor(node, pos);
                 ctx.fillRect(
                     pos[0] * fieldSizePx + gapsPx,
                     pos[1] * fieldSizePx + gapsPx,
@@ -113,4 +113,10 @@ export default function WeatherCanvas({
             height={canvasSizePx}
         />
     );
+}
+
+function cellColor(node: AtmosphereNode, pos: Point) {
+    const factor = (node.pressure + 0.3) / 0.6;
+    const c = [255 * factor, 0, 255 * (1 - factor)];
+    return `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
 }

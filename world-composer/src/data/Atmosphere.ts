@@ -87,9 +87,9 @@ export class Atmosphere {
         return this.apply((node, pos) => {
             return {
                 ...node,
-                pressure: math.random(),
-                // velocity: [1 * math.random(), 1 * math.random()],
-                velocity: [1 - 2 * math.random(), 1 - 2 * math.random()],
+                pressure: 0,
+                velocity: [1 * math.random(), 1 * math.random()],
+                // velocity: [0.5 - 1 * math.random(), 0.5 - 1 * math.random()],
             };
         });
     }
@@ -109,8 +109,8 @@ export class Atmosphere {
 
     private coords(index: number): Point {
         return [
-            Math.floor(index / this.dim2d) - this.radius + 1,
             (index % this.dim2d) - this.radius + 1,
+            Math.floor(index / this.dim2d) - this.radius + 1,
         ];
     }
 

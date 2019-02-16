@@ -14,7 +14,6 @@ export function evolve(
     centrifugalMagnitudeMod: number,
     coriolisMagnitudeMod: number
 ) {
-    console.log('step start');
     const conventedAtmoModel = atmo.apply((node, pos, originalNodes) => {
         const newVelocity = applyConvectionForce(
             timePass,
@@ -25,20 +24,20 @@ export function evolve(
 
         let outputVelocity = newVelocity;
 
-        // const distanceFromCenter =
-        //     (math.distance(pos, Center) as number) / atmo.radius;
-        // const externalForces = math.add(
-        //     math.multiply(
-        //         perpendicular(normalize(pos)),
-        //         coriolisMagnitudeMod * distanceFromCenter * timePass
-        //     ),
-        //     math.multiply(
-        //         normalize(pos),
-        //         distanceFromCenter * centrifugalMagnitudeMod* timePass
-        //     )
-        // ) as Vector;
+        const distanceFromCenter =
+            (math.distance(pos, Center) as number) / atmo.radius;
+        const externalForces = math.add(
+            math.multiply(
+                perpendicular(normalize(pos)),
+                coriolisMagnitudeMod * distanceFromCenter * timePass
+            ),
+            math.multiply(
+                normalize(pos),
+                distanceFromCenter * centrifugalMagnitudeMod * timePass
+            )
+        ) as Vector;
 
-        // let outputVelocity = math.add(newVelocity, externalForces) as Vector;
+        outputVelocity = math.add(newVelocity, externalForces) as Vector;
 
         // // general leak of energy
         // outputVelocity = math.multiply(
@@ -47,9 +46,9 @@ export function evolve(
         // ) as Vector;
 
         // temporary max vector size
-        if (math.norm(outputVelocity) > 1) {
-            outputVelocity = normalize(outputVelocity);
-        }
+        // if (math.norm(outputVelocity) > 1) {
+        //     outputVelocity = normalize(outputVelocity);
+        // }
 
         return {
             ...node,
@@ -57,9 +56,7 @@ export function evolve(
         };
     });
 
-    console.log('applying pressure');
     applyPressureModel(atmo, timePass);
-    console.log('done');
 }
 
 function iterateNeighbors(
@@ -88,8 +85,7 @@ function applyPressureModel(atmo: Atmosphere, timePass: number) {
     const coefficientMatrixA: number[][] = new Array(fluidIndexesSize);
     const divergenceVectorB = new Array(fluidIndexesSize);
 
-    console.log('preparing arrays');
-    fluidIndexes.forEach((nodePos: Point, nodeInd: number) => {
+    fluidIndexes.forEach((nodePos, fluidIndex) => {
         const fieldARow = coefficientBaseRow.slice(0);
 
         let fluidNeightborsCount = 0;
@@ -100,26 +96,24 @@ function applyPressureModel(atmo: Atmosphere, timePass: number) {
                 fieldARow[neightNode.fluidIndex] = 1;
             }
         });
-        fieldARow[nodeInd] = -fluidNeightborsCount;
-        coefficientMatrixA[nodeInd] = fieldARow;
-        divergenceVectorB[nodeInd] = divergence(atmo, nodePos) / timePass;
+        fieldARow[fluidIndex] = fluidNeightborsCount;
+        coefficientMatrixA[fluidIndex] = fieldARow;
+        divergenceVectorB[fluidIndex] = -divergence(atmo, nodePos) / timePass;
     });
 
-    console.log('calculating lusolve');
     const pressureMatrix: number[][] = math.lusolve(
         coefficientMatrixA,
         divergenceVectorB
     ) as number[][];
-    console.log('apply pressure to nodes');
+
     fluidIndexes.forEach((pos, fluidInd) => {
         const node = atmo.get(pos);
         node.pressure = pressureMatrix[fluidInd++][0];
     });
 
-    console.log('apply velocity from pressure gradient');
-    return atmo.apply((node, pos) => {
+    atmo.apply((node, pos) => {
         const pressureGradientValue = math.multiply(
-            timePass,
+            -timePass,
             pressureGradient(atmo, pos)
         ) as Vector;
         return {
@@ -131,20 +125,38 @@ function applyPressureModel(atmo: Atmosphere, timePass: number) {
 
 function pressureGradient(atmo: Atmosphere, pos: Point): Vector {
     const mainNode = atmo.get(pos);
-    return [
-        mainNode.pressure - atmo.get([pos[0] - 1, pos[1]]).pressure,
-        mainNode.pressure - atmo.get([pos[0], pos[1] - 1]).pressure,
-    ];
+
+    const lastXPos: Point = [pos[0] - 1, pos[1]];
+    const lastYPos: Point = [pos[0], pos[1] - 1];
+
+    const xDiff =
+        atmo.get(lastXPos).type === NodeType.Solid
+            ? 0
+            : mainNode.pressure - atmo.get([pos[0] - 1, pos[1]]).pressure;
+
+    const yDiff =
+        atmo.get(lastYPos).type === NodeType.Solid
+            ? 0
+            : mainNode.pressure - atmo.get([pos[0], pos[1] - 1]).pressure;
+
+    return [xDiff, yDiff];
 }
 
-function divergence(atmo: Atmosphere, pos: Point): number {
-    const mainNode = atmo.get(pos);
-    return (
-        atmo.get([pos[0] + 1, pos[1]]).velocity[0] -
-        mainNode.velocity[0] +
-        atmo.get([pos[0], pos[1] + 1]).velocity[1] -
-        mainNode.velocity[1]
-    );
+export function divergence(atmo: Atmosphere, pos: Point): number {
+    const mainNodeVelocity = atmo.get(pos).velocity;
+    const nextXPos: Point = [pos[0] + 1, pos[1]];
+    const nextYPos: Point = [pos[0], pos[1] + 1];
+
+    const xDiff =
+        atmo.get(nextXPos).type === NodeType.Solid
+            ? 0
+            : atmo.get(nextXPos).velocity[0] - mainNodeVelocity[0];
+    const yDiff =
+        atmo.get(nextYPos).type === NodeType.Solid
+            ? 0
+            : atmo.get(nextYPos).velocity[1] - mainNodeVelocity[1];
+
+    return xDiff + yDiff;
 }
 
 function interpolateVelocityComponentAt(
@@ -169,9 +181,6 @@ function interpolateVelocityComponentAt(
                 gridPos[0] + offsetX,
                 gridPos[1] + offsetY,
             ]);
-            if (!neighNode) {
-                console.log([gridPos[0] + offsetX, gridPos[1] + offsetY]);
-            }
             if (neighNode.type === NodeType.Solid) {
                 continue;
             }
@@ -180,11 +189,10 @@ function interpolateVelocityComponentAt(
             cmpNewValue += weightX * weightY * cmpValue;
         }
     }
-    // console.log('weight sum', gridPos, weightSum);
-    return cmpNewValue / weightSum;
+    return weightSum === 0 ? 0 : cmpNewValue / weightSum;
 }
 
-export function interpolateVeloctyAt(atmo: Atmosphere, pos: Point): Vector {
+export function interpolateVelocityAt(atmo: Atmosphere, pos: Point): Vector {
     return [
         interpolateVelocityComponentAt(
             atmo,
@@ -205,13 +213,13 @@ function applyConvectionForce(
     pos: Point,
     originalAtmo: Atmosphere
 ): Vector {
-    const approxVelocity = interpolateVeloctyAt(originalAtmo, pos);
+    const approxVelocity = interpolateVelocityAt(originalAtmo, pos);
     const lastKnownPosition: Point = math.add(
         pos,
         math.multiply(approxVelocity, timePass / 2)
     ) as Point;
 
-    const approxAverageVelocity = interpolateVeloctyAt(
+    const approxAverageVelocity = interpolateVelocityAt(
         originalAtmo,
         lastKnownPosition
     );
@@ -221,5 +229,5 @@ function applyConvectionForce(
         math.multiply(approxAverageVelocity, timePass)
     ) as Point;
 
-    return interpolateVeloctyAt(originalAtmo, approxDestinityPoint);
+    return interpolateVelocityAt(originalAtmo, approxDestinityPoint);
 }

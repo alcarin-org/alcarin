@@ -1,19 +1,23 @@
 import React, { useEffect, useState, MouseEvent } from 'react';
+import math from 'mathjs';
+
 import './App.scss';
 import WeatherCanvas from './canvas/WeatherCanvas';
 import { Atmosphere } from '../data/Atmosphere';
-import { interpolateVeloctyAt, evolve } from '../data/AtmoMotion';
+import { Vector, Point } from '../utils/Math';
+import { interpolateVelocityAt, evolve, divergence } from '../data/AtmoMotion';
 import { ipcRenderer } from '../electron-bridge';
 import Stats from './Stats';
 
-const WorldRadius = 8;
+const WorldRadius = 6;
 const atmosphereSample = new Atmosphere(WorldRadius);
 atmosphereSample.randomizeField();
 
 function App() {
     useEffect(() => ipcRenderer.send('main-window-ready'), []);
-    const [coriolisMagnitude, setCoriolisMagnitude] = useState(0.04);
-    const [centrifugalMagnitude, setCentrifugalMagnitude] = useState(0.04);
+    const [coriolisMagnitude, setCoriolisMagnitude] = useState(0.05);
+    const [centrifugalMagnitude, setCentrifugalMagnitude] = useState(0.05);
+    const [clickedNodePos, setClickedNodePos] = useState([0, 0] as Point);
 
     const [atmo, pause, setPause] = useEvolveEngine(
         centrifugalMagnitude,
@@ -26,23 +30,12 @@ function App() {
 
         const cellX = Math.floor(ev.nativeEvent.offsetX / 30) - atmo.radius + 1;
         const cellY = Math.floor(ev.nativeEvent.offsetY / 30) - atmo.radius + 1;
-
-        console.log(
-            cellX,
-            cellY,
-            atmo.get([cellX, cellY]).velocity,
-            interpolateVeloctyAt(atmo, [x, y])
-        );
-        // const newAtmo = set(atmo, [x, y], {
-        //     pressure: 0,
-        //     velocity: [1 - 2 * Math.random(), 1 - 2 * Math.random()],
-        // });
-        // setAtmo(newAtmo);
+        setClickedNodePos([cellX, cellY]);
     }
 
     return (
         <div className="app">
-            <Stats atmosphere={atmo} />
+            <Stats atmosphere={atmo} mouseOver={clickedNodePos} />
             <button onClick={() => setPause(!pause)}>Play/Pause</button>
             <label>
                 Centrifugal Force
@@ -50,7 +43,7 @@ function App() {
                     type="range"
                     min={0}
                     max={100}
-                    step={10}
+                    step={2}
                     value={centrifugalMagnitude * 100}
                     onChange={ev =>
                         setCentrifugalMagnitude(
@@ -65,7 +58,7 @@ function App() {
                     type="range"
                     min={0}
                     max={100}
-                    step={10}
+                    step={2}
                     value={coriolisMagnitude * 100}
                     onChange={ev =>
                         setCoriolisMagnitude(
@@ -121,13 +114,12 @@ function useEvolveEngine(
                     (now.getTime() - lastPlayDate.getTime()) / 1000;
                 const newAtmo = evolve(
                     atmosphereSample,
-                    // timePass,
-                    0.05,
+                    timePass,
                     centrifugalMagnitude,
                     coriolisMagnitude
                 );
-                setLastPlayDate(now);
                 // setPaused(true);
+                setLastPlayDate(now);
             }, 50);
             return () => clearTimeout(timeoutId);
         },
