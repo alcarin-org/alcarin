@@ -16,7 +16,24 @@ export enum MapType {
 type Color = [number, number, number];
 
 const PressureDrawRange = 1.4;
-const VelocityDrawRange = 1.4;
+const VelocityDrawRange = 5.0;
+
+export function initializeGrid(
+    ctx: CanvasRenderingContext2D,
+    atmo: Atmosphere,
+    fieldSizePx: number
+) {
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+    for (let i = 0; i < atmo.dim2d; i++) {
+        for (let j = 0; j < atmo.dim2d; j++) {
+            ctx.moveTo(i * fieldSizePx, (j + 1) * fieldSizePx - 1);
+            ctx.lineTo(i * fieldSizePx, j * fieldSizePx);
+            ctx.lineTo((i + 1) * fieldSizePx - 1, j * fieldSizePx);
+        }
+    }
+    ctx.stroke();
+}
 
 export function renderVelocities(
     ctx: CanvasRenderingContext2D,
@@ -52,6 +69,32 @@ export function renderBgTexture(
     atmo.forEach((node, pos) => drawCell(ctx, mapType, atmo, pos));
 }
 
+export function renderBigBgTexture(
+    ctx: CanvasRenderingContext2D,
+    pixelOffset: number,
+    canvasSizePx: number,
+    fieldSizePx: number,
+    atmo: Atmosphere,
+    mapType: MapType
+) {
+    for (let i = 0; i < canvasSizePx; i++) {
+        for (let j = 0; j < canvasSizePx; j++) {
+            const p = pxToAtmoPos(i, j, fieldSizePx, atmo);
+            let color: Color;
+            switch (mapType) {
+                case MapType.Velocity:
+                    color = velocityColor(atmo.interpolateVelocity(p));
+                    break;
+                case MapType.Pressure:
+                default:
+                    color = pressureColor(atmo.interpolatePressure(p));
+            }
+            ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+            ctx.fillRect(i, j, 1, 1);
+        }
+    }
+}
+
 function drawCell(
     ctx: CanvasRenderingContext2D,
     mapType: MapType,
@@ -79,6 +122,18 @@ function pressureColor(pressure: number): Color {
 
 function velocityColor(velocity: Vector): Color {
     const length = magnitude(velocity);
-    const factor = (length + PressureDrawRange) / (2 * PressureDrawRange);
+    const factor = (length + VelocityDrawRange) / (2 * VelocityDrawRange);
     return [255 * factor, 0, 255 * (1 - factor)];
+}
+
+export function pxToAtmoPos(
+    x: number,
+    y: number,
+    fieldSizePx: number,
+    atmo: Atmosphere
+): Point {
+    return [
+        x / fieldSizePx - atmo.radius + 1 - 0.5,
+        y / fieldSizePx - atmo.radius + 1 - 0.5,
+    ];
 }

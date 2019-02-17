@@ -6,7 +6,14 @@ import React, {
     RefObject,
 } from 'react';
 
-import { renderBgTexture, renderVelocities, MapType } from './primitives';
+import {
+    renderBgTexture,
+    renderBigBgTexture,
+    renderVelocities,
+    MapType,
+    initializeGrid,
+    pxToAtmoPos,
+} from './primitives';
 import { Atmosphere, AtmosphereNode, NodeType } from '../../data/Atmosphere';
 import {
     Point,
@@ -19,15 +26,19 @@ import {
 interface Props {
     atmosphere: Atmosphere;
     fieldSizePx?: number;
-    onClick: MouseEventHandler<HTMLCanvasElement>;
+    onClick: (p: Point) => void;
     mapType: MapType;
+    drawRealInterpolation: boolean;
+    drawGrid: boolean;
 }
 
 export default function WeatherCanvas({
     atmosphere,
-    fieldSizePx = 25,
+    fieldSizePx = 40,
     onClick,
     mapType = MapType.Pressure,
+    drawRealInterpolation,
+    drawGrid,
 }: Props) {
     const atmo = atmosphere;
     const displayCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -38,35 +49,49 @@ export default function WeatherCanvas({
         canvasSizePx,
         displayCanvasRef
     );
-    const [pressureCanvasRef, pressureCtxRef] = useCanvas(
-        atmo.dim2d,
-        atmo.dim2d
-    );
+    const [gridCanvasRef, gridCtxRef] = useCanvas(canvasSizePx, canvasSizePx);
+    const [bgCanvasRef, bgCtxRef] = useCanvas(atmo.dim2d, atmo.dim2d);
 
     const [cellCanvasRef, cellCtxRef] = useCanvas(fieldSizePx, fieldSizePx);
     const pixelOffset = (atmo.radius - 1) * fieldSizePx;
 
     useEffect(() => {
         screenCtxRef.current!.strokeStyle = 'black';
-        pressureCtxRef.current!.translate(atmo.radius - 1, atmo.radius - 1);
+        bgCtxRef.current!.translate(atmo.radius - 1, atmo.radius - 1);
         const halfSize = Math.trunc(fieldSizePx / 2);
         cellCtxRef.current!.translate(halfSize, halfSize);
         cellCtxRef.current!.strokeStyle = 'black';
+        initializeGrid(gridCtxRef.current!, atmo, fieldSizePx);
     }, []);
 
     useEffect(() => {
         function renderAtmosphere() {
             const screenCtx = screenCtxRef.current!;
 
-            renderBgTexture(pressureCtxRef.current!, atmo, mapType);
+            if (drawRealInterpolation) {
+                renderBigBgTexture(
+                    screenCtx,
+                    pixelOffset,
+                    canvasSizePx,
+                    fieldSizePx,
+                    atmo,
+                    mapType
+                );
+            } else {
+                renderBgTexture(bgCtxRef.current!, atmo, mapType);
+                screenCtx.drawImage(
+                    bgCanvasRef.current!,
+                    0,
+                    0,
+                    canvasSizePx,
+                    canvasSizePx
+                );
+            }
 
-            screenCtx.drawImage(
-                pressureCanvasRef.current!,
-                0,
-                0,
-                canvasSizePx,
-                canvasSizePx
-            );
+            if (drawGrid) {
+                screenCtx.drawImage(gridCanvasRef.current!, 0, 0);
+            }
+
             renderVelocities(
                 screenCtx,
                 atmo,
@@ -81,9 +106,19 @@ export default function WeatherCanvas({
         return () => cancelAnimationFrame(requestId);
     });
 
+    function onAtmoClick(ev: React.MouseEvent) {
+        const pos = pxToAtmoPos(
+            ev.nativeEvent.offsetX,
+            ev.nativeEvent.offsetY,
+            fieldSizePx,
+            atmo
+        );
+        onClick(pos);
+    }
+
     return (
         <canvas
-            onClick={onClick}
+            onClick={onAtmoClick}
             ref={displayCanvasRef}
             width={canvasSizePx}
             height={canvasSizePx}

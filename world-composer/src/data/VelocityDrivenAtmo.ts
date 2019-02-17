@@ -34,7 +34,7 @@ export class VelocityDrivenAtmo {
 
     private convectVelocity(deltaTime: number) {
         // this.atmo.forEach(node => (node.newVelocity = node.velocity));
-
+        console.log(deltaTime);
         this.atmo.forEach((node, p) => {
             // better velocity interpolation needed here
             const lastKnownP: Point = [
@@ -47,7 +47,9 @@ export class VelocityDrivenAtmo {
                 return;
             }
 
-            node.newVelocity = this.atmo.interpolateVelocity(lastKnownP);
+            const avVelocity = this.atmo.interpolateVelocity(lastKnownP);
+            node.newVelocity = avVelocity;
+            // const newPoint =
         });
 
         this.atmo.forEach(node => (node.velocity = node.newVelocity));

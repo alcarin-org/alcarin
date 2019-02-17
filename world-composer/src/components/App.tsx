@@ -11,9 +11,9 @@ import { ipcRenderer } from '../electron-bridge';
 import Stats from './Stats';
 
 const autopause = false;
-const stepTimeout = 1;
+const stepTimeout = 100;
 
-const WorldRadius = 12;
+const WorldRadius = 6;
 const atmosphereSample = new Atmosphere(WorldRadius);
 atmosphereSample.randomizeField();
 const pressureAtmoSystem = new VelocityDrivenAtmo(atmosphereSample);
@@ -24,6 +24,8 @@ function App() {
     const [centrifugalMagnitude, setCentrifugalMagnitude] = useState(0.05);
     const [clickedNodePos, setClickedNodePos] = useState([0, 0] as Point);
     const [mapType, setMapType] = useState(MapType.Pressure);
+    const [drawRealInterpolation, setDrawRealInterpolation] = useState(false);
+    const [drawGrid, setDrawGrid] = useState(false);
 
     const [atmo, pause, setPause, fps] = useEvolveEngine(
         centrifugalMagnitude,
@@ -34,13 +36,16 @@ function App() {
         setMapType(parseInt(ev.currentTarget.value, 10));
     }
 
-    function onAtmoClick(ev: MouseEvent) {
-        const x = ev.nativeEvent.offsetX / 30 - atmo.radius + 1;
-        const y = ev.nativeEvent.offsetY / 30 - atmo.radius + 1;
+    function onAtmoClick(p: Point) {
+        setClickedNodePos(p);
+    }
 
-        const cellX = Math.floor(ev.nativeEvent.offsetX / 30) - atmo.radius + 1;
-        const cellY = Math.floor(ev.nativeEvent.offsetY / 30) - atmo.radius + 1;
-        setClickedNodePos([cellX, cellY]);
+    function onDrawRealInterpoltation(ev: FormEvent<HTMLInputElement>) {
+        setDrawRealInterpolation(ev.currentTarget.checked);
+    }
+
+    function onDrawGrid(ev: FormEvent<HTMLInputElement>) {
+        setDrawGrid(ev.currentTarget.checked);
     }
 
     return (
@@ -49,6 +54,8 @@ function App() {
                 atmosphere={atmo}
                 onClick={onAtmoClick}
                 mapType={mapType}
+                drawRealInterpolation={drawRealInterpolation}
+                drawGrid={drawGrid}
             />
             <Stats atmosphere={atmo} mouseOver={clickedNodePos} fps={fps} />
             <button onClick={() => setPause(!pause)}>Play/Pause</button>
@@ -104,6 +111,17 @@ function App() {
                             )
                         }
                     />
+                </label>
+                <label>
+                    <input
+                        type="checkbox"
+                        onChange={onDrawRealInterpoltation}
+                    />
+                    Draw real gradient (slow)
+                </label>
+                <label>
+                    <input type="checkbox" onChange={onDrawGrid} />
+                    Draw grid
                 </label>
             </div>
         </div>

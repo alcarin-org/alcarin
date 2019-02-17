@@ -4,7 +4,7 @@ import React from 'react';
 
 import { Atmosphere } from '../data/Atmosphere';
 // import { divergence } from '../data/AtmoMotion';
-import { Vector, Point, magnitude, add, multiply } from '../utils/Math';
+import { Vector, Point, magnitude, add, multiply, floor } from '../utils/Math';
 
 interface Props {
     atmosphere: Atmosphere;
@@ -26,7 +26,10 @@ export default function Stats({ atmosphere, mouseOver, fps }: Props) {
     // const avDivergence = totalDivergence / length;
     const avVelocity = multiply(totalVelocity, 1 / length);
 
-    const clickedNode = atmosphere.get(mouseOver);
+    const mouseOverCell = floor(add(mouseOver, [0.5, 0.5]));
+    const clickedNode = atmosphere.get(mouseOverCell);
+    const clickedInterpolatedVel = atmosphere.interpolateVelocity(mouseOver);
+    const clickedInterpolatedPress = atmosphere.interpolatePressure(mouseOver);
     return (
         <div className="stats">
             <dl>
@@ -39,7 +42,8 @@ export default function Stats({ atmosphere, mouseOver, fps }: Props) {
                 <dd>{avPressure.toFixed(3)}</dd>
                 <dt>Clicked</dt>
                 <dd>
-                    ({mouseOver[0]}, {mouseOver[1]})
+                    ({mouseOver[0].toFixed(3)}, {mouseOver[1].toFixed(3)}) ~(
+                    {mouseOverCell[0]}, {mouseOverCell[1]})
                 </dd>
                 <dt>Clicked velocity</dt>
                 <dd>
@@ -48,6 +52,14 @@ export default function Stats({ atmosphere, mouseOver, fps }: Props) {
                 </dd>
                 <dt>Clicked pressure:</dt>
                 <dd>{clickedNode.pressure.toFixed(3)}</dd>
+
+                <dt>Clicked interp. pressure:</dt>
+                <dd>{clickedInterpolatedPress.toFixed(3)}</dd>
+                <dt>Clicked interp. velocity:</dt>
+                <dd>
+                    ({clickedInterpolatedVel[0].toFixed(3)},
+                    {clickedInterpolatedVel[1].toFixed(3)})
+                </dd>
                 <dt>fps</dt>
                 <dd>{fps}</dd>
             </dl>
