@@ -6,7 +6,7 @@ import React, {
     RefObject,
 } from 'react';
 
-import { renderPressureTexture, renderVelocities } from './primitives';
+import { renderBgTexture, renderVelocities, MapType } from './primitives';
 import { Atmosphere, AtmosphereNode, NodeType } from '../../data/Atmosphere';
 import {
     Point,
@@ -20,12 +20,14 @@ interface Props {
     atmosphere: Atmosphere;
     fieldSizePx?: number;
     onClick: MouseEventHandler<HTMLCanvasElement>;
+    mapType: MapType;
 }
 
 export default function WeatherCanvas({
     atmosphere,
-    fieldSizePx = 30,
+    fieldSizePx = 25,
     onClick,
+    mapType = MapType.Pressure,
 }: Props) {
     const atmo = atmosphere;
     const displayCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -56,7 +58,8 @@ export default function WeatherCanvas({
         function renderAtmosphere() {
             const screenCtx = screenCtxRef.current!;
 
-            renderPressureTexture(pressureCtxRef.current!, atmo);
+            renderBgTexture(pressureCtxRef.current!, atmo, mapType);
+
             screenCtx.drawImage(
                 pressureCanvasRef.current!,
                 0,

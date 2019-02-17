@@ -1,3 +1,5 @@
+import './Stats.scss';
+
 import React from 'react';
 
 import { Atmosphere } from '../data/Atmosphere';
@@ -35,7 +37,11 @@ export default function Stats({ atmosphere, mouseOver, fps }: Props) {
                 </dd>
                 <dt>Av. Pressure</dt>
                 <dd>{avPressure.toFixed(3)}</dd>
-                <dt>Clicked velocity:</dt>
+                <dt>Clicked</dt>
+                <dd>
+                    ({mouseOver[0]}, {mouseOver[1]})
+                </dd>
+                <dt>Clicked velocity</dt>
                 <dd>
                     ({clickedNode.velocity[0].toFixed(3)},
                     {clickedNode.velocity[1].toFixed(3)})

@@ -40,8 +40,8 @@ export class PressureDrivenAtmo {
         this.atmo.forEach((node, p) => {
             // better velocity interpolation needed here
             const lastKnownP: Point = [
-                p[0] - deltaTime * node.velocity[0],
-                p[1] - deltaTime * node.velocity[1],
+                p[0] - node.velocity[0],
+                p[1] - node.velocity[1],
             ];
             const lastKnownPCell = round(lastKnownP);
 
@@ -52,11 +52,22 @@ export class PressureDrivenAtmo {
             const pressure = this.atmo.interpolatePressure(lastKnownP);
             const lastNode = this.atmo.get(lastKnownPCell);
             const pressureFlow = deltaTime * (pressure - node.pressure);
+            // if (p[0] === 0 && p[1] === 13) {
+            //     console.log(
+            //         'now',
+            //         node.pressure,
+            //         'last',
+            //         pressure,
+            //         pressureFlow
+            //     );
+            // }
+            // console.log('point', p, 'pressure to flow', pressureFlow);
             // const pressureFlow = deltaTime * (pressure;
-            this.atmo.injectNewPressure(lastKnownP, -pressureFlow);
+            // this.atmo.injectNewPressure(lastKnownP, -pressureFlow);
             // if (lastNode !== node) {
             //     console.log('yeah');
             // }
+
             node.newPressure += pressureFlow;
         });
 

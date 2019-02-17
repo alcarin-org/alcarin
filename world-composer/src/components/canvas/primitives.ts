@@ -8,7 +8,15 @@ import {
 } from '../../utils/Math';
 import { Atmosphere } from '../../data/Atmosphere';
 
+export enum MapType {
+    Pressure,
+    Velocity,
+}
+
+type Color = [number, number, number];
+
 const PressureDrawRange = 1.4;
+const VelocityDrawRange = 1.4;
 
 export function renderVelocities(
     ctx: CanvasRenderingContext2D,
@@ -36,22 +44,41 @@ export function renderVelocities(
     ctx.stroke();
 }
 
-export function renderPressureTexture(
+export function renderBgTexture(
     ctx: CanvasRenderingContext2D,
-    atmo: Atmosphere
+    atmo: Atmosphere,
+    mapType: MapType
 ) {
-    atmo.forEach((node, pos) => drawCell(ctx, atmo, pos));
+    atmo.forEach((node, pos) => drawCell(ctx, mapType, atmo, pos));
 }
 
-function drawCell(ctx: CanvasRenderingContext2D, atmo: Atmosphere, pos: Point) {
-    const pressureColor = cellColor(atmo.get(pos).pressure);
-    ctx.fillStyle = `rgb(${pressureColor[0]}, ${pressureColor[1]}, ${
-        pressureColor[2]
-    })`;
+function drawCell(
+    ctx: CanvasRenderingContext2D,
+    mapType: MapType,
+    atmo: Atmosphere,
+    pos: Point
+) {
+    const node = atmo.get(pos);
+    let color: Color;
+    switch (mapType) {
+        case MapType.Velocity:
+            color = velocityColor(node.velocity);
+            break;
+        case MapType.Pressure:
+        default:
+            color = pressureColor(node.pressure);
+    }
+    ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
     ctx.fillRect(pos[0], pos[1], 1, 1);
 }
 
-function cellColor(pressure: number) {
+function pressureColor(pressure: number): Color {
     const factor = (pressure + PressureDrawRange) / (2 * PressureDrawRange);
-    return [255 * factor, 0, 255 * (1 - factor), 1];
+    return [255 * factor, 0, 255 * (1 - factor)];
+}
+
+function velocityColor(velocity: Vector): Color {
+    const length = magnitude(velocity);
+    const factor = (length + PressureDrawRange) / (2 * PressureDrawRange);
+    return [255 * factor, 0, 255 * (1 - factor)];
 }

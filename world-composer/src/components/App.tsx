@@ -1,29 +1,38 @@
-import React, { useEffect, useState, MouseEvent } from 'react';
+import React, { useEffect, useState, MouseEvent, FormEvent } from 'react';
 
 import './App.scss';
 import WeatherCanvas from './canvas/WeatherCanvas';
+import { MapType } from './canvas/primitives';
 import { Atmosphere } from '../data/Atmosphere';
 import { Vector, Point } from '../utils/Math';
 // import { interpolateVelocityAt, evolve, divergence } from '../data/AtmoMotion';
-import { PressureDrivenAtmo } from '../data/PressureDrivenAtmo';
+import { VelocityDrivenAtmo } from '../data/VelocityDrivenAtmo';
 import { ipcRenderer } from '../electron-bridge';
 import Stats from './Stats';
 
-const WorldRadius = 10;
+const autopause = false;
+const stepTimeout = 1;
+
+const WorldRadius = 12;
 const atmosphereSample = new Atmosphere(WorldRadius);
 atmosphereSample.randomizeField();
-const pressureAtmoSystem = new PressureDrivenAtmo(atmosphereSample);
+const pressureAtmoSystem = new VelocityDrivenAtmo(atmosphereSample);
 
 function App() {
     useEffect(() => ipcRenderer.send('main-window-ready'), []);
     const [coriolisMagnitude, setCoriolisMagnitude] = useState(0.05);
     const [centrifugalMagnitude, setCentrifugalMagnitude] = useState(0.05);
     const [clickedNodePos, setClickedNodePos] = useState([0, 0] as Point);
+    const [mapType, setMapType] = useState(MapType.Pressure);
 
     const [atmo, pause, setPause, fps] = useEvolveEngine(
         centrifugalMagnitude,
         coriolisMagnitude
     );
+
+    function onMapTypeChange(ev: FormEvent<HTMLInputElement>) {
+        setMapType(parseInt(ev.currentTarget.value, 10));
+    }
 
     function onAtmoClick(ev: MouseEvent) {
         const x = ev.nativeEvent.offsetX / 30 - atmo.radius + 1;
@@ -36,7 +45,11 @@ function App() {
 
     return (
         <div className="app">
-            <WeatherCanvas atmosphere={atmo} onClick={onAtmoClick} />
+            <WeatherCanvas
+                atmosphere={atmo}
+                onClick={onAtmoClick}
+                mapType={mapType}
+            />
             <Stats atmosphere={atmo} mouseOver={clickedNodePos} fps={fps} />
             <button onClick={() => setPause(!pause)}>Play/Pause</button>
             <label>
@@ -68,6 +81,26 @@ function App() {
                         )
                     }
                 />
+            </label>
+            <label>
+                <input
+                    type="radio"
+                    name="mapType[]"
+                    value={MapType.Pressure}
+                    checked={mapType === MapType.Pressure}
+                    onChange={onMapTypeChange}
+                />{' '}
+                Pressure
+            </label>
+            <label>
+                <input
+                    type="radio"
+                    name="mapType[]"
+                    value={MapType.Velocity}
+                    checked={mapType === MapType.Velocity}
+                    onChange={onMapTypeChange}
+                />{' '}
+                Velocity
             </label>
         </div>
     );
@@ -120,9 +153,11 @@ function useEvolveEngine(
                     setFpsCounter(counter => counter + 1);
                 }
                 pressureAtmoSystem.evolve(timePass);
-                // setPaused(true);
+                if (autopause) {
+                    setPaused(true);
+                }
                 setLastPlayDate(now);
-            }, 1);
+            }, stepTimeout);
             return () => clearTimeout(timeoutId);
         },
         [lastPlayDate]

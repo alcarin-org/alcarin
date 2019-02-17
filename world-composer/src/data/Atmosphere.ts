@@ -8,16 +8,15 @@ export enum NodeType {
 export interface AtmosphereNode {
     // m/s^2
     velocity: Vector;
+    newVelocity: Vector;
     pressure: number;
-    newPressure: number;
     type: NodeType;
 }
 
 const Center: Point = [0, 0];
 const Vector0: Vector = [0, 0];
 
-const DefaultPressure = 0;
-const RandomPressureRange = 0.3;
+const RandomRange = 0.5;
 
 export class Atmosphere {
     public readonly radius: number;
@@ -32,9 +31,9 @@ export class Atmosphere {
 
             return {
                 velocity: Vector0,
-                pressure: DefaultPressure,
+                newVelocity: Vector0,
+                pressure: 0,
                 type: NodeType.Fluid,
-                newPressure: 0,
             };
         });
     }
@@ -52,9 +51,6 @@ export class Atmosphere {
                     minCellP[0] + offsetX,
                     minCellP[1] + offsetY,
                 ];
-                // if (p[0] === -2 && p[1] === 0) {
-                //     console.log(offsetX, offsetY, this.contains(neighPos));
-                // }
                 if (!this.contains(neighPos)) {
                     continue;
                 }
@@ -67,7 +63,7 @@ export class Atmosphere {
             }
         }
 
-        return weightSum === 0 ? 0 : multiply(resultVel, 1 / weightSum);
+        return weightSum === 0 ? Vector0 : multiply(resultVel, 1 / weightSum);
     }
 
     public interpolatePressure(p: Point) {
@@ -98,59 +94,61 @@ export class Atmosphere {
         return weightSum === 0 ? 0 : resultPressure / weightSum;
     }
 
-    public injectNewPressure(p: Point, pressure: number) {
-        const minCellP = [Math.floor(p[0]), Math.floor(p[1])];
-        const relToCell = [p[0] - minCellP[0], p[1] - minCellP[1]];
+    // public injectNewPressure(p: Point, pressure: number) {
+    //     const minCellP = [Math.floor(p[0]), Math.floor(p[1])];
+    //     const relToCell = [p[0] - minCellP[0], p[1] - minCellP[1]];
 
-        const range = [0, 1];
-        let weightSum = 0;
-        // let resultPressure = 0;
+    //     const range = [0, 1];
+    //     let weightSum = 0;
+    //     // let resultPressure = 0;
 
-        // (p * weight) / (weightSum)
-        const nodes: AtmosphereNode[] = new Array(4);
-        const pressureToApply: Float64Array = new Float64Array(4);
-        for (const offsetX of range) {
-            for (const offsetY of range) {
-                const neighPos: Point = [
-                    minCellP[0] + offsetX,
-                    minCellP[1] + offsetY,
-                ];
-                if (!this.contains(neighPos)) {
-                    continue;
-                }
-                const ind = offsetY * 2 + offsetX;
-                // const neighPressure = this.get(neighPos).pressure;
-                nodes[ind] = this.get(neighPos);
+    //     // (p * weight) / (weightSum)
+    //     const nodes: AtmosphereNode[] = new Array(4);
+    //     const pressureToApply: Float64Array = new Float64Array(4);
+    //     for (const offsetX of range) {
+    //         for (const offsetY of range) {
+    //             const neighPos: Point = [
+    //                 minCellP[0] + offsetX,
+    //                 minCellP[1] + offsetY,
+    //             ];
+    //             if (!this.contains(neighPos)) {
+    //                 continue;
+    //             }
+    //             const ind = offsetY * 2 + offsetX;
+    //             // const neighPressure = this.get(neighPos).pressure;
+    //             nodes[ind] = this.get(neighPos);
 
-                const velWeight =
-                    (offsetX === 0 ? 1 - relToCell[0] : relToCell[0]) *
-                    (offsetY === 0 ? 1 - relToCell[1] : relToCell[1]);
-                weightSum += velWeight;
+    //             const velWeight =
+    //                 (offsetX === 0 ? 1 - relToCell[0] : relToCell[0]) *
+    //                 (offsetY === 0 ? 1 - relToCell[1] : relToCell[1]);
+    //             weightSum += velWeight;
 
-                pressureToApply[ind] = pressure * velWeight;
-            }
-        }
+    //             pressureToApply[ind] = pressure * velWeight;
+    //         }
+    //     }
 
-        let injectSum = 0;
-        for (let i = 0; i < 4; i++) {
-            if (nodes[i]) {
-                injectSum += pressureToApply[i] / weightSum;
-                nodes[i].newPressure += pressureToApply[i] / weightSum;
-            }
-        }
-    }
+    //     let injectSum = 0;
+    //     for (let i = 0; i < 4; i++) {
+    //         if (nodes[i]) {
+    //             injectSum += pressureToApply[i] / weightSum;
+    //             nodes[i].newPressure += pressureToApply[i] / weightSum;
+    //         }
+    //     }
+    // }
 
     public randomizeField() {
         return this.apply((node, p) => {
             return {
                 ...node,
-                pressure:
+                pressure: 0,
+                velocity: [
                     (p[0] < 0 ? 1 : 0) +
-                    // Math.sin(p[0]) * RandomPressureRange +
-                    // Math.cos(p[1]) * RandomPressureRange +
-                    0.25 -
-                    0.5 * Math.random(),
-                velocity: [0, 0],
+                        // Math.sin(p[0]) * RandomPressureRange +
+                        // Math.cos(p[1]) * RandomPressureRange +
+                        RandomRange / 2 -
+                        RandomRange * Math.random(),
+                    RandomRange / 2 - RandomRange * Math.random(),
+                ],
             };
         });
     }
