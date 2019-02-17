@@ -4,7 +4,6 @@
   "private": true,
   "dependencies": {
     "electron": "4.0.4",
-    "mathjs": "^5.4.2",
     "node-sass": "4.11.0",
     "react": "16.8.1",
     "react-dom": "16.8.1",

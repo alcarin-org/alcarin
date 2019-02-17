@@ -10,13 +10,6 @@ export function normalize(v: Vector): Vector {
     return multiply(v, 1 / magnitude(v));
 }
 
-export function angle(v: Vector, v2: Vector = [1, 0]) {
-    const normalizedV = normalize(v);
-    const normalizedV2 = normalize(v2);
-
-    return Math.atan2(v[1], v[0]) - Math.atan2(v2[1], v2[0]);
-}
-
 export function magnitude(v: Vector) {
     return Math.sqrt(v[0] ** 2 + v[1] ** 2);
 }

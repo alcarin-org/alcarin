@@ -1,5 +1,3 @@
-import math from 'mathjs';
-
 import { Vector, Point, add, multiply } from '../utils/Math';
 
 export enum NodeType {
@@ -103,7 +101,7 @@ export class Atmosphere {
                 ...node,
                 pressure:
                     Math.sin(p[0]) * RandomPressureRange +
-                    // Math.cos(p[1]) * RandomPressureRange +
+                    Math.cos(p[1]) * RandomPressureRange +
                     0.25 -
                     0.5 * Math.random(),
                 velocity: [0, 0],

@@ -1,5 +1,4 @@
 import React, { useEffect, useState, MouseEvent } from 'react';
-import math from 'mathjs';
 
 import './App.scss';
 import WeatherCanvas from './canvas/WeatherCanvas';
