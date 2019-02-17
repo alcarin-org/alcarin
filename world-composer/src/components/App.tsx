@@ -52,56 +52,60 @@ function App() {
             />
             <Stats atmosphere={atmo} mouseOver={clickedNodePos} fps={fps} />
             <button onClick={() => setPause(!pause)}>Play/Pause</button>
-            <label>
-                Centrifugal Force
-                <input
-                    type="range"
-                    min={0}
-                    max={500}
-                    step={2}
-                    value={centrifugalMagnitude * 100}
-                    onChange={ev =>
-                        setCentrifugalMagnitude(
-                            parseInt(ev.currentTarget.value, 10) / 100
-                        )
-                    }
-                />
-            </label>
-            <label>
-                Coriolis Force
-                <input
-                    type="range"
-                    min={0}
-                    max={100}
-                    step={2}
-                    value={coriolisMagnitude * 100}
-                    onChange={ev =>
-                        setCoriolisMagnitude(
-                            parseInt(ev.currentTarget.value, 10) / 100
-                        )
-                    }
-                />
-            </label>
-            <label>
-                <input
-                    type="radio"
-                    name="mapType[]"
-                    value={MapType.Pressure}
-                    checked={mapType === MapType.Pressure}
-                    onChange={onMapTypeChange}
-                />{' '}
-                Pressure
-            </label>
-            <label>
-                <input
-                    type="radio"
-                    name="mapType[]"
-                    value={MapType.Velocity}
-                    checked={mapType === MapType.Velocity}
-                    onChange={onMapTypeChange}
-                />{' '}
-                Velocity
-            </label>
+            <div className="app__control-panel">
+                <div className="app__input-group">
+                    <label>
+                        <input
+                            type="radio"
+                            name="mapType[]"
+                            value={MapType.Pressure}
+                            checked={mapType === MapType.Pressure}
+                            onChange={onMapTypeChange}
+                        />{' '}
+                        Pressure
+                    </label>
+                    <label>
+                        <input
+                            type="radio"
+                            name="mapType[]"
+                            value={MapType.Velocity}
+                            checked={mapType === MapType.Velocity}
+                            onChange={onMapTypeChange}
+                        />{' '}
+                        Velocity
+                    </label>
+                </div>
+                <label>
+                    Centrifugal Force
+                    <input
+                        type="range"
+                        min={0}
+                        max={500}
+                        step={2}
+                        value={centrifugalMagnitude * 100}
+                        onChange={ev =>
+                            setCentrifugalMagnitude(
+                                parseInt(ev.currentTarget.value, 10) / 100
+                            )
+                        }
+                    />
+                </label>
+                <label>
+                    Coriolis Force
+                    <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        step={2}
+                        value={coriolisMagnitude * 100}
+                        onChange={ev =>
+                            setCoriolisMagnitude(
+                                parseInt(ev.currentTarget.value, 10) / 100
+                            )
+                        }
+                    />
+                </label>
+            </div>
         </div>
     );
 }

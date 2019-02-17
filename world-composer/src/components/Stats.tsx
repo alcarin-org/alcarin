@@ -50,8 +50,6 @@ export default function Stats({ atmosphere, mouseOver, fps }: Props) {
                 <dd>{clickedNode.pressure.toFixed(3)}</dd>
                 <dt>fps</dt>
                 <dd>{fps}</dd>
-                <dt>type</dt>
-                <dd>{clickedNode.type}</dd>
             </dl>
         </div>
     );

@@ -21,6 +21,14 @@
     &__link {
         color: #61dafb;
     }
+
+    &__control-panel {
+        display: flex;
+        flex-flow: column;
+        & > * {
+            margin: 10px 0;
+        }
+    }
 }
 
 @keyframes App-logo-spin {
