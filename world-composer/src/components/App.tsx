@@ -10,7 +10,7 @@ import { PressureDrivenAtmo } from '../data/PressureDrivenAtmo';
 import { ipcRenderer } from '../electron-bridge';
 import Stats from './Stats';
 
-const WorldRadius = 10;
+const WorldRadius = 16;
 const atmosphereSample = new Atmosphere(WorldRadius);
 atmosphereSample.randomizeField();
 const pressureAtmoSystem = new PressureDrivenAtmo(atmosphereSample);
@@ -37,12 +37,7 @@ function App() {
 
     return (
         <div className="app">
-            <WeatherCanvas
-                atmosphere={atmo}
-                onClick={onAtmoClick}
-                centrifugalMagnitudeMod={centrifugalMagnitude}
-                coriolisMagnitudeMod={coriolisMagnitude}
-            />
+            <WeatherCanvas atmosphere={atmo} onClick={onAtmoClick} />
             <Stats atmosphere={atmo} mouseOver={clickedNodePos} fps={fps} />
             <button onClick={() => setPause(!pause)}>Play/Pause</button>
             <label>
@@ -125,11 +120,10 @@ function useEvolveEngine(
                     setFpsAcc(last => last + timePass);
                     setFpsCounter(counter => counter + 1);
                 }
-                console.log('evolve call');
                 pressureAtmoSystem.evolve(timePass);
                 // setPaused(true);
                 setLastPlayDate(now);
-            }, 0);
+            }, 1);
             return () => clearTimeout(timeoutId);
         },
         [lastPlayDate]

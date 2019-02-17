@@ -1,5 +1,3 @@
-import math from 'mathjs';
-
 export type Vector = [number, number];
 
 export type Point = Vector;
@@ -8,7 +6,8 @@ export function normalize(v: Vector): Vector {
     if (v[0] === 0 && v[1] === 0) {
         return v;
     }
-    return math.divide(v, math.norm(v)) as Vector;
+
+    return multiply(v, 1 / magnitude(v));
 }
 
 export function angle(v: Vector, v2: Vector = [1, 0]) {
@@ -18,9 +17,12 @@ export function angle(v: Vector, v2: Vector = [1, 0]) {
     return Math.atan2(v[1], v[0]) - Math.atan2(v2[1], v2[0]);
 }
 
+export function magnitude(v: Vector) {
+    return Math.sqrt(v[0] ** 2 + v[1] ** 2);
+}
+
 export function constraints(from: number, to: number, val: number) {
-    const [rFrom, rTo] = [from, to].sort();
-    return math.min(math.max(rFrom, val), rTo);
+    return Math.min(Math.max(from, val), to);
 }
 
 export function perpendicular(v: Vector): Vector {

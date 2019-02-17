@@ -103,7 +103,7 @@ export class Atmosphere {
                 ...node,
                 pressure:
                     Math.sin(p[0]) * RandomPressureRange +
-                    Math.cos(p[1]) * RandomPressureRange +
+                    // Math.cos(p[1]) * RandomPressureRange +
                     0.25 -
                     0.5 * Math.random(),
                 velocity: [0, 0],

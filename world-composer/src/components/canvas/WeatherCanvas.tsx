@@ -1,6 +1,12 @@
-import React, { useRef, useEffect, useState, MouseEventHandler } from 'react';
-import math from 'mathjs';
+import React, {
+    useRef,
+    useEffect,
+    useState,
+    MouseEventHandler,
+    RefObject,
+} from 'react';
 
+import { renderPressureTexture, renderVelocity } from './primitives';
 import { Atmosphere, AtmosphereNode, NodeType } from '../../data/Atmosphere';
 import {
     Point,
@@ -14,133 +20,108 @@ import {
 interface Props {
     atmosphere: Atmosphere;
     fieldSizePx?: number;
-    gapsPx?: number;
-    circle?: boolean;
-    centrifugalMagnitudeMod: number;
-    coriolisMagnitudeMod: number;
     onClick: MouseEventHandler<HTMLCanvasElement>;
 }
-
-const PressureDrawRange = 1.4;
 
 export default function WeatherCanvas({
     atmosphere,
     fieldSizePx = 30,
-    gapsPx = 0,
-    circle = true,
-    centrifugalMagnitudeMod = 0,
-    coriolisMagnitudeMod = 0.1,
     onClick,
 }: Props) {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const canvasSizePx = (2 * atmosphere.radius - 1) * fieldSizePx;
-    const worldColor = 'blue';
-    const bgColor = 'silver';
-    const [i, forceRerender] = useState(0);
+    const atmo = atmosphere;
+    const displayCanvasRef = useRef<HTMLCanvasElement>(null);
+    const canvasSizePx = fieldSizePx * atmo.dim2d;
+
+    const [screenCanvasRef, screenCtxRef] = useCanvas(
+        canvasSizePx,
+        canvasSizePx,
+        displayCanvasRef
+    );
+    const [pressureCanvasRef, pressureCtxRef] = useCanvas(
+        atmo.dim2d,
+        atmo.dim2d
+    );
+
+    const [cellCanvasRef, cellCtxRef] = useCanvas(fieldSizePx, fieldSizePx);
+    const pixelOffset = (atmo.radius - 1) * fieldSizePx;
+
     useEffect(() => {
-        requestAnimationFrame(renderAtmosphere);
+        pressureCtxRef.current!.translate(atmo.radius - 1, atmo.radius - 1);
+        const halfSize = Math.trunc(fieldSizePx / 2);
+        cellCtxRef.current!.translate(halfSize, halfSize);
+        cellCtxRef.current!.strokeStyle = 'black';
+    }, []);
 
+    useEffect(() => {
         function renderAtmosphere() {
-            if (!canvasRef.current) {
-                return;
-            }
-            const ctx: CanvasRenderingContext2D = canvasRef.current.getContext(
-                '2d'
-            )!;
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.translate(
-                (atmosphere.radius - 1) * fieldSizePx,
-                (atmosphere.radius - 1) * fieldSizePx
-            );
-            const visibleCellSize = fieldSizePx - 2 * gapsPx;
-            const fieldHalfSizePx = fieldSizePx / 2;
-            const center: Point = [0, 0];
+            const screenCtx = screenCtxRef.current!;
 
-            ctx.fillStyle = worldColor;
-            atmosphere.forEach((node, pos) => {
-                // we render only cells inside circle.
-                // 0.5 is just for nicer graphic effect
-                drawCell(ctx, atmosphere, pos, fieldSizePx, gapsPx);
-                drawVelocity(ctx, node.velocity, pos, fieldSizePx);
-            });
-            drawVelocity(
-                ctx,
-                atmosphere.get(center).velocity,
-                center,
-                fieldSizePx,
-                'yellow'
+            renderPressureTexture(pressureCtxRef.current!, atmo);
+            screenCtx.drawImage(
+                pressureCanvasRef.current!,
+                0,
+                0,
+                canvasSizePx,
+                canvasSizePx
             );
+            atmosphere.forEach((node, pos) => {
+                renderVelocity(
+                    cellCtxRef.current!,
+                    atmosphere.get(pos).velocity,
+                    fieldSizePx
+                );
+
+                screenCtx.drawImage(
+                    cellCanvasRef.current!,
+                    pixelOffset + fieldSizePx * pos[0],
+                    pixelOffset + fieldSizePx * pos[1],
+                    fieldSizePx,
+                    fieldSizePx
+                );
+                // drawCell(ctx, atmosphere, pos);
+                // drawVelocity(ctx, node.velocity, pos, fieldSizePx);
+            });
+            // screenCtx.drawImage(
+            //     cellCanvasRef.current!,
+            //     0 + pixelOffset,
+            //     0 + pixelOffset,
+            //     fieldSizePx,
+            //     fieldSizePx
+            // );
         }
+
+        const requestId = requestAnimationFrame(renderAtmosphere);
+
+        return () => cancelAnimationFrame(requestId);
     });
 
     return (
         <canvas
             onClick={onClick}
-            ref={canvasRef}
+            ref={displayCanvasRef}
             width={canvasSizePx}
             height={canvasSizePx}
         />
     );
 }
 
-function drawVelocity(
-    ctx: CanvasRenderingContext2D,
-    // 0..1
-    velocity: Vector,
-    pos: Point,
-    fieldSizePx: number,
-    color: string = 'rgba(0,0,0, 0.25)'
-) {
-    const halfSize = fieldSizePx / 2 - 1;
-    const vPower = constraints(0.1, 1, math.norm(velocity) as number);
-    const v = multiply(normalize(velocity), 0.7 * fieldSizePx);
-    ctx.fillStyle = 'color';
-    ctx.strokeStyle = 'color';
+function useCanvas(
+    width: number,
+    height: number,
+    sourceCanvasRef?: RefObject<HTMLCanvasElement>
+): [RefObject<HTMLCanvasElement>, RefObject<CanvasRenderingContext2D>] {
+    const canvasRef = useRef<HTMLCanvasElement | null>(null);
+    const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+    useEffect(() => {
+        const canvas = sourceCanvasRef
+            ? sourceCanvasRef.current!
+            : document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d')!;
+        canvasRef.current = canvas;
+        ctxRef.current = ctx;
+    }, []);
 
-    const off = [
-        pos[0] * fieldSizePx + fieldSizePx / 2,
-        pos[1] * fieldSizePx + fieldSizePx / 2,
-    ];
-    ctx.beginPath();
-    ctx.moveTo(off[0] - 0.5 * v[0], off[1] - 0.5 * v[1]);
-    ctx.lineTo(off[0] + 0.5 * v[0], off[1] + 0.5 * v[1]);
-    ctx.stroke();
-
-    ctx.fillStyle = 'yellow';
-    ctx.fillRect(-1 + off[0] + 0.5 * v[0], -1 + off[1] + 0.5 * v[1], 2, 2);
-}
-
-function drawCell(
-    ctx: CanvasRenderingContext2D,
-    atmo: Atmosphere,
-    pos: Point,
-    fieldSizePx: number,
-    gapsPx: number
-) {
-    ctx.fillStyle = cellColor(atmo.get(pos).pressure);
-    ctx.fillRect(
-        pos[0] * fieldSizePx + gapsPx,
-        pos[1] * fieldSizePx + gapsPx,
-        fieldSizePx - 2 * gapsPx,
-        fieldSizePx - 2 * gapsPx
-    );
-    // const range = fieldSizePx - 2 * gapsPx;
-    // for (let i = gapsPx; i < fieldSizePx - gapsPx; i++) {
-    //     for (let j = gapsPx; j < fieldSizePx - gapsPx; j++) {
-    //         const exactPoint: Point = [pos[0] + i / range, pos[1] + j / range];
-    //         ctx.fillStyle = cellColor(atmo.interpolatePressure(exactPoint));
-    //         ctx.fillRect(
-    //             pos[0] * fieldSizePx + i,
-    //             pos[1] * fieldSizePx + j,
-    //             1,
-    //             1
-    //         );
-    //     }
-    // }
-}
-
-function cellColor(pressure: number) {
-    const factor = (pressure + PressureDrawRange) / (2 * PressureDrawRange);
-    const c = [255 * factor, 0, 255 * (1 - factor)];
-    return `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
+    return [canvasRef, ctxRef];
 }

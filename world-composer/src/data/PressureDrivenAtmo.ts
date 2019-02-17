@@ -54,6 +54,9 @@ export class PressureDrivenAtmo {
             const pressureFlow = (deltaTime * (pressure + node.pressure)) / 2;
             // const pressureFlow = deltaTime * (pressure;
             lastNode.newPressure -= pressureFlow;
+            if (lastNode !== node) {
+                console.log('yeah');
+            }
             node.newPressure += pressureFlow;
         });
 
