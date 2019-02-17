@@ -51,12 +51,12 @@ export class PressureDrivenAtmo {
 
             const pressure = this.atmo.interpolatePressure(lastKnownP);
             const lastNode = this.atmo.get(lastKnownPCell);
-            const pressureFlow = (deltaTime * (pressure + node.pressure)) / 2;
+            const pressureFlow = deltaTime * (pressure - node.pressure);
             // const pressureFlow = deltaTime * (pressure;
-            lastNode.newPressure -= pressureFlow;
-            if (lastNode !== node) {
-                console.log('yeah');
-            }
+            this.atmo.injectNewPressure(lastKnownP, -pressureFlow);
+            // if (lastNode !== node) {
+            //     console.log('yeah');
+            // }
             node.newPressure += pressureFlow;
         });
 
@@ -88,9 +88,6 @@ export class PressureDrivenAtmo {
             }
             if (this.atmo.contains(rightNode)) {
                 xVel -= this.pressure(rightNode) - node.pressure;
-            }
-            if (isNaN(xVel)) {
-                console.log(this.pressure(leftNode), node.pressure);
             }
             // in place, for performance reasons
             node.velocity = [xVel, yVel];

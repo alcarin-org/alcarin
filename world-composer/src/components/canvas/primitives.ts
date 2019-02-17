@@ -31,7 +31,7 @@ export function renderVelocities(
         ctx.moveTo(offsetX + -0.5 * v[0], offsetY + -0.5 * v[1]);
         ctx.lineTo(offsetX + 0.5 * v[0], offsetY + 0.5 * v[1]);
 
-        ctx.fillRect(offsetX + 0.5 * v[0] - 1, offsetY + 0.5 * v[1] - 1, 2, 2);
+        ctx.fillRect(offsetX + 0.5 * v[0] - 2, offsetY + 0.5 * v[1] - 2, 4, 4);
     });
     ctx.stroke();
 }

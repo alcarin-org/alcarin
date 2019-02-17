@@ -9,7 +9,7 @@ import { PressureDrivenAtmo } from '../data/PressureDrivenAtmo';
 import { ipcRenderer } from '../electron-bridge';
 import Stats from './Stats';
 
-const WorldRadius = 16;
+const WorldRadius = 10;
 const atmosphereSample = new Atmosphere(WorldRadius);
 atmosphereSample.randomizeField();
 const pressureAtmoSystem = new PressureDrivenAtmo(atmosphereSample);

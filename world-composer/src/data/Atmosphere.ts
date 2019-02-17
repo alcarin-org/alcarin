@@ -52,6 +52,9 @@ export class Atmosphere {
                     minCellP[0] + offsetX,
                     minCellP[1] + offsetY,
                 ];
+                // if (p[0] === -2 && p[1] === 0) {
+                //     console.log(offsetX, offsetY, this.contains(neighPos));
+                // }
                 if (!this.contains(neighPos)) {
                     continue;
                 }
@@ -95,13 +98,56 @@ export class Atmosphere {
         return weightSum === 0 ? 0 : resultPressure / weightSum;
     }
 
+    public injectNewPressure(p: Point, pressure: number) {
+        const minCellP = [Math.floor(p[0]), Math.floor(p[1])];
+        const relToCell = [p[0] - minCellP[0], p[1] - minCellP[1]];
+
+        const range = [0, 1];
+        let weightSum = 0;
+        // let resultPressure = 0;
+
+        // (p * weight) / (weightSum)
+        const nodes: AtmosphereNode[] = new Array(4);
+        const pressureToApply: Float64Array = new Float64Array(4);
+        for (const offsetX of range) {
+            for (const offsetY of range) {
+                const neighPos: Point = [
+                    minCellP[0] + offsetX,
+                    minCellP[1] + offsetY,
+                ];
+                if (!this.contains(neighPos)) {
+                    continue;
+                }
+                const ind = offsetY * 2 + offsetX;
+                // const neighPressure = this.get(neighPos).pressure;
+                nodes[ind] = this.get(neighPos);
+
+                const velWeight =
+                    (offsetX === 0 ? 1 - relToCell[0] : relToCell[0]) *
+                    (offsetY === 0 ? 1 - relToCell[1] : relToCell[1]);
+                weightSum += velWeight;
+
+                pressureToApply[ind] = pressure * velWeight;
+            }
+        }
+
+        let injectSum = 0;
+        for (let i = 0; i < 4; i++) {
+            if (nodes[i]) {
+                injectSum += pressureToApply[i] / weightSum;
+                nodes[i].newPressure += pressureToApply[i] / weightSum;
+            }
+        }
+    }
+
     public randomizeField() {
         return this.apply((node, p) => {
             return {
                 ...node,
                 pressure:
-                    Math.sin(p[0]) * RandomPressureRange +
-                    Math.cos(p[1]) * RandomPressureRange +
+                    (p[0] < 0 ? 1 : 0) +
+                    // Math.sin(p[0]) * RandomPressureRange +
+                    // Math.cos(p[1]) * RandomPressureRange +
                     0.25 -
                     0.5 * Math.random(),
                 velocity: [0, 0],
@@ -110,19 +156,19 @@ export class Atmosphere {
     }
 
     public get(p: Point): AtmosphereNode {
-        const ind = this.index(p);
-        if (ind < 0 || ind >= this.nodes.length) {
+        // this check should be removed on working alghoritm, for performance
+        if (!this.contains(p)) {
             throw new Error(`Point (${p[0]}, ${p[1]}) is not in map radius`);
         }
-        return this.nodes[ind];
+        return this.nodes[this.index(p)];
     }
 
     public set(p: Point, value: AtmosphereNode) {
-        const ind = this.index(p);
-        if (ind < 0 || ind >= this.nodes.length) {
+        // this check should be removed on working alghoritm, for performance
+        if (!this.contains(p)) {
             throw new Error(`Point (${p[0]}, ${p[1]}) is not in map radius`);
         }
-        this.nodes[ind] = value;
+        this.nodes[this.index(p)] = value;
     }
 
     public forEach(callback: (node: AtmosphereNode, p: Point) => void) {
@@ -152,8 +198,13 @@ export class Atmosphere {
     }
 
     public contains(p: Point): boolean {
-        const ind = this.index(p);
-        return ind >= 0 && ind < this.nodes.length;
+        const realRadius = this.radius - 0.5;
+        return (
+            p[0] > -realRadius &&
+            p[0] < realRadius &&
+            p[1] > -realRadius &&
+            p[1] < realRadius
+        );
     }
 
     // public isInRadius(p: Point): boolean {
