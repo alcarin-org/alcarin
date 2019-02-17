@@ -6,12 +6,11 @@ import React, {
     RefObject,
 } from 'react';
 
-import { renderPressureTexture, renderVelocity } from './primitives';
+import { renderPressureTexture, renderVelocities } from './primitives';
 import { Atmosphere, AtmosphereNode, NodeType } from '../../data/Atmosphere';
 import {
     Point,
     Vector,
-    angle,
     constraints,
     normalize,
     multiply,
@@ -46,6 +45,7 @@ export default function WeatherCanvas({
     const pixelOffset = (atmo.radius - 1) * fieldSizePx;
 
     useEffect(() => {
+        screenCtxRef.current!.strokeStyle = 'black';
         pressureCtxRef.current!.translate(atmo.radius - 1, atmo.radius - 1);
         const halfSize = Math.trunc(fieldSizePx / 2);
         cellCtxRef.current!.translate(halfSize, halfSize);
@@ -64,30 +64,13 @@ export default function WeatherCanvas({
                 canvasSizePx,
                 canvasSizePx
             );
-            atmosphere.forEach((node, pos) => {
-                renderVelocity(
-                    cellCtxRef.current!,
-                    atmosphere.get(pos).velocity,
-                    fieldSizePx
-                );
-
-                screenCtx.drawImage(
-                    cellCanvasRef.current!,
-                    pixelOffset + fieldSizePx * pos[0],
-                    pixelOffset + fieldSizePx * pos[1],
-                    fieldSizePx,
-                    fieldSizePx
-                );
-                // drawCell(ctx, atmosphere, pos);
-                // drawVelocity(ctx, node.velocity, pos, fieldSizePx);
-            });
-            // screenCtx.drawImage(
-            //     cellCanvasRef.current!,
-            //     0 + pixelOffset,
-            //     0 + pixelOffset,
-            //     fieldSizePx,
-            //     fieldSizePx
-            // );
+            renderVelocities(
+                screenCtx,
+                atmo,
+                pixelOffset,
+                pixelOffset,
+                fieldSizePx
+            );
         }
 
         const requestId = requestAnimationFrame(renderAtmosphere);

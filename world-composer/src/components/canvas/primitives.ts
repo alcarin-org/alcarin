@@ -10,29 +10,30 @@ import { Atmosphere } from '../../data/Atmosphere';
 
 const PressureDrawRange = 1.4;
 
-export function renderVelocity(
+export function renderVelocities(
     ctx: CanvasRenderingContext2D,
-    velocity: Vector,
-    fieldSizePx: number,
-    tipColor: string = 'yellow'
+    atmo: Atmosphere,
+    screenOffsetX: number,
+    screenOffsetY: number,
+    fieldSizePx: number
 ) {
-    const vPower = constraints(0.1, 1, magnitude(velocity));
-    const vNorm = normalize(velocity);
-    const v = multiply(vNorm, 0.85 * fieldSizePx * vPower);
-
-    ctx.clearRect(
-        -0.5 * fieldSizePx,
-        -0.5 * fieldSizePx,
-        fieldSizePx,
-        fieldSizePx
-    );
+    ctx.fillStyle = 'yellow';
     ctx.beginPath();
-    ctx.moveTo(-0.5 * v[0], -0.5 * v[1]);
-    ctx.lineTo(0.5 * v[0], 0.5 * v[1]);
-    ctx.stroke();
+    atmo.forEach((node, pos) => {
+        const offsetX =
+            screenOffsetX + fieldSizePx * pos[0] + 0.5 * fieldSizePx;
+        const offsetY =
+            screenOffsetY + fieldSizePx * pos[1] + 0.5 * fieldSizePx;
+        const vPower = constraints(0.1, 1, magnitude(node.velocity));
+        const vNorm = normalize(node.velocity);
+        const v = multiply(vNorm, 0.85 * fieldSizePx * vPower);
 
-    ctx.fillStyle = tipColor;
-    ctx.fillRect(0.5 * v[0] - 1, 0.5 * v[1] - 1, 2, 2);
+        ctx.moveTo(offsetX + -0.5 * v[0], offsetY + -0.5 * v[1]);
+        ctx.lineTo(offsetX + 0.5 * v[0], offsetY + 0.5 * v[1]);
+
+        ctx.fillRect(offsetX + 0.5 * v[0] - 1, offsetY + 0.5 * v[1] - 1, 2, 2);
+    });
+    ctx.stroke();
 }
 
 export function renderPressureTexture(
