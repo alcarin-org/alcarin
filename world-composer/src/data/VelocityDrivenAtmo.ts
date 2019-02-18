@@ -32,43 +32,37 @@ export class VelocityDrivenAtmo {
         this.convectVelocity(deltaTime);
     }
 
+    private traceBackParticleVelocity(p: Point, deltaTime: number): Point {
+        const v = this.atmo.interpolateVelocity(p);
+        const lastKnownP: Point = [
+            p[0] - 0.5 * deltaTime * v[0],
+            p[1] - 0.5 * deltaTime * v[1],
+        ];
+        // ???
+        if (!this.atmo.contains(lastKnownP)) {
+            return [0, 0];
+        }
+
+        const avVelocity = this.atmo.interpolateVelocity(lastKnownP);
+        const particlePos = add(p, multiply(avVelocity, deltaTime));
+        return this.atmo.interpolateVelocity(particlePos);
+    }
     private convectVelocity(deltaTime: number) {
-        // this.atmo.forEach(node => (node.newVelocity = node.velocity));
         this.atmo.forEach((node, p) => {
-            // const debug = p[0] === 0 && p[1] === 0;
-            // better velocity interpolation needed here
-            const v = this.atmo.interpolateVelocity(p);
-            const lastKnownP: Point = [
-                p[0] - deltaTime * v[0],
-                p[1] - deltaTime * v[1],
+            const xTracedParticleVelocity = this.traceBackParticleVelocity(
+                [p[0], p[1] + 0.5],
+                deltaTime
+            );
+            const yTracedParticleVelocity = this.traceBackParticleVelocity(
+                [p[0] + 0.5, p[1]],
+                deltaTime
+            );
+            node.newVelocity = [
+                xTracedParticleVelocity[0],
+                yTracedParticleVelocity[1],
             ];
-            // debug && console.log('1', lastKnownP);
-            const lastKnownPCell = round(lastKnownP);
-
-            if (!this.atmo.contains(lastKnownPCell)) {
-                return;
-            }
-
-            const avVelocity = this.atmo.interpolateVelocity(lastKnownP);
-            // debug && console.log('2', avVelocity);
-            node.newVelocity = avVelocity;
         });
 
         this.atmo.forEach(node => (node.velocity = node.newVelocity));
     }
-
-    private vel(p: Point) {
-        return this.atmo.get(p).velocity;
-    }
-
-    // private getNeightboursCoords(p: Point): [AtmosphereNode, Point, Vector] {
-    //     const neightbours = [];
-    //     for (const offset of neightboursRange) {
-    //         const nCoords: Point = [p[0] + offset[0], p[1] + offset[1]];
-    //         if (this.atmo.contains(nCoords)) {
-    //             neightbours.push([this.atmo.get(nCoords), nCoords, offset]);
-    //         }
-    //     }
-    //     return neightbours;
-    // }
 }

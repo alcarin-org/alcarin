@@ -37,7 +37,7 @@ interface Props {
 
 export default function WeatherCanvas({
     atmosphere,
-    fieldSizePx = 40,
+    fieldSizePx = 30,
     onClick,
     mapType = MapType.Pressure,
     drawRealInterpolation,

@@ -16,7 +16,7 @@ export interface AtmosphereNode {
 const Center: Point = [0, 0];
 const Vector0: Vector = [0, 0];
 
-const RandomRange = 5;
+const RandomRange = 0.8;
 
 export class Atmosphere {
     public readonly radius: number;
@@ -149,22 +149,25 @@ export class Atmosphere {
     // }
 
     public randomizeField() {
+        const rand = () => RandomRange / 2 - RandomRange * Math.random();
         return this.apply((node, p) => {
             return {
                 ...node,
                 pressure: 0,
-                velocity: [
-                    RandomRange / 2 - RandomRange * Math.random(),
-                    RandomRange / 2 - RandomRange * Math.random(),
-                ],
+                // velocity: [
+                //     RandomRange / 2 - RandomRange * Math.random(),
+                //     RandomRange / 2 - RandomRange * Math.random(),
+                // ],
                 // velocity:
                 //     (p[0] < 0 ? 2 : 0) +
-                //         // Math.sin(p[0]) * RandomPressureRange +
-                //         // Math.cos(p[1]) * RandomPressureRange +
                 //         RandomRange / 2 -
                 //         RandomRange * Math.random(),
                 //     RandomRange / 2 - RandomRange * Math.random(),
                 // ],
+                velocity: [
+                    Math.cos((2 * Math.PI * p[0]) / this.radius) + rand(),
+                    Math.sin((2 * Math.PI * p[1]) / this.radius) + rand(),
+                ],
             };
         });
     }

@@ -5,6 +5,7 @@ import {
     multiply,
     magnitude,
     Point,
+    add,
 } from '../../utils/Math';
 import { Atmosphere } from '../../data/Atmosphere';
 
@@ -101,15 +102,16 @@ function drawCell(
     atmo: Atmosphere,
     pos: Point
 ) {
-    const node = atmo.get(pos);
     let color: Color;
     switch (mapType) {
         case MapType.Velocity:
-            color = velocityColor(node.velocity);
+            color = velocityColor(
+                atmo.interpolateVelocity(add(pos, [0.5, 0.5]))
+            );
             break;
         case MapType.Pressure:
         default:
-            color = pressureColor(node.pressure);
+            color = pressureColor(atmo.get(pos).pressure);
     }
     ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
     ctx.fillRect(pos[0], pos[1], 1, 1);

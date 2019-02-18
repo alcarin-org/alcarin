@@ -11,9 +11,11 @@ import { ipcRenderer } from '../electron-bridge';
 import Stats from './Stats';
 
 const autopause = false;
-const stepTimeout = 100;
+const stepTimeout = 0;
 
-const WorldRadius = 7;
+const WorldRadius = 14;
+const DrawFieldSize = 27;
+
 const atmosphereSample = new Atmosphere(WorldRadius);
 atmosphereSample.randomizeField();
 const pressureAtmoSystem = new VelocityDrivenAtmo(atmosphereSample);
@@ -51,6 +53,7 @@ function App() {
     return (
         <div className="app">
             <WeatherCanvas
+                fieldSizePx={DrawFieldSize}
                 atmosphere={atmo}
                 onClick={onAtmoClick}
                 mapType={mapType}
