@@ -37,7 +37,7 @@ export class VelocityDrivenAtmo {
         const divergenceVectorB = new Float64Array(this.atmo.dim2d ** 2).map(
             (_, ind) => {
                 const p = this.atmo.coords(ind);
-                return this.atmo.divergence(p) * deltaTime;
+                return this.atmo.divergence(p) / deltaTime;
             }
         );
         const pressureMatrix = resolveLinearByJacobi(

@@ -176,29 +176,34 @@ export class Atmosphere {
 
     public randomizeField() {
         const rand = () => RandomRange / 2 - RandomRange * Math.random();
+        type RandomMethod = (p: Point) => Vector;
+        const methods: RandomMethod[] = [
+            // random
+            () => [
+                1.5 * RandomRange - 3 * RandomRange * Math.random(),
+                1.5 * RandomRange - 3 * RandomRange * Math.random(),
+            ],
+            // left -> right
+            p => [
+                (p[0] < 0 ? 2 : 0) +
+                    RandomRange / 2 -
+                    RandomRange * Math.random(),
+                RandomRange / 2 - RandomRange * Math.random(),
+            ],
+            // // many circles
+            p => [
+                Math.cos((2 * Math.PI * p[0]) / this.radius) + rand(),
+                Math.sin((2 * Math.PI * p[1]) / this.radius) + rand(),
+            ],
+            // // curl
+            p => multiply([p[1] - 0.1, -p[0] - 0.1], 0.15),
+        ];
+        const randMethod = methods[Math.floor(Math.random() * methods.length)];
         return this.apply((node, p) => {
             return {
                 ...node,
                 pressure: 0,
-                // random
-                // velocity: [
-                //     RandomRange / 2 - RandomRange * Math.random(),
-                //     RandomRange / 2 - RandomRange * Math.random(),
-                // ],
-                // from left to right
-                // velocity: [
-                //     (p[0] < 0 ? 2 : 0) +
-                //         RandomRange / 2 -
-                //         RandomRange * Math.random(),
-                //     RandomRange / 2 - RandomRange * Math.random(),
-                // ],
-                // many circles
-                velocity: [
-                    Math.cos((2 * Math.PI * p[0]) / this.radius) + rand(),
-                    Math.sin((2 * Math.PI * p[1]) / this.radius) + rand(),
-                ],
-                // curl
-                // velocity: multiply([p[1] - 0.1, -p[0] - 0.1], 0.15),
+                velocity: randMethod(p),
             };
         });
     }

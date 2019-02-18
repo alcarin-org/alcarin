@@ -10,7 +10,7 @@ import { VelocityDrivenAtmo } from '../data/VelocityDrivenAtmo';
 import { ipcRenderer } from '../electron-bridge';
 import Stats from './Stats';
 
-const stepTimeout = 0;
+const stepTimeout = 300;
 
 const WorldRadius = 10;
 const DrawFieldSize = 30;
@@ -28,6 +28,8 @@ function App() {
     const [drawRealInterpolation, setDrawRealInterpolation] = useState(false);
     const [drawGrid, setDrawGrid] = useState(false);
     const [autoplay, setAutoplay] = useState(true);
+
+    const [_, forceRedraw] = useState(true);
 
     const [atmo, pause, setPause, fps] = useEvolveEngine(
         centrifugalMagnitude,
@@ -55,6 +57,11 @@ function App() {
         setDrawGrid(ev.currentTarget.checked);
     }
 
+    function randomizeMap() {
+        atmosphereSample.randomizeField();
+        forceRedraw(!_);
+    }
+
     return (
         <div className="app">
             <WeatherCanvas
@@ -67,7 +74,7 @@ function App() {
                 selectedNodePosition={clickedNodePos}
             />
             <Stats atmosphere={atmo} mouseOver={clickedNodePos} fps={fps} />
-            <button onClick={() => atmosphereSample.randomizeField()}>
+            <button onClick={randomizeMap}>
                 {' '}
                 Random
             </button>
