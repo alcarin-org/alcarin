@@ -13,6 +13,7 @@ import {
     MapType,
     initializeGrid,
     pxToAtmoPos,
+    posToPx,
 } from './primitives';
 import { Atmosphere, AtmosphereNode, NodeType } from '../../data/Atmosphere';
 import {
@@ -111,10 +112,12 @@ export default function WeatherCanvas({
 
                 screenCtx.strokeStyle = 'rgba(255,0,0,0.75)';
                 screenCtx.setLineDash([5, 5]);
+
+                const pxPos = posToPx(pos, fieldSizePx, atmo);
                 // screenCtx.stroke
                 screenCtx.strokeRect(
-                    pixelOffset + pos[0] * fieldSizePx,
-                    pixelOffset + pos[1] * fieldSizePx,
+                    pxPos[0],
+                    pxPos[1],
                     fieldSizePx,
                     fieldSizePx
                 );

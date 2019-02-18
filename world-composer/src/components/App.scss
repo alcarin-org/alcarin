@@ -25,8 +25,15 @@
     &__control-panel {
         display: flex;
         flex-flow: column;
+
         & > * {
             margin: 10px 0;
+        }
+    }
+
+    &__checkboxes {
+        & > * {
+            padding: 0 10px;
         }
     }
 }

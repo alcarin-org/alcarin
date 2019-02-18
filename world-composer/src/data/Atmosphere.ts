@@ -1,4 +1,11 @@
-import { Vector, Point, add, multiply, VectorComponent } from '../utils/Math';
+import {
+    Vector,
+    Point,
+    add,
+    multiply,
+    VectorComponent,
+    normalize,
+} from '../utils/Math';
 
 export enum NodeType {
     Fluid,
@@ -20,11 +27,11 @@ const RandomRange = 0.8;
 
 export class Atmosphere {
     public readonly radius: number;
-    // coded as MAC grid.
-    // integer point (floor of coords) represent left-top corner of the grid cell
-    // pressure is on the center of grid
-    // velocity X is on the middle of the left face
-    // velocity Y is on the middle of the top face
+    // coded as MAC grid with cell size 1.
+    // integer point ((px, py)) represent left-top corner of a cell
+    // pressure is stored on the center of cell ((px, py) + (0.5, 0.5))
+    // velocity X is on the middle of the left face (px, py + 0.5)
+    // velocity Y is on the middle of the top face (px + 0.5, py)
     private nodes: AtmosphereNode[];
 
     public constructor(radius: number) {
@@ -154,20 +161,25 @@ export class Atmosphere {
             return {
                 ...node,
                 pressure: 0,
+                // random
                 // velocity: [
                 //     RandomRange / 2 - RandomRange * Math.random(),
                 //     RandomRange / 2 - RandomRange * Math.random(),
                 // ],
+                // from left to right
                 // velocity:
                 //     (p[0] < 0 ? 2 : 0) +
                 //         RandomRange / 2 -
                 //         RandomRange * Math.random(),
                 //     RandomRange / 2 - RandomRange * Math.random(),
                 // ],
-                velocity: [
-                    Math.cos((2 * Math.PI * p[0]) / this.radius) + rand(),
-                    Math.sin((2 * Math.PI * p[1]) / this.radius) + rand(),
-                ],
+                // many circles
+                // velocity: [
+                //     Math.cos((2 * Math.PI * p[0]) / this.radius) + rand(),
+                //     Math.sin((2 * Math.PI * p[1]) / this.radius) + rand(),
+                // ],
+                // curl
+                velocity: multiply([p[1] - 0.1, -p[0] - 0.1], 0.15),
             };
         });
     }

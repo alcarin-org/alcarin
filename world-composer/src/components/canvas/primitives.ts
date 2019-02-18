@@ -134,8 +134,20 @@ export function pxToAtmoPos(
     fieldSizePx: number,
     atmo: Atmosphere
 ): Point {
+    console.log(x, x / fieldSizePx - atmo.radius + 1);
     return [
         x / fieldSizePx - atmo.radius + 1,
         y / fieldSizePx - atmo.radius + 1,
+    ];
+}
+
+export function posToPx(
+    p: Point,
+    fieldSizePx: number,
+    atmo: Atmosphere
+): Point {
+    return [
+        (p[0] + atmo.radius - 1) * fieldSizePx,
+        (p[1] + atmo.radius - 1) * fieldSizePx,
     ];
 }

@@ -10,11 +10,10 @@ import { VelocityDrivenAtmo } from '../data/VelocityDrivenAtmo';
 import { ipcRenderer } from '../electron-bridge';
 import Stats from './Stats';
 
-const autopause = false;
 const stepTimeout = 0;
 
-const WorldRadius = 14;
-const DrawFieldSize = 27;
+const WorldRadius = 10;
+const DrawFieldSize = 30;
 
 const atmosphereSample = new Atmosphere(WorldRadius);
 atmosphereSample.randomizeField();
@@ -28,10 +27,12 @@ function App() {
     const [mapType, setMapType] = useState(MapType.Velocity);
     const [drawRealInterpolation, setDrawRealInterpolation] = useState(false);
     const [drawGrid, setDrawGrid] = useState(false);
+    const [autoplay, setAutoplay] = useState(true);
 
     const [atmo, pause, setPause, fps] = useEvolveEngine(
         centrifugalMagnitude,
-        coriolisMagnitude
+        coriolisMagnitude,
+        autoplay
     );
 
     function onMapTypeChange(ev: FormEvent<HTMLInputElement>) {
@@ -40,6 +41,10 @@ function App() {
 
     function onAtmoClick(p: Point) {
         setClickedNodePos(p);
+    }
+
+    function onAutoplay(ev: FormEvent<HTMLInputElement>) {
+        setAutoplay(ev.currentTarget.checked);
     }
 
     function onDrawRealInterpoltation(ev: FormEvent<HTMLInputElement>) {
@@ -62,11 +67,20 @@ function App() {
                 selectedNodePosition={clickedNodePos}
             />
             <Stats atmosphere={atmo} mouseOver={clickedNodePos} fps={fps} />
-            <button onClick={() => setPause(!pause)}>Play/Pause</button>
             <button onClick={() => atmosphereSample.randomizeField()}>
                 {' '}
                 Random
             </button>
+            <button onClick={() => setPause(!pause)}>Run</button>
+
+            <label>
+                <input
+                    type="checkbox"
+                    onChange={onAutoplay}
+                    checked={autoplay}
+                />
+                Auto Play
+            </label>
             <div className="app__control-panel">
                 <div className="app__input-group">
                     <label>
@@ -120,17 +134,26 @@ function App() {
                         }
                     />
                 </label>
-                <label>
-                    <input
-                        type="checkbox"
-                        onChange={onDrawRealInterpoltation}
-                    />
-                    Draw real gradient (slow)
-                </label>
-                <label>
-                    <input type="checkbox" onChange={onDrawGrid} />
-                    Draw grid
-                </label>
+                <div className="app__checkboxes">
+                    <label>
+                        <input
+                            type="checkbox"
+                            onChange={onDrawRealInterpoltation}
+                        />
+                        Draw real gradient (slow)
+                    </label>
+                    <label>
+                        <input type="checkbox" onChange={onDrawGrid} />
+                        Draw grid
+                    </label>
+                    <label>
+                        <input
+                            type="checkbox"
+                            onChange={onDrawRealInterpoltation}
+                        />
+                        Draw real gradient (slow)
+                    </label>
+                </div>
             </div>
         </div>
     );
@@ -156,7 +179,8 @@ function usePause(
 
 function useEvolveEngine(
     centrifugalMagnitude: number,
-    coriolisMagnitude: number
+    coriolisMagnitude: number,
+    autoplay: boolean
 ): [Atmosphere, boolean, (val: boolean) => void, number] {
     const [pausedNow, setPaused, lastPlayDate, setLastPlayDate] = usePause(
         true
@@ -183,7 +207,7 @@ function useEvolveEngine(
                     setFpsCounter(counter => counter + 1);
                 }
                 pressureAtmoSystem.evolve(timePass);
-                if (autopause) {
+                if (!autoplay) {
                     setPaused(true);
                 }
                 setLastPlayDate(now);

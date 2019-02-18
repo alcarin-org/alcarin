@@ -38,10 +38,6 @@ export class VelocityDrivenAtmo {
             p[0] - 0.5 * deltaTime * v[0],
             p[1] - 0.5 * deltaTime * v[1],
         ];
-        // ???
-        if (!this.atmo.contains(lastKnownP)) {
-            return [0, 0];
-        }
 
         const avVelocity = this.atmo.interpolateVelocity(lastKnownP);
         const particlePos = add(p, multiply(avVelocity, deltaTime));
