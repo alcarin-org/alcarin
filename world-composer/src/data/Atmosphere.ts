@@ -1,4 +1,4 @@
-import { Vector, Point, add, multiply } from '../utils/Math';
+import { Vector, Point, add, multiply, VectorComponent } from '../utils/Math';
 
 export enum NodeType {
     Fluid,
@@ -16,10 +16,15 @@ export interface AtmosphereNode {
 const Center: Point = [0, 0];
 const Vector0: Vector = [0, 0];
 
-const RandomRange = 0.5;
+const RandomRange = 5;
 
 export class Atmosphere {
     public readonly radius: number;
+    // coded as MAC grid.
+    // integer point (floor of coords) represent left-top corner of the grid cell
+    // pressure is on the center of grid
+    // velocity X is on the middle of the left face
+    // velocity Y is on the middle of the top face
     private nodes: AtmosphereNode[];
 
     public constructor(radius: number) {
@@ -38,13 +43,20 @@ export class Atmosphere {
         });
     }
 
-    public interpolateVelocity(p: Point): Point {
+    public interpolateVelocity(p: Point): Vector {
+        return [
+            this.interpolateVelocityAt([p[0], p[1] - 0.5], VectorComponent.x),
+            this.interpolateVelocityAt([p[0] - 0.5, p[1]], VectorComponent.y),
+        ];
+    }
+
+    public interpolateVelocityAt(p: Point, cmp: VectorComponent): number {
         const minCellP = [Math.floor(p[0]), Math.floor(p[1])];
         const relToCell = [p[0] - minCellP[0], p[1] - minCellP[1]];
 
         const range = [0, 1];
         let weightSum = 0;
-        let resultVel: Vector = [0, 0];
+        let resultVel = 0;
         for (const offsetX of range) {
             for (const offsetY of range) {
                 const neighPos: Point = [
@@ -54,18 +66,16 @@ export class Atmosphere {
                 if (!this.contains(neighPos)) {
                     continue;
                 }
-                const neighVel = this.get(neighPos).velocity;
+                const neighVel = this.get(neighPos).velocity[cmp];
                 const velWeight =
                     (offsetX === 0 ? 1 - relToCell[0] : relToCell[0]) *
                     (offsetY === 0 ? 1 - relToCell[1] : relToCell[1]);
                 weightSum += velWeight;
-                resultVel = add(resultVel, multiply(neighVel, velWeight));
+                resultVel += neighVel * velWeight;
             }
         }
 
-        return weightSum === 0
-            ? Vector0
-            : [resultVel[0] / weightSum, resultVel[1] / weightSum];
+        return weightSum === 0 ? 0 : resultVel / weightSum;
     }
 
     public interpolatePressure(p: Point) {
@@ -144,13 +154,17 @@ export class Atmosphere {
                 ...node,
                 pressure: 0,
                 velocity: [
-                    (p[0] < 0 ? 2 : 0) +
-                        // Math.sin(p[0]) * RandomPressureRange +
-                        // Math.cos(p[1]) * RandomPressureRange +
-                        RandomRange / 2 -
-                        RandomRange * Math.random(),
+                    RandomRange / 2 - RandomRange * Math.random(),
                     RandomRange / 2 - RandomRange * Math.random(),
                 ],
+                // velocity:
+                //     (p[0] < 0 ? 2 : 0) +
+                //         // Math.sin(p[0]) * RandomPressureRange +
+                //         // Math.cos(p[1]) * RandomPressureRange +
+                //         RandomRange / 2 -
+                //         RandomRange * Math.random(),
+                //     RandomRange / 2 - RandomRange * Math.random(),
+                // ],
             };
         });
     }
@@ -198,11 +212,11 @@ export class Atmosphere {
     }
 
     public contains(p: Point): boolean {
-        const realRadius = this.radius - 0.5;
+        const realRadius = this.radius;
         return (
-            p[0] > -realRadius &&
+            p[0] >= -realRadius + 1 &&
             p[0] < realRadius &&
-            p[1] > -realRadius &&
+            p[1] >= -realRadius + 1 &&
             p[1] < realRadius
         );
     }

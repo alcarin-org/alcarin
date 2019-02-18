@@ -13,7 +13,7 @@ import Stats from './Stats';
 const autopause = false;
 const stepTimeout = 100;
 
-const WorldRadius = 6;
+const WorldRadius = 7;
 const atmosphereSample = new Atmosphere(WorldRadius);
 atmosphereSample.randomizeField();
 const pressureAtmoSystem = new VelocityDrivenAtmo(atmosphereSample);
@@ -60,6 +60,10 @@ function App() {
             />
             <Stats atmosphere={atmo} mouseOver={clickedNodePos} fps={fps} />
             <button onClick={() => setPause(!pause)}>Play/Pause</button>
+            <button onClick={() => atmosphereSample.randomizeField()}>
+                {' '}
+                Random
+            </button>
             <div className="app__control-panel">
                 <div className="app__input-group">
                     <label>

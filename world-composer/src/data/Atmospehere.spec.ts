@@ -26,17 +26,18 @@ test.only('Should properly interpolate velocity on given point', () => {
     const atmo = atmoFromVelocityArray([
         [V0, V0,     V0,     V0, V0    ],
         [V0, [1, 1], [2, 1], V0, V0    ],
-        [V0, [1, 2], [2, 2], V0, V0    ],
+        [V0, [1, 1], [2, 2], V0, V0    ],
         [V0, V0,     V0,     V0, V0    ],
         [V0, V0,     V0,     V0, [4, 1]],
     ]);
-    expect(atmo.interpolateVelocity([-0.5, -0.5])).toEqual([1.5, 1.5]);
-    // on exact points interpolation should have same value like real vector
     expect(atmo.interpolateVelocity([0, 0])).toEqual([2, 2]);
-    // decreasing fast, as all 3 neightbours (but 0,0), are 0 vector
-    expect(atmo.interpolateVelocity([0.5, 0.5])).toEqual([0.5, 0.5]);
-    // decreasing slower, as we move only on X
-    expect(atmo.interpolateVelocity([0.5, 0])).toEqual([1, 1]);
-    // do not interpolate on borders
-    expect(atmo.interpolateVelocity([2.5, 2.5])).toEqual([4, 1]);
+
+    // expect(atmo.interpolateVelocity([-0.5, -0.5])).toEqual([1.5, 1.5]);
+    // // on exact points interpolation should have same value like real vector
+    // // decreasing fast, as all 3 neightbours (but 0,0), are 0 vector
+    // expect(atmo.interpolateVelocity([0.5, 0.5])).toEqual([0.5, 0.5]);
+    // // decreasing slower, as we move only on X
+    // expect(atmo.interpolateVelocity([0.5, 0])).toEqual([1, 1]);
+    // // do not interpolate on borders
+    // expect(atmo.interpolateVelocity([2.5, 2.5])).toEqual([4, 1]);
 });

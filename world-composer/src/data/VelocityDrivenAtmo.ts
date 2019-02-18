@@ -35,13 +35,14 @@ export class VelocityDrivenAtmo {
     private convectVelocity(deltaTime: number) {
         // this.atmo.forEach(node => (node.newVelocity = node.velocity));
         this.atmo.forEach((node, p) => {
-            const debug = p[0] === 0 && p[1] === 0;
+            // const debug = p[0] === 0 && p[1] === 0;
             // better velocity interpolation needed here
+            const v = this.atmo.interpolateVelocity(p);
             const lastKnownP: Point = [
-                p[0] - deltaTime * node.velocity[0],
-                p[1] - deltaTime * node.velocity[1],
+                p[0] - deltaTime * v[0],
+                p[1] - deltaTime * v[1],
             ];
-            debug && console.log('1', lastKnownP);
+            // debug && console.log('1', lastKnownP);
             const lastKnownPCell = round(lastKnownP);
 
             if (!this.atmo.contains(lastKnownPCell)) {
@@ -49,7 +50,7 @@ export class VelocityDrivenAtmo {
             }
 
             const avVelocity = this.atmo.interpolateVelocity(lastKnownP);
-            debug && console.log('2', avVelocity);
+            // debug && console.log('2', avVelocity);
             node.newVelocity = avVelocity;
         });
 

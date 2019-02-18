@@ -26,7 +26,7 @@ export default function Stats({ atmosphere, mouseOver, fps }: Props) {
     // const avDivergence = totalDivergence / length;
     const avVelocity = multiply(totalVelocity, 1 / length);
 
-    const mouseOverCell = floor(add(mouseOver, [0.5, 0.5]));
+    const mouseOverCell = floor(mouseOver);
     const selectedNode = atmosphere.get(mouseOverCell);
     const clickedInterpolatedVel = atmosphere.interpolateVelocity(mouseOver);
     const clickedInterpolatedPress = atmosphere.interpolatePressure(mouseOver);

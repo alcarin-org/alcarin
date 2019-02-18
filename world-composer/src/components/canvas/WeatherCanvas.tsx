@@ -107,7 +107,7 @@ export default function WeatherCanvas({
             );
 
             if (selectedNodePosition) {
-                const pos = floor(add(selectedNodePosition, [0.5, 0.5]));
+                const pos = floor(selectedNodePosition);
 
                 screenCtx.strokeStyle = 'rgba(255,0,0,0.75)';
                 screenCtx.setLineDash([5, 5]);

@@ -1,4 +1,8 @@
 export type Vector = [number, number];
+export enum VectorComponent {
+    x = 0,
+    y = 1,
+}
 
 export type Point = Vector;
 

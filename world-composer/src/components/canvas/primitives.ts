@@ -133,7 +133,7 @@ export function pxToAtmoPos(
     atmo: Atmosphere
 ): Point {
     return [
-        x / fieldSizePx - atmo.radius + 1 - 0.5,
-        y / fieldSizePx - atmo.radius + 1 - 0.5,
+        x / fieldSizePx - atmo.radius + 1,
+        y / fieldSizePx - atmo.radius + 1,
     ];
 }
