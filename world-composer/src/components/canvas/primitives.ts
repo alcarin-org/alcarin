@@ -17,7 +17,7 @@ export enum MapType {
 
 type Color = [number, number, number];
 
-const PressureDrawRange = 1.4;
+const PressureDrawRange = 0.04;
 const VelocityDrawRange = 4;
 const DivergenceDrawRange = 4;
 

@@ -45,3 +45,46 @@ export function floor(p: Point): Point {
 export function round(p: Point): Point {
     return [Math.round(p[0]), Math.round(p[1])];
 }
+
+// coefficientA main diagonal CAN NOT HAVE zeros. in our system
+// main diagonal represent neightbours of given cell. as we do not have
+// fully separated cell, there will be no 0s on main diagonal
+export function resolveLinearByJacobi(
+    A: Int8Array, // coefficient matrix A
+    B: Float64Array // constants matrix B
+): Float64Array {
+    if (A.length !== B.length ** 2) {
+        throw new Error(
+            'Coefficient matrix A has different size that constant matrix B! Can not continue.'
+        );
+    }
+    const x = new Float64Array(B.length); // resultsMatrix
+
+    // one step
+    for (let step = 0; step < 10; step++) {
+        for (let iUnknown = 0; iUnknown < B.length; iUnknown++) {
+            const iUnknownCoefficientOffset = iUnknown * B.length;
+
+            let iGuess = 0;
+            // iGuess = (eqA[i] * x[i] + ...) / eqA[iUnknown];
+            for (
+                let iCoefficient = 0;
+                iCoefficient < B.length;
+                iCoefficient++
+            ) {
+                if (iCoefficient === iUnknown) {
+                    continue;
+                }
+                iGuess -=
+                    A[iUnknownCoefficientOffset + iCoefficient] *
+                    x[iCoefficient];
+            }
+            iGuess =
+                (iGuess + B[iUnknown]) /
+                A[iUnknownCoefficientOffset + iUnknown];
+            x[iUnknown] = iGuess;
+        }
+    }
+
+    return x;
+}

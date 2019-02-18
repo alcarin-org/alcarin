@@ -10,7 +10,7 @@ import { VelocityDrivenAtmo } from '../data/VelocityDrivenAtmo';
 import { ipcRenderer } from '../electron-bridge';
 import Stats from './Stats';
 
-const stepTimeout = 150;
+const stepTimeout = 0;
 
 const WorldRadius = 10;
 const DrawFieldSize = 30;

@@ -50,6 +50,10 @@ export class Atmosphere {
         });
     }
 
+    get size() {
+        return this.nodes.length;
+    }
+
     public divergence(pos: Point): number {
         const cellVel = this.get(pos).velocity;
         const nextXPos: Point = [pos[0] + 1, pos[1]];
@@ -182,17 +186,17 @@ export class Atmosphere {
                 //     RandomRange / 2 - RandomRange * Math.random(),
                 // ],
                 // from left to right
-                velocity: [
-                    (p[0] < 0 ? 2 : 0) +
-                        RandomRange / 2 -
-                        RandomRange * Math.random(),
-                    RandomRange / 2 - RandomRange * Math.random(),
-                ],
-                // many circles
                 // velocity: [
-                //     Math.cos((2 * Math.PI * p[0]) / this.radius) + rand(),
-                //     Math.sin((2 * Math.PI * p[1]) / this.radius) + rand(),
+                //     (p[0] < 0 ? 2 : 0) +
+                //         RandomRange / 2 -
+                //         RandomRange * Math.random(),
+                //     RandomRange / 2 - RandomRange * Math.random(),
                 // ],
+                // many circles
+                velocity: [
+                    Math.cos((2 * Math.PI * p[0]) / this.radius) + rand(),
+                    Math.sin((2 * Math.PI * p[1]) / this.radius) + rand(),
+                ],
                 // curl
                 // velocity: multiply([p[1] - 0.1, -p[0] - 0.1], 0.15),
             };
