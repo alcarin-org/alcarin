@@ -12,12 +12,14 @@ import { Atmosphere } from '../../data/Atmosphere';
 export enum MapType {
     Pressure,
     Velocity,
+    Divergence,
 }
 
 type Color = [number, number, number];
 
 const PressureDrawRange = 1.4;
 const VelocityDrawRange = 4;
+const DivergenceDrawRange = 4;
 
 export function initializeGrid(
     ctx: CanvasRenderingContext2D,
@@ -46,12 +48,13 @@ export function renderVelocities(
     ctx.fillStyle = 'yellow';
     ctx.beginPath();
     atmo.forEach((node, pos) => {
+        const vel = atmo.interpolateVelocity(add(pos, [0.5, 0.5]));
         const offsetX =
             screenOffsetX + fieldSizePx * pos[0] + 0.5 * fieldSizePx;
         const offsetY =
             screenOffsetY + fieldSizePx * pos[1] + 0.5 * fieldSizePx;
-        const vPower = constraints(0.1, 1, magnitude(node.velocity));
-        const vNorm = normalize(node.velocity);
+        const vPower = constraints(0.1, 1, magnitude(vel));
+        const vNorm = normalize(vel);
         const v = multiply(vNorm, 0.85 * fieldSizePx * vPower);
 
         ctx.moveTo(offsetX + -0.5 * v[0], offsetY + -0.5 * v[1]);
@@ -84,7 +87,9 @@ export function renderBigBgTexture(
             let color: Color;
             switch (mapType) {
                 case MapType.Velocity:
-                    color = velocityColor(atmo.interpolateVelocity(p));
+                    color = velocityColor(
+                        atmo.interpolateVelocity(add(p, [0.5, 0.5]))
+                    );
                     break;
                 case MapType.Pressure:
                 default:
@@ -109,6 +114,9 @@ function drawCell(
                 atmo.interpolateVelocity(add(pos, [0.5, 0.5]))
             );
             break;
+        case MapType.Divergence:
+            color = divergenceColor(atmo.divergence(pos));
+            break;
         case MapType.Pressure:
         default:
             color = pressureColor(atmo.get(pos).pressure);
@@ -128,13 +136,18 @@ function velocityColor(velocity: Vector): Color {
     return [255 * factor, 0, 255 * (1 - factor)];
 }
 
+function divergenceColor(divergence: number): Color {
+    const factor =
+        (divergence + DivergenceDrawRange) / (2 * DivergenceDrawRange);
+    return [255 * factor, 0, 255 * (1 - factor)];
+}
+
 export function pxToAtmoPos(
     x: number,
     y: number,
     fieldSizePx: number,
     atmo: Atmosphere
 ): Point {
-    console.log(x, x / fieldSizePx - atmo.radius + 1);
     return [
         x / fieldSizePx - atmo.radius + 1,
         y / fieldSizePx - atmo.radius + 1,

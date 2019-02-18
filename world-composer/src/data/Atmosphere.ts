@@ -50,6 +50,21 @@ export class Atmosphere {
         });
     }
 
+    public divergence(pos: Point): number {
+        const cellVel = this.get(pos).velocity;
+        const nextXPos: Point = [pos[0] + 1, pos[1]];
+        const nextYPos: Point = [pos[0], pos[1] + 1];
+
+        const xDiff = this.contains(nextXPos)
+            ? this.get(nextXPos).velocity[0] - cellVel[0]
+            : 0;
+        const yDiff = this.contains(nextYPos)
+            ? this.get(nextYPos).velocity[1] - cellVel[1]
+            : 0;
+
+        return xDiff + yDiff;
+    }
+
     public interpolateVelocity(p: Point): Vector {
         return [
             this.interpolateVelocityAt([p[0], p[1] - 0.5], VectorComponent.x),
@@ -167,19 +182,19 @@ export class Atmosphere {
                 //     RandomRange / 2 - RandomRange * Math.random(),
                 // ],
                 // from left to right
-                // velocity:
-                //     (p[0] < 0 ? 2 : 0) +
-                //         RandomRange / 2 -
-                //         RandomRange * Math.random(),
-                //     RandomRange / 2 - RandomRange * Math.random(),
-                // ],
+                velocity: [
+                    (p[0] < 0 ? 2 : 0) +
+                        RandomRange / 2 -
+                        RandomRange * Math.random(),
+                    RandomRange / 2 - RandomRange * Math.random(),
+                ],
                 // many circles
                 // velocity: [
                 //     Math.cos((2 * Math.PI * p[0]) / this.radius) + rand(),
                 //     Math.sin((2 * Math.PI * p[1]) / this.radius) + rand(),
                 // ],
                 // curl
-                velocity: multiply([p[1] - 0.1, -p[0] - 0.1], 0.15),
+                // velocity: multiply([p[1] - 0.1, -p[0] - 0.1], 0.15),
             };
         });
     }

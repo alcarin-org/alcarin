@@ -10,7 +10,7 @@ import { VelocityDrivenAtmo } from '../data/VelocityDrivenAtmo';
 import { ipcRenderer } from '../electron-bridge';
 import Stats from './Stats';
 
-const stepTimeout = 0;
+const stepTimeout = 150;
 
 const WorldRadius = 10;
 const DrawFieldSize = 30;
@@ -102,6 +102,16 @@ function App() {
                             onChange={onMapTypeChange}
                         />{' '}
                         Velocity
+                    </label>
+                    <label>
+                        <input
+                            type="radio"
+                            name="mapType[]"
+                            value={MapType.Divergence}
+                            checked={mapType === MapType.Divergence}
+                            onChange={onMapTypeChange}
+                        />{' '}
+                        Divergence
                     </label>
                 </div>
                 <label>

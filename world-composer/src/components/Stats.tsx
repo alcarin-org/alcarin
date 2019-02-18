@@ -16,20 +16,21 @@ export default function Stats({ atmosphere, mouseOver, fps }: Props) {
     const length = atmosphere.dim2d ** 2;
     let pressure = 0;
     let totalVelocity: Vector = [0, 0];
-    // let totalDivergence = 0;
+    let totalDivergence = 0;
     atmosphere.forEach((node, pos) => {
         totalVelocity = add(totalVelocity, node.velocity);
         pressure += node.pressure;
-        // totalDivergence += divergence(atmosphere, pos);
+        totalDivergence += atmosphere.divergence(pos);
     });
     const avPressure = pressure / length;
-    // const avDivergence = totalDivergence / length;
+    const avDivergence = totalDivergence / length;
     const avVelocity = multiply(totalVelocity, 1 / length);
 
     const mouseOverCell = floor(mouseOver);
     const selectedNode = atmosphere.get(mouseOverCell);
     const clickedInterpolatedVel = atmosphere.interpolateVelocity(mouseOver);
     const clickedInterpolatedPress = atmosphere.interpolatePressure(mouseOver);
+    const clickedDivergence = atmosphere.divergence(mouseOverCell);
     return (
         <div className="stats">
             <dl>
@@ -40,6 +41,8 @@ export default function Stats({ atmosphere, mouseOver, fps }: Props) {
                 </dd>
                 <dt>Av. Pressure</dt>
                 <dd>{avPressure.toFixed(3)}</dd>
+                <dt>Av. Divergence</dt>
+                <dd>({avDivergence.toFixed(3)})</dd>
                 <dt>Selected</dt>
                 <dd>
                     ({mouseOver[0].toFixed(3)}, {mouseOver[1].toFixed(3)}) ~(
@@ -60,13 +63,11 @@ export default function Stats({ atmosphere, mouseOver, fps }: Props) {
                     ({clickedInterpolatedVel[0].toFixed(3)},
                     {clickedInterpolatedVel[1].toFixed(3)})
                 </dd>
+                <dt>Clicked divergence:</dt>
+                <dd>{clickedDivergence.toFixed(3)}</dd>
                 <dt>fps</dt>
                 <dd>{fps}</dd>
             </dl>
         </div>
     );
-    // <dt>Av. Divergence</dt>
-    // <dd>({avDivergence.toFixed(3)})</dd>
-    // <dt>Clicked divergence:</dt>
-    // <dd>{divergence(atmosphere, mouseOver).toFixed(3)}</dd>
 }
