@@ -16,7 +16,7 @@ export enum MapType {
 type Color = [number, number, number];
 
 const PressureDrawRange = 1.4;
-const VelocityDrawRange = 5.0;
+const VelocityDrawRange = 4;
 
 export function initializeGrid(
     ctx: CanvasRenderingContext2D,

@@ -21,6 +21,8 @@ import {
     constraints,
     normalize,
     multiply,
+    floor,
+    add,
 } from '../../utils/Math';
 
 interface Props {
@@ -28,6 +30,7 @@ interface Props {
     fieldSizePx?: number;
     onClick: (p: Point) => void;
     mapType: MapType;
+    selectedNodePosition?: Point;
     drawRealInterpolation: boolean;
     drawGrid: boolean;
 }
@@ -39,6 +42,7 @@ export default function WeatherCanvas({
     mapType = MapType.Pressure,
     drawRealInterpolation,
     drawGrid,
+    selectedNodePosition,
 }: Props) {
     const atmo = atmosphere;
     const displayCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -67,6 +71,8 @@ export default function WeatherCanvas({
     useEffect(() => {
         function renderAtmosphere() {
             const screenCtx = screenCtxRef.current!;
+            screenCtx.strokeStyle = 'black';
+            screenCtx.setLineDash([]);
 
             if (drawRealInterpolation) {
                 renderBigBgTexture(
@@ -99,6 +105,20 @@ export default function WeatherCanvas({
                 pixelOffset,
                 fieldSizePx
             );
+
+            if (selectedNodePosition) {
+                const pos = floor(add(selectedNodePosition, [0.5, 0.5]));
+
+                screenCtx.strokeStyle = 'rgba(255,0,0,0.75)';
+                screenCtx.setLineDash([5, 5]);
+                // screenCtx.stroke
+                screenCtx.strokeRect(
+                    pixelOffset + pos[0] * fieldSizePx,
+                    pixelOffset + pos[1] * fieldSizePx,
+                    fieldSizePx,
+                    fieldSizePx
+                );
+            }
         }
 
         const requestId = requestAnimationFrame(renderAtmosphere);

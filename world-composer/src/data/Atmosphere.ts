@@ -16,7 +16,7 @@ export interface AtmosphereNode {
 const Center: Point = [0, 0];
 const Vector0: Vector = [0, 0];
 
-const RandomRange = 0;
+const RandomRange = 0.5;
 
 export class Atmosphere {
     public readonly radius: number;
@@ -38,7 +38,7 @@ export class Atmosphere {
         });
     }
 
-    public interpolateVelocity(p: Point) {
+    public interpolateVelocity(p: Point): Point {
         const minCellP = [Math.floor(p[0]), Math.floor(p[1])];
         const relToCell = [p[0] - minCellP[0], p[1] - minCellP[1]];
 
@@ -63,7 +63,9 @@ export class Atmosphere {
             }
         }
 
-        return weightSum === 0 ? Vector0 : multiply(resultVel, 1 / weightSum);
+        return weightSum === 0
+            ? Vector0
+            : [resultVel[0] / weightSum, resultVel[1] / weightSum];
     }
 
     public interpolatePressure(p: Point) {
@@ -142,7 +144,7 @@ export class Atmosphere {
                 ...node,
                 pressure: 0,
                 velocity: [
-                    (p[0] < 0 ? 5 : 0) +
+                    (p[0] < 0 ? 2 : 0) +
                         // Math.sin(p[0]) * RandomPressureRange +
                         // Math.cos(p[1]) * RandomPressureRange +
                         RandomRange / 2 -

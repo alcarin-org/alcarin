@@ -27,7 +27,7 @@ export default function Stats({ atmosphere, mouseOver, fps }: Props) {
     const avVelocity = multiply(totalVelocity, 1 / length);
 
     const mouseOverCell = floor(add(mouseOver, [0.5, 0.5]));
-    const clickedNode = atmosphere.get(mouseOverCell);
+    const selectedNode = atmosphere.get(mouseOverCell);
     const clickedInterpolatedVel = atmosphere.interpolateVelocity(mouseOver);
     const clickedInterpolatedPress = atmosphere.interpolatePressure(mouseOver);
     return (
@@ -40,18 +40,18 @@ export default function Stats({ atmosphere, mouseOver, fps }: Props) {
                 </dd>
                 <dt>Av. Pressure</dt>
                 <dd>{avPressure.toFixed(3)}</dd>
-                <dt>Clicked</dt>
+                <dt>Selected</dt>
                 <dd>
                     ({mouseOver[0].toFixed(3)}, {mouseOver[1].toFixed(3)}) ~(
                     {mouseOverCell[0]}, {mouseOverCell[1]})
                 </dd>
-                <dt>Clicked velocity</dt>
+                <dt>Selected velocity</dt>
                 <dd>
-                    ({clickedNode.velocity[0].toFixed(3)},
-                    {clickedNode.velocity[1].toFixed(3)})
+                    ({selectedNode.velocity[0].toFixed(3)},
+                    {selectedNode.velocity[1].toFixed(3)})
                 </dd>
-                <dt>Clicked pressure:</dt>
-                <dd>{clickedNode.pressure.toFixed(3)}</dd>
+                <dt>Selected pressure:</dt>
+                <dd>{selectedNode.pressure.toFixed(3)}</dd>
 
                 <dt>Clicked interp. pressure:</dt>
                 <dd>{clickedInterpolatedPress.toFixed(3)}</dd>

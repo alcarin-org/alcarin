@@ -23,7 +23,7 @@ function App() {
     const [coriolisMagnitude, setCoriolisMagnitude] = useState(0.05);
     const [centrifugalMagnitude, setCentrifugalMagnitude] = useState(0.05);
     const [clickedNodePos, setClickedNodePos] = useState([0, 0] as Point);
-    const [mapType, setMapType] = useState(MapType.Pressure);
+    const [mapType, setMapType] = useState(MapType.Velocity);
     const [drawRealInterpolation, setDrawRealInterpolation] = useState(false);
     const [drawGrid, setDrawGrid] = useState(false);
 
@@ -56,6 +56,7 @@ function App() {
                 mapType={mapType}
                 drawRealInterpolation={drawRealInterpolation}
                 drawGrid={drawGrid}
+                selectedNodePosition={clickedNodePos}
             />
             <Stats atmosphere={atmo} mouseOver={clickedNodePos} fps={fps} />
             <button onClick={() => setPause(!pause)}>Play/Pause</button>
