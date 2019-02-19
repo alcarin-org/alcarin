@@ -119,7 +119,8 @@ function drawCell(
             break;
         case MapType.Pressure:
         default:
-            color = pressureColor(atmo.get(pos).pressure);
+            const ind = atmo.index(pos);
+            color = pressureColor(atmo.pressureVector[ind]);
     }
     ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
     ctx.fillRect(pos[0], pos[1], 1, 1);

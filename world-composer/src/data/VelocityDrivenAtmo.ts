@@ -17,9 +17,9 @@ enum VectorComponent {
 const relNeightbours: Vector[] = [[-1, 0], [1, 0], [0, -1], [0, 1]];
 
 export class VelocityDrivenAtmo {
-    public atmo: Atmosphere;
+    public readonly atmo: Atmosphere;
 
-    private neightboursMatrix: Int8Array;
+    public readonly neightboursMatrix: Int8Array;
 
     public constructor(atmo: Atmosphere) {
         this.atmo = atmo;
@@ -32,33 +32,35 @@ export class VelocityDrivenAtmo {
         this.adjustVelocityFromPressure(deltaTime);
     }
 
-    private calculatePressure(deltaTime: number) {
-        const neighboursMatrixA = this.neightboursMatrix;
-        const divergenceVectorB = new Float64Array(this.atmo.dim2d ** 2).map(
-            (_, ind) => {
-                const p = this.atmo.coords(ind);
-                return this.atmo.divergence(p) / deltaTime;
-            }
-        );
-        const pressureMatrix = resolveLinearByJacobi(
-            neighboursMatrixA,
-            divergenceVectorB
-        );
-        this.atmo.forEach((node, pos) => {
-            node.pressure = pressureMatrix[this.atmo.index(pos)];
+    public divergenceVector(deltaTime: number) {
+        return new Float64Array(this.atmo.dim2d ** 2).map((_, ind) => {
+            const p = this.atmo.coords(ind);
+            return this.atmo.divergence(p) / deltaTime;
         });
     }
 
-    private adjustVelocityFromPressure(deltaTime: number) {
+    public calculatePressure(deltaTime: number) {
+        const neighboursMatrixA = this.neightboursMatrix;
+        const divergenceVectorB = this.divergenceVector(deltaTime);
+        this.atmo.pressureVector = resolveLinearByJacobi(
+            neighboursMatrixA,
+            divergenceVectorB
+        );
+    }
+
+    public adjustVelocityFromPressure(deltaTime: number) {
         this.atmo.forEach((node, pos) => {
+            const posPressure = this.atmo.pressureVector[this.atmo.index(pos)];
             const lastXCell: Point = [pos[0] - 1, pos[0]];
             const pressureGradientX = this.atmo.contains(lastXCell)
-                ? node.pressure - this.atmo.get(lastXCell).pressure
+                ? posPressure -
+                  this.atmo.pressureVector[this.atmo.index(lastXCell)]
                 : 0;
 
             const lastYCell: Point = [pos[0], pos[0] - 1];
             const pressureGradientY = this.atmo.contains(lastYCell)
-                ? node.pressure - this.atmo.get([pos[0], pos[0] - 1]).pressure
+                ? posPressure -
+                  this.atmo.pressureVector[this.atmo.index(lastYCell)]
                 : 0;
 
             node.newVelocity = [
@@ -93,6 +95,7 @@ export class VelocityDrivenAtmo {
 
     private precalcNeightboursMatrix() {
         const matrix = new Int8Array(this.atmo.dim2d ** 4);
+
         for (let iCell = 0; iCell < this.atmo.size; iCell++) {
             const offset = iCell * this.atmo.size;
             const p = this.atmo.coords(iCell);
@@ -102,8 +105,8 @@ export class VelocityDrivenAtmo {
                 if (this.atmo.contains(nPos)) {
                     const nIndex = this.atmo.index(nPos);
                     matrix[offset + nIndex] = 1;
+                    nCount++;
                 }
-                nCount++;
             }
             matrix[offset + iCell] = -nCount;
         }

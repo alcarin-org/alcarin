@@ -18,8 +18,9 @@ export default function Stats({ atmosphere, mouseOver, fps }: Props) {
     let totalVelocity: Vector = [0, 0];
     let totalDivergence = 0;
     atmosphere.forEach((node, pos) => {
+        const ind = atmosphere.index(pos);
         totalVelocity = add(totalVelocity, node.velocity);
-        pressure += node.pressure;
+        pressure += atmosphere.pressureVector[ind];
         totalDivergence += atmosphere.divergence(pos);
     });
     const avPressure = pressure / length;
@@ -31,6 +32,8 @@ export default function Stats({ atmosphere, mouseOver, fps }: Props) {
     const clickedInterpolatedVel = atmosphere.interpolateVelocity(mouseOver);
     const clickedInterpolatedPress = atmosphere.interpolatePressure(mouseOver);
     const clickedDivergence = atmosphere.divergence(mouseOverCell);
+    const ind = atmosphere.index(mouseOverCell);
+    const selectedNodePressure = atmosphere.pressureVector[ind];
     return (
         <div className="stats">
             <dl>
@@ -54,7 +57,7 @@ export default function Stats({ atmosphere, mouseOver, fps }: Props) {
                     {selectedNode.velocity[1].toFixed(3)})
                 </dd>
                 <dt>Selected pressure:</dt>
-                <dd>{selectedNode.pressure.toFixed(3)}</dd>
+                <dd>{selectedNodePressure.toFixed(3)}</dd>
 
                 <dt>Clicked interp. pressure:</dt>
                 <dd>{clickedInterpolatedPress.toFixed(3)}</dd>

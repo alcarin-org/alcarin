@@ -1,18 +1,9 @@
 import { Atmosphere } from './Atmosphere';
 
 import { Vector } from '../utils/Math';
+import { atmoFromVelocityArray } from '../utils/SpecHelpers';
 
 const V0: Vector = [0, 0];
-
-const atmoFromVelocityArray = (velArray: Vector[][]) => {
-    const radius = (velArray.length + 1) / 2;
-    const atmo = new Atmosphere(radius);
-    atmo.apply((node, p) => ({
-        ...node,
-        velocity: velArray[p[1] + radius - 1][p[0] + radius - 1],
-    }));
-    return atmo;
-};
 
 test('Should properly interpolate velocity on given point for empty velocity field', () => {
     const atmo = new Atmosphere(4);

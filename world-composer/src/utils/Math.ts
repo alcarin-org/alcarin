@@ -58,14 +58,14 @@ export function resolveLinearByJacobi(
             'Coefficient matrix A has different size that constant matrix B! Can not continue.'
         );
     }
-    const x = new Float64Array(B.length); // resultsMatrix
-
+    let x = new Float64Array(B.length); // resultsMatrix
     // one step
-    for (let step = 0; step < 10; step++) {
+    for (let step = 0; step < 20; step++) {
+        const localResX = x.slice(0);
         for (let iUnknown = 0; iUnknown < B.length; iUnknown++) {
             const iUnknownCoefficientOffset = iUnknown * B.length;
 
-            let iGuess = 0;
+            let iGuess = B[iUnknown];
             // iGuess = (eqA[i] * x[i] + ...) / eqA[iUnknown];
             for (
                 let iCoefficient = 0;
@@ -79,11 +79,10 @@ export function resolveLinearByJacobi(
                     A[iUnknownCoefficientOffset + iCoefficient] *
                     x[iCoefficient];
             }
-            iGuess =
-                (iGuess + B[iUnknown]) /
-                A[iUnknownCoefficientOffset + iUnknown];
-            x[iUnknown] = iGuess;
+            iGuess /= A[iUnknownCoefficientOffset + iUnknown];
+            localResX[iUnknown] = iGuess;
         }
+        x = localResX;
     }
 
     return x;

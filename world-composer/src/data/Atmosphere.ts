@@ -16,7 +16,6 @@ export interface AtmosphereNode {
     // m/s^2
     velocity: Vector;
     newVelocity: Vector;
-    pressure: number;
     type: NodeType;
 }
 
@@ -26,25 +25,27 @@ const Vector0: Vector = [0, 0];
 const RandomRange = 0.8;
 
 export class Atmosphere {
-    public readonly radius: number;
     // coded as MAC grid with cell size 1.
     // integer point ((px, py)) represent left-top corner of a cell
     // pressure is stored on the center of cell ((px, py) + (0.5, 0.5))
     // velocity X is on the middle of the left face (px, py + 0.5)
     // velocity Y is on the middle of the top face (px + 0.5, py)
+
+    public readonly radius: number;
+    public pressureVector: Float64Array;
     private nodes: AtmosphereNode[];
 
     public constructor(radius: number) {
         this.radius = radius;
         const dim = this.dim2d;
 
+        this.pressureVector = new Float64Array(dim ** 2);
         this.nodes = new Array(dim ** 2).fill(null).map((_, ind) => {
             const coords = this.coords(ind);
 
             return {
                 velocity: Vector0,
                 newVelocity: Vector0,
-                pressure: 0,
                 type: NodeType.Fluid,
             };
         });
@@ -120,7 +121,8 @@ export class Atmosphere {
                 if (!this.contains(neighPos)) {
                     continue;
                 }
-                const neighPressure = this.get(neighPos).pressure;
+                const ind = this.index(neighPos);
+                const neighPressure = this.pressureVector[ind];
                 const velWeight =
                     (offsetX === 0 ? 1 - relToCell[0] : relToCell[0]) *
                     (offsetY === 0 ? 1 - relToCell[1] : relToCell[1]);
@@ -202,7 +204,6 @@ export class Atmosphere {
         return this.apply((node, p) => {
             return {
                 ...node,
-                pressure: 0,
                 velocity: randMethod(p),
             };
         });
