@@ -10,7 +10,7 @@ import { VelocityDrivenAtmo } from '../data/VelocityDrivenAtmo';
 import { ipcRenderer } from '../electron-bridge';
 import Stats from './Stats';
 
-const stepTimeout = 300;
+const stepTimeout = 20;
 
 const WorldRadius = 10;
 const DrawFieldSize = 30;
@@ -59,6 +59,7 @@ function App() {
 
     function randomizeMap() {
         atmosphereSample.randomizeField();
+        pressureAtmoSystem.calculatePressure(1);
         forceRedraw(!_);
     }
 

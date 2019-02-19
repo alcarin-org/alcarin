@@ -23,7 +23,6 @@ const smallAtmo = () => atmoFromVelocityArray([
 ]);
 
 test('Should calculate pressure based on given velocities that effect with 0 divergence', () => {
-    return;
     const driver = new VelocityDrivenAtmo(smallAtmo());
     const divergenceVector = Array.from(driver.divergenceVector(1));
     driver.calculatePressure(1);

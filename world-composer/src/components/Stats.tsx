@@ -30,10 +30,11 @@ export default function Stats({ atmosphere, mouseOver, fps }: Props) {
     const mouseOverCell = floor(mouseOver);
     const selectedNode = atmosphere.get(mouseOverCell);
     const clickedInterpolatedVel = atmosphere.interpolateVelocity(mouseOver);
-    const clickedInterpolatedPress = atmosphere.interpolatePressure(mouseOver);
     const clickedDivergence = atmosphere.divergence(mouseOverCell);
     const ind = atmosphere.index(mouseOverCell);
+
     const selectedNodePressure = atmosphere.pressureVector[ind];
+    const clickedInterpolatedPress = atmosphere.interpolatePressure(mouseOver);
     return (
         <div className="stats">
             <dl>

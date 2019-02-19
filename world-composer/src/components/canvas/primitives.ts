@@ -17,8 +17,8 @@ export enum MapType {
 
 type Color = [number, number, number];
 
-const PressureDrawRange = 0.04;
-const VelocityDrawRange = 4;
+const PressureDrawRange = 2;
+const VelocityDrawRange = 2.5;
 const DivergenceDrawRange = 4;
 
 export function initializeGrid(
@@ -70,7 +70,25 @@ export function renderBgTexture(
     atmo: Atmosphere,
     mapType: MapType
 ) {
-    atmo.forEach((node, pos) => drawCell(ctx, mapType, atmo, pos));
+    atmo.forEach((node, pos) => {
+        let color: Color;
+        switch (mapType) {
+            case MapType.Velocity:
+                color = velocityColor(
+                    atmo.interpolateVelocity(add(pos, [0.5, 0.5]))
+                );
+                break;
+            case MapType.Divergence:
+                color = divergenceColor(atmo.divergence(pos));
+                break;
+            case MapType.Pressure:
+            default:
+                const ind = atmo.index(pos);
+                color = pressureColor(atmo.pressureVector[ind]);
+        }
+        ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+        ctx.fillRect(pos[0], pos[1], 1, 1);
+    });
 }
 
 export function renderBigBgTexture(
@@ -88,7 +106,7 @@ export function renderBigBgTexture(
             switch (mapType) {
                 case MapType.Velocity:
                     color = velocityColor(
-                        atmo.interpolateVelocity(add(p, [0.5, 0.5]))
+                        atmo.interpolateVelocity(add(p, [0, -0.5]))
                     );
                     break;
                 case MapType.Pressure:
@@ -99,31 +117,6 @@ export function renderBigBgTexture(
             ctx.fillRect(i, j, 1, 1);
         }
     }
-}
-
-function drawCell(
-    ctx: CanvasRenderingContext2D,
-    mapType: MapType,
-    atmo: Atmosphere,
-    pos: Point
-) {
-    let color: Color;
-    switch (mapType) {
-        case MapType.Velocity:
-            color = velocityColor(
-                atmo.interpolateVelocity(add(pos, [0.5, 0.5]))
-            );
-            break;
-        case MapType.Divergence:
-            color = divergenceColor(atmo.divergence(pos));
-            break;
-        case MapType.Pressure:
-        default:
-            const ind = atmo.index(pos);
-            color = pressureColor(atmo.pressureVector[ind]);
-    }
-    ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
-    ctx.fillRect(pos[0], pos[1], 1, 1);
 }
 
 function pressureColor(pressure: number): Color {

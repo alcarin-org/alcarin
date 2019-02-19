@@ -22,7 +22,8 @@ export interface AtmosphereNode {
 const Center: Point = [0, 0];
 const Vector0: Vector = [0, 0];
 
-const RandomRange = 0.8;
+const RandomRange = 0;
+const DefaultRange = 1;
 
 export class Atmosphere {
     // coded as MAC grid with cell size 1.
@@ -106,8 +107,12 @@ export class Atmosphere {
     }
 
     public interpolatePressure(p: Point) {
-        const minCellP = [Math.floor(p[0]), Math.floor(p[1])];
-        const relToCell = [p[0] - minCellP[0], p[1] - minCellP[1]];
+        const minCellP = [Math.floor(p[0] - 0.5), Math.floor(p[1] - 0.5)];
+        // pressure is located on the middle of the cell
+        const relToCenter = [
+            p[0] - minCellP[0] - 0.5,
+            p[1] - minCellP[1] - 0.5,
+        ];
 
         const range = [0, 1];
         let weightSum = 0;
@@ -124,8 +129,8 @@ export class Atmosphere {
                 const ind = this.index(neighPos);
                 const neighPressure = this.pressureVector[ind];
                 const velWeight =
-                    (offsetX === 0 ? 1 - relToCell[0] : relToCell[0]) *
-                    (offsetY === 0 ? 1 - relToCell[1] : relToCell[1]);
+                    (offsetX === 0 ? 1 - relToCenter[0] : relToCenter[0]) *
+                    (offsetY === 0 ? 1 - relToCenter[1] : relToCenter[1]);
                 weightSum += velWeight;
                 resultPressure = resultPressure + neighPressure * velWeight;
             }
@@ -181,24 +186,22 @@ export class Atmosphere {
         type RandomMethod = (p: Point) => Vector;
         const methods: RandomMethod[] = [
             // random
-            () => [
-                1.5 * RandomRange - 3 * RandomRange * Math.random(),
-                1.5 * RandomRange - 3 * RandomRange * Math.random(),
-            ],
+            // () => [rand(), rand()],
             // left -> right
-            p => [
-                (p[0] < 0 ? 2 : 0) +
-                    RandomRange / 2 -
-                    RandomRange * Math.random(),
-                RandomRange / 2 - RandomRange * Math.random(),
-            ],
+            p => [(p[0] < 0 ? DefaultRange : 0) + rand(), rand()],
             // // many circles
-            p => [
-                Math.cos((2 * Math.PI * p[0]) / this.radius) + rand(),
-                Math.sin((2 * Math.PI * p[1]) / this.radius) + rand(),
-            ],
+            // p => [
+            //     Math.cos((2 * Math.PI * p[0] * DefaultRange) / this.radius) +
+            //         rand(),
+            //     Math.sin((2 * Math.PI * p[1] * DefaultRange) / this.radius) +
+            //         rand(),
+            // ],
             // // curl
-            p => multiply([p[1] - 0.1, -p[0] - 0.1], 0.15),
+            // p =>
+            //     multiply(
+            //         normalize([p[1] - 0.1 + rand(), -p[0] - 0.1 + rand()]),
+            //         DefaultRange
+            //     ),
         ];
         const randMethod = methods[Math.floor(Math.random() * methods.length)];
         return this.apply((node, p) => {

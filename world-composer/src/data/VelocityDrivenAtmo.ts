@@ -24,28 +24,27 @@ export class VelocityDrivenAtmo {
     public constructor(atmo: Atmosphere) {
         this.atmo = atmo;
         this.neightboursMatrix = this.precalcNeightboursMatrix();
+        this.atmo.pressureVector = this.calculatePressure(1);
     }
 
     public evolve(deltaTime: number) {
         this.convectVelocity(deltaTime);
-        this.calculatePressure(deltaTime);
+        this.atmo.pressureVector = this.calculatePressure(deltaTime);
+        // this.atmo.pressureVector[this.atmo.index([0, 0])]
         this.adjustVelocityFromPressure(deltaTime);
     }
 
     public divergenceVector(deltaTime: number) {
         return new Float64Array(this.atmo.dim2d ** 2).map((_, ind) => {
             const p = this.atmo.coords(ind);
-            return this.atmo.divergence(p) / deltaTime;
+            return this.atmo.divergence(p);
         });
     }
 
     public calculatePressure(deltaTime: number) {
         const neighboursMatrixA = this.neightboursMatrix;
         const divergenceVectorB = this.divergenceVector(deltaTime);
-        this.atmo.pressureVector = resolveLinearByJacobi(
-            neighboursMatrixA,
-            divergenceVectorB
-        );
+        return resolveLinearByJacobi(neighboursMatrixA, divergenceVectorB);
     }
 
     public adjustVelocityFromPressure(deltaTime: number) {
