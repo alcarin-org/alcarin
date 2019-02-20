@@ -51,16 +51,22 @@ export function round(p: Point): Point {
 // fully separated cell, there will be no 0s on main diagonal
 export function resolveLinearByJacobi(
     A: Int8Array, // coefficient matrix A
-    B: Float64Array // constants matrix B
+    B: Float64Array, // constants matrix B
+    initX?: Float64Array
 ): Float64Array {
-    if (A.length !== B.length ** 2) {
+    // const win = window as any;
+    // console.log(new win.Matrix(2, 2, [[1, 2], [3, 4]]));
+    // const Afix = new win.Matrix(B.length, B.length, A);
+    // const x = win.solve(Afix, B) as Float64Array;
+
+    if (A.length !== B.length ** 2 || (initX && initX.length !== B.length)) {
         throw new Error(
             'Coefficient matrix A has different size that constant matrix B! Can not continue.'
         );
     }
     let x = new Float64Array(B.length); // resultsMatrix
     // one step
-    for (let step = 0; step < 20; step++) {
+    for (let step = 0; step < 100; step++) {
         const localResX = x.slice(0);
         for (let iUnknown = 0; iUnknown < B.length; iUnknown++) {
             const iUnknownCoefficientOffset = iUnknown * B.length;
@@ -85,5 +91,18 @@ export function resolveLinearByJacobi(
         x = localResX;
     }
 
+    // const resultB = new Float64Array(B.length);
+    // for (let iEq = 0; iEq < B.length; iEq++) {
+    //     resultB[iEq] = x.reduce(
+    //         (acc, xVal, xInd) => acc + xVal * A[iEq * B.length + xInd],
+    //         0
+    //     );
+    // }
+
+    // console.log('A', A);
+    // console.log('x', x);
+    // console.log("b vs b'", B, resultB);
     return x;
+
+    // return x;
 }

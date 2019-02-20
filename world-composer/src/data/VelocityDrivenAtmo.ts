@@ -1,4 +1,4 @@
-import { Atmosphere, AtmosphereNode } from './Atmosphere';
+import { Atmosphere } from './Atmosphere';
 import {
     Point,
     Vector,
@@ -7,6 +7,8 @@ import {
     add,
     round,
     resolveLinearByJacobi,
+    normalize,
+    magnitude,
 } from '../utils/Math';
 
 enum VectorComponent {
@@ -30,73 +32,67 @@ export class VelocityDrivenAtmo {
     public evolve(deltaTime: number) {
         this.convectVelocity(deltaTime);
         this.atmo.pressureVector = this.calculatePressure(deltaTime);
-        // this.atmo.pressureVector[this.atmo.index([0, 0])]
         this.adjustVelocityFromPressure(deltaTime);
     }
 
     public divergenceVector(deltaTime: number) {
-        return new Float64Array(this.atmo.dim2d ** 2).map((_, ind) => {
-            const p = this.atmo.coords(ind);
-            return this.atmo.divergence(p);
-        });
+        // todo: consider delta time
+        return this.atmo.divergenceVector();
     }
 
     public calculatePressure(deltaTime: number) {
         const neighboursMatrixA = this.neightboursMatrix;
         const divergenceVectorB = this.divergenceVector(deltaTime);
-        return resolveLinearByJacobi(neighboursMatrixA, divergenceVectorB);
+        return resolveLinearByJacobi(
+            neighboursMatrixA,
+            divergenceVectorB,
+            this.atmo.pressureVector
+        );
     }
 
     public adjustVelocityFromPressure(deltaTime: number) {
-        this.atmo.forEach((node, pos) => {
-            const posPressure = this.atmo.pressureVector[this.atmo.index(pos)];
-            const lastXCell: Point = [pos[0] - 1, pos[0]];
-            const pressureGradientX = this.atmo.contains(lastXCell)
-                ? posPressure -
-                  this.atmo.pressureVector[this.atmo.index(lastXCell)]
-                : 0;
-
-            const lastYCell: Point = [pos[0], pos[0] - 1];
-            const pressureGradientY = this.atmo.contains(lastYCell)
-                ? posPressure -
-                  this.atmo.pressureVector[this.atmo.index(lastYCell)]
-                : 0;
-
-            node.newVelocity = [
-                node.velocity[0] - deltaTime * pressureGradientX,
-                node.velocity[1] - deltaTime * pressureGradientY,
-            ];
+        this.atmo.velX = this.atmo.velX.map((vel, ind) => {
+            const posPressure = this.atmo.pressureVector[ind];
+            const onLeftBorder = ind % this.atmo.size === 0;
+            const pressureGradientX = onLeftBorder
+                ? 0
+                : posPressure - this.atmo.pressureVector[ind - 1];
+            return vel - deltaTime * pressureGradientX;
         });
-
-        this.atmo.forEach((node, pos) => {
-            node.velocity = node.newVelocity;
+        this.atmo.velY = this.atmo.velY.map((vel, ind) => {
+            const posPressure = this.atmo.pressureVector[ind];
+            const onTopBorder = Math.floor(ind / this.atmo.size) === 0;
+            const pressureGradientY = onTopBorder
+                ? 0
+                : posPressure - this.atmo.pressureVector[ind - this.atmo.size];
+            return vel - deltaTime * pressureGradientY;
         });
     }
 
     private convectVelocity(deltaTime: number) {
-        this.atmo.forEach((node, p) => {
-            const xTracedParticleVelocity = this.traceBackParticleVelocity(
-                [p[0], p[1] + 0.5],
+        const newVelX = this.atmo.velX.map((_, ind) => {
+            const p = this.atmo.coords(ind);
+            return this.traceBackParticleVelocity(
+                [p[0] - 0.5, p[1]],
                 deltaTime
-            );
-            const yTracedParticleVelocity = this.traceBackParticleVelocity(
-                [p[0] + 0.5, p[1]],
-                deltaTime
-            );
-            node.newVelocity = [
-                xTracedParticleVelocity[0],
-                yTracedParticleVelocity[1],
-            ];
+            )[0];
         });
-
-        this.atmo.forEach(node => (node.velocity = node.newVelocity));
+        const newVelY = this.atmo.velX.map((_, ind) => {
+            const p = this.atmo.coords(ind);
+            return this.traceBackParticleVelocity(
+                [p[0], p[1] - 0.5],
+                deltaTime
+            )[1];
+        });
+        this.atmo.velX = newVelX;
+        this.atmo.velY = newVelY;
     }
 
     private precalcNeightboursMatrix() {
-        const matrix = new Int8Array(this.atmo.dim2d ** 4);
+        const matrix = new Int8Array(this.atmo.vectorSize ** 2);
 
-        for (let iCell = 0; iCell < this.atmo.size; iCell++) {
-            const offset = iCell * this.atmo.size;
+        for (let iCell = 0; iCell < this.atmo.vectorSize; iCell++) {
+            const offset = iCell * this.atmo.vectorSize;
             const p = this.atmo.coords(iCell);
             let nCount = 0;
             for (const relPos of relNeightbours) {

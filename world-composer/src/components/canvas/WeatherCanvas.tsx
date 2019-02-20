@@ -15,14 +15,14 @@ import {
     pxToAtmoPos,
     posToPx,
 } from './primitives';
-import { Atmosphere, AtmosphereNode, NodeType } from '../../data/Atmosphere';
+import { Atmosphere } from '../../data/Atmosphere';
 import {
     Point,
     Vector,
     constraints,
     normalize,
     multiply,
-    floor,
+    round,
     add,
 } from '../../utils/Math';
 
@@ -47,7 +47,7 @@ export default function WeatherCanvas({
 }: Props) {
     const atmo = atmosphere;
     const displayCanvasRef = useRef<HTMLCanvasElement>(null);
-    const canvasSizePx = fieldSizePx * atmo.dim2d;
+    const canvasSizePx = fieldSizePx * atmo.size;
 
     const [screenCanvasRef, screenCtxRef] = useCanvas(
         canvasSizePx,
@@ -55,14 +55,13 @@ export default function WeatherCanvas({
         displayCanvasRef
     );
     const [gridCanvasRef, gridCtxRef] = useCanvas(canvasSizePx, canvasSizePx);
-    const [bgCanvasRef, bgCtxRef] = useCanvas(atmo.dim2d, atmo.dim2d);
+    const [bgCanvasRef, bgCtxRef] = useCanvas(atmo.size, atmo.size);
 
     const [cellCanvasRef, cellCtxRef] = useCanvas(fieldSizePx, fieldSizePx);
-    const pixelOffset = (atmo.radius - 1) * fieldSizePx;
 
     useEffect(() => {
         screenCtxRef.current!.strokeStyle = 'black';
-        bgCtxRef.current!.translate(atmo.radius - 1, atmo.radius - 1);
+        // bgCtxRef.current!.translate(atmo.radius - 1, atmo.radius - 1);
         const halfSize = Math.trunc(fieldSizePx / 2);
         cellCtxRef.current!.translate(halfSize, halfSize);
         cellCtxRef.current!.strokeStyle = 'black';
@@ -78,7 +77,6 @@ export default function WeatherCanvas({
             if (drawRealInterpolation) {
                 renderBigBgTexture(
                     screenCtx,
-                    pixelOffset,
                     canvasSizePx,
                     fieldSizePx,
                     atmo,
@@ -99,22 +97,19 @@ export default function WeatherCanvas({
                 screenCtx.drawImage(gridCanvasRef.current!, 0, 0);
             }
 
-            renderVelocities(
-                screenCtx,
-                atmo,
-                pixelOffset,
-                pixelOffset,
-                fieldSizePx
-            );
+            renderVelocities(screenCtx, atmo, fieldSizePx);
 
             if (selectedNodePosition) {
-                const pos = floor(selectedNodePosition);
+                const pos = round(selectedNodePosition);
 
                 screenCtx.strokeStyle = 'rgba(255,0,0,0.75)';
                 screenCtx.setLineDash([5, 5]);
 
-                const pxPos = posToPx(pos, fieldSizePx, atmo);
-                // screenCtx.stroke
+                const pxPos = posToPx(
+                    [pos[0] - 0.5, pos[1] - 0.5],
+                    fieldSizePx,
+                    atmo
+                );
                 screenCtx.strokeRect(
                     pxPos[0],
                     pxPos[1],

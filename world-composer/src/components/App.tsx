@@ -10,9 +10,9 @@ import { VelocityDrivenAtmo } from '../data/VelocityDrivenAtmo';
 import { ipcRenderer } from '../electron-bridge';
 import Stats from './Stats';
 
-const stepTimeout = 20;
+const stepTimeout = 0;
 
-const WorldRadius = 10;
+const WorldRadius = 13;
 const DrawFieldSize = 30;
 
 const atmosphereSample = new Atmosphere(WorldRadius);
@@ -21,6 +21,7 @@ const pressureAtmoSystem = new VelocityDrivenAtmo(atmosphereSample);
 
 function App() {
     useEffect(() => ipcRenderer.send('main-window-ready'), []);
+
     const [coriolisMagnitude, setCoriolisMagnitude] = useState(0.05);
     const [centrifugalMagnitude, setCentrifugalMagnitude] = useState(0.05);
     const [clickedNodePos, setClickedNodePos] = useState([0, 0] as Point);
@@ -75,10 +76,7 @@ function App() {
                 selectedNodePosition={clickedNodePos}
             />
             <Stats atmosphere={atmo} mouseOver={clickedNodePos} fps={fps} />
-            <button onClick={randomizeMap}>
-                {' '}
-                Random
-            </button>
+            <button onClick={randomizeMap}> Random</button>
             <button onClick={() => setPause(!pause)}>Run</button>
 
             <label>
@@ -163,13 +161,6 @@ function App() {
                     <label>
                         <input type="checkbox" onChange={onDrawGrid} />
                         Draw grid
-                    </label>
-                    <label>
-                        <input
-                            type="checkbox"
-                            onChange={onDrawRealInterpoltation}
-                        />
-                        Draw real gradient (slow)
                     </label>
                 </div>
             </div>

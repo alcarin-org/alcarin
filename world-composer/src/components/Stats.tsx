@@ -4,7 +4,7 @@ import React from 'react';
 
 import { Atmosphere } from '../data/Atmosphere';
 // import { divergence } from '../data/AtmoMotion';
-import { Vector, Point, magnitude, add, multiply, floor } from '../utils/Math';
+import { Vector, Point, magnitude, add, multiply, round } from '../utils/Math';
 
 interface Props {
     atmosphere: Atmosphere;
@@ -13,24 +13,27 @@ interface Props {
 }
 
 export default function Stats({ atmosphere, mouseOver, fps }: Props) {
-    const length = atmosphere.dim2d ** 2;
+    const divVector = atmosphere.divergenceVector();
+    const length = atmosphere.size ** 2;
     let pressure = 0;
     let totalVelocity: Vector = [0, 0];
     let totalDivergence = 0;
-    atmosphere.forEach((node, pos) => {
-        const ind = atmosphere.index(pos);
-        totalVelocity = add(totalVelocity, node.velocity);
-        pressure += atmosphere.pressureVector[ind];
-        totalDivergence += atmosphere.divergence(pos);
-    });
+    for (let i = 0; i < atmosphere.vectorSize; i++) {
+        totalVelocity = add(totalVelocity, [
+            atmosphere.velX[0],
+            atmosphere.velX[1],
+        ]);
+        pressure += atmosphere.pressureVector[i];
+        totalDivergence += divVector[i];
+    }
     const avPressure = pressure / length;
     const avDivergence = totalDivergence / length;
     const avVelocity = multiply(totalVelocity, 1 / length);
 
-    const mouseOverCell = floor(mouseOver);
-    const selectedNode = atmosphere.get(mouseOverCell);
+    const mouseOverCell = round(mouseOver);
+    const selectedInd = atmosphere.index(mouseOverCell);
     const clickedInterpolatedVel = atmosphere.interpolateVelocity(mouseOver);
-    const clickedDivergence = atmosphere.divergence(mouseOverCell);
+    const clickedDivergence = divVector[selectedInd];
     const ind = atmosphere.index(mouseOverCell);
 
     const selectedNodePressure = atmosphere.pressureVector[ind];
@@ -54,8 +57,8 @@ export default function Stats({ atmosphere, mouseOver, fps }: Props) {
                 </dd>
                 <dt>Selected velocity</dt>
                 <dd>
-                    ({selectedNode.velocity[0].toFixed(3)},
-                    {selectedNode.velocity[1].toFixed(3)})
+                    ({atmosphere.velX[selectedInd].toFixed(3)},
+                    {atmosphere.velY[selectedInd].toFixed(3)})
                 </dd>
                 <dt>Selected pressure:</dt>
                 <dd>{selectedNodePressure.toFixed(3)}</dd>

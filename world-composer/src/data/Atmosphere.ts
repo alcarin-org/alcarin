@@ -7,18 +7,6 @@ import {
     normalize,
 } from '../utils/Math';
 
-export enum NodeType {
-    Fluid,
-    Solid,
-}
-
-export interface AtmosphereNode {
-    // m/s^2
-    velocity: Vector;
-    newVelocity: Vector;
-    type: NodeType;
-}
-
 const Center: Point = [0, 0];
 const Vector0: Vector = [0, 0];
 
@@ -27,92 +15,61 @@ const DefaultRange = 1;
 
 export class Atmosphere {
     // coded as MAC grid with cell size 1.
-    // integer point ((px, py)) represent left-top corner of a cell
-    // pressure is stored on the center of cell ((px, py) + (0.5, 0.5))
-    // velocity X is on the middle of the left face (px, py + 0.5)
-    // velocity Y is on the middle of the top face (px + 0.5, py)
+    // integer point ((px, py)) represent center of a cell
+    // pressure is stored on the center of cell (px, py)
+    // velocity X is on the middle of the left face (px - 0.5, py)
+    // velocity Y is on the middle of the top face (px, py - 0.5),
+    // e.g. velX: (-0.5, 0), velY: (0, -0.5)
 
     public readonly radius: number;
     public pressureVector: Float64Array;
-    private nodes: AtmosphereNode[];
+    // X velocities component, stored on (x-0.5, y) from center of every cell
+    public velX: Float64Array;
+    // Y velocities component, stored on (x, y-0.5) from center of every cell
+    public velY: Float64Array;
+
+    public readonly size: number;
+    public readonly vectorSize: number;
 
     public constructor(radius: number) {
         this.radius = radius;
-        const dim = this.dim2d;
 
-        this.pressureVector = new Float64Array(dim ** 2);
-        this.nodes = new Array(dim ** 2).fill(null).map((_, ind) => {
-            const coords = this.coords(ind);
+        this.size = 2 * this.radius - 1;
+        this.vectorSize = this.size ** 2;
 
-            return {
-                velocity: Vector0,
-                newVelocity: Vector0,
-                type: NodeType.Fluid,
-            };
-        });
+        this.pressureVector = new Float64Array(this.vectorSize);
+        this.velX = new Float64Array(this.vectorSize);
+        this.velY = new Float64Array(this.vectorSize);
     }
 
-    get size() {
-        return this.nodes.length;
-    }
+    public divergenceVector(): Float64Array {
+        const divVector = new Float64Array(this.vectorSize);
+        // we calculate divergence of given cell by sum of derivative
+        // of x and y velocity components around given cell center.
+        // we treat velocity as 0 when it's between solid/fluid cells,
+        // as nothing can flow between the walls
+        for (let iCell = 0; iCell < this.vectorSize; iCell++) {
+            const velX = iCell % this.size === 0 ? 0 : this.velX[iCell];
+            const velY =
+                Math.trunc(iCell / this.size) === 0 ? 0 : this.velY[iCell];
 
-    public divergence(pos: Point): number {
-        const cellVel = this.get(pos).velocity;
-        const nextXPos: Point = [pos[0] + 1, pos[1]];
-        const nextYPos: Point = [pos[0], pos[1] + 1];
+            const rightBorder = iCell % this.size === this.size - 1;
+            const bottomBorder =
+                Math.trunc(iCell / this.size) === this.size - 1;
 
-        const xDiff = this.contains(nextXPos)
-            ? this.get(nextXPos).velocity[0] - cellVel[0]
-            : 0;
-        const yDiff = this.contains(nextYPos)
-            ? this.get(nextYPos).velocity[1] - cellVel[1]
-            : 0;
+            const velX2 = rightBorder ? 0 : this.velX[iCell + 1];
+            const velY2 = bottomBorder ? 0 : this.velY[iCell + this.size];
 
-        return xDiff + yDiff;
-    }
-
-    public interpolateVelocity(p: Point): Vector {
-        return [
-            this.interpolateVelocityAt([p[0], p[1] - 0.5], VectorComponent.x),
-            this.interpolateVelocityAt([p[0] - 0.5, p[1]], VectorComponent.y),
-        ];
-    }
-
-    public interpolateVelocityAt(p: Point, cmp: VectorComponent): number {
-        const minCellP = [Math.floor(p[0]), Math.floor(p[1])];
-        const relToCell = [p[0] - minCellP[0], p[1] - minCellP[1]];
-
-        const range = [0, 1];
-        let weightSum = 0;
-        let resultVel = 0;
-        for (const offsetX of range) {
-            for (const offsetY of range) {
-                const neighPos: Point = [
-                    minCellP[0] + offsetX,
-                    minCellP[1] + offsetY,
-                ];
-                if (!this.contains(neighPos)) {
-                    continue;
-                }
-                const neighVel = this.get(neighPos).velocity[cmp];
-                const velWeight =
-                    (offsetX === 0 ? 1 - relToCell[0] : relToCell[0]) *
-                    (offsetY === 0 ? 1 - relToCell[1] : relToCell[1]);
-                weightSum += velWeight;
-                resultVel += neighVel * velWeight;
-            }
+            divVector[iCell] = velX2 - velX + velY2 - velY;
         }
 
-        return weightSum === 0 ? 0 : resultVel / weightSum;
+        return divVector;
     }
 
     public interpolatePressure(p: Point) {
-        const minCellP = [Math.floor(p[0] - 0.5), Math.floor(p[1] - 0.5)];
+        const minCellP = [Math.floor(p[0]), Math.floor(p[1])];
         // pressure is located on the middle of the cell
-        const relToCenter = [
-            p[0] - minCellP[0] - 0.5,
-            p[1] - minCellP[1] - 0.5,
-        ];
+        const relToCenter = [p[0] - minCellP[0], p[1] - minCellP[1]];
 
         const range = [0, 1];
         let weightSum = 0;
@@ -139,144 +96,105 @@ export class Atmosphere {
         return weightSum === 0 ? 0 : resultPressure / weightSum;
     }
 
-    // public injectNewPressure(p: Point, pressure: number) {
-    //     const minCellP = [Math.floor(p[0]), Math.floor(p[1])];
-    //     const relToCell = [p[0] - minCellP[0], p[1] - minCellP[1]];
-
-    //     const range = [0, 1];
-    //     let weightSum = 0;
-    //     // let resultPressure = 0;
-
-    //     // (p * weight) / (weightSum)
-    //     const nodes: AtmosphereNode[] = new Array(4);
-    //     const pressureToApply: Float64Array = new Float64Array(4);
-    //     for (const offsetX of range) {
-    //         for (const offsetY of range) {
-    //             const neighPos: Point = [
-    //                 minCellP[0] + offsetX,
-    //                 minCellP[1] + offsetY,
-    //             ];
-    //             if (!this.contains(neighPos)) {
-    //                 continue;
-    //             }
-    //             const ind = offsetY * 2 + offsetX;
-    //             // const neighPressure = this.get(neighPos).pressure;
-    //             nodes[ind] = this.get(neighPos);
-
-    //             const velWeight =
-    //                 (offsetX === 0 ? 1 - relToCell[0] : relToCell[0]) *
-    //                 (offsetY === 0 ? 1 - relToCell[1] : relToCell[1]);
-    //             weightSum += velWeight;
-
-    //             pressureToApply[ind] = pressure * velWeight;
-    //         }
-    //     }
-
-    //     let injectSum = 0;
-    //     for (let i = 0; i < 4; i++) {
-    //         if (nodes[i]) {
-    //             injectSum += pressureToApply[i] / weightSum;
-    //             nodes[i].newPressure += pressureToApply[i] / weightSum;
-    //         }
-    //     }
-    // }
+    public interpolateVelocity(p: Point): Vector {
+        return [
+            this.interpolateVelocityAt([p[0], p[1] - 0.5], VectorComponent.x),
+            this.interpolateVelocityAt([p[0] - 0.5, p[1]], VectorComponent.y),
+        ];
+    }
 
     public randomizeField() {
         const rand = () => RandomRange / 2 - RandomRange * Math.random();
-        type RandomMethod = (p: Point) => Vector;
+        type RandomMethod = [(ind: number) => number, (ind: number) => number];
         const methods: RandomMethod[] = [
             // random
             // () => [rand(), rand()],
             // left -> right
-            p => [(p[0] < 0 ? DefaultRange : 0) + rand(), rand()],
-            // // many circles
-            // p => [
-            //     Math.cos((2 * Math.PI * p[0] * DefaultRange) / this.radius) +
-            //         rand(),
-            //     Math.sin((2 * Math.PI * p[1] * DefaultRange) / this.radius) +
-            //         rand(),
-            // ],
-            // // curl
-            // p =>
-            //     multiply(
-            //         normalize([p[1] - 0.1 + rand(), -p[0] - 0.1 + rand()]),
-            //         DefaultRange
-            //     ),
+            [
+                ind => (ind % this.size < 0 ? DefaultRange : 0) + rand(),
+                () => rand(),
+            ],
+            // many circles
+            [
+                ind =>
+                    Math.cos(
+                        (2 * Math.PI * (ind % this.size) * DefaultRange) /
+                            this.size
+                    ) + rand(),
+                ind =>
+                    Math.sin(
+                        (2 *
+                            Math.PI *
+                            Math.floor(ind / this.size) *
+                            DefaultRange) /
+                            this.size
+                    ) + rand(),
+            ],
+            // curl
+            [
+                ind => DefaultRange * Math.floor(ind / this.size) + rand(),
+                ind => DefaultRange * (-ind % this.size) + rand(),
+            ],
         ];
         const randMethod = methods[Math.floor(Math.random() * methods.length)];
-        return this.apply((node, p) => {
-            return {
-                ...node,
-                velocity: randMethod(p),
-            };
-        });
+        this.velX = this.velX.map((_, ind) => randMethod[0](ind));
+        this.velY = this.velY.map((_, ind) => randMethod[1](ind));
     }
 
-    public get(p: Point): AtmosphereNode {
-        // this check should be removed on working alghoritm, for performance
-        if (!this.contains(p)) {
-            throw new Error(`Point (${p[0]}, ${p[1]}) is not in map radius`);
-        }
-        return this.nodes[this.index(p)];
-    }
-
-    public set(p: Point, value: AtmosphereNode) {
-        // this check should be removed on working alghoritm, for performance
-        if (!this.contains(p)) {
-            throw new Error(`Point (${p[0]}, ${p[1]}) is not in map radius`);
-        }
-        this.nodes[this.index(p)] = value;
-    }
-
-    public forEach(callback: (node: AtmosphereNode, p: Point) => void) {
-        this.nodes.forEach((node, index) => {
-            callback(node, this.coords(index));
-        });
-    }
-
-    public apply(
-        callback: (
-            node: AtmosphereNode,
-            p: Point,
-            originalAtmo: Atmosphere
-        ) => AtmosphereNode
-    ) {
-        const newNodes = new Array(this.nodes.length);
-        this.nodes.map((node, index) => {
-            const coords = this.coords(index);
-            newNodes[index] = callback(node, coords, this);
-        });
-
-        this.nodes = newNodes;
-    }
-
-    public get dim2d() {
-        return 2 * this.radius - 1;
-    }
-
-    public contains(p: Point): boolean {
-        const realRadius = this.radius;
-        return (
-            p[0] >= -realRadius + 1 &&
-            p[0] < realRadius &&
-            p[1] >= -realRadius + 1 &&
-            p[1] < realRadius
-        );
-    }
-
-    // public isInRadius(p: Point): boolean {
-    //     return math.distance(p, Center) <= this.radius - 1 + 0.5;
+    // public forEach(callback: (node: AtmosphereNode, p: Point) => void) {
+    //     this.nodes.forEach((node, index) => {
+    //         callback(node, this.coords(index));
+    //     });
     // }
 
+    public contains(p: Point): boolean {
+        return p[0] >= 0 && p[0] < this.size && p[1] >= 0 && p[1] < this.size;
+    }
+
     public index(p: Point) {
-        const dim = 2 * this.radius - 1;
-        return dim * (p[1] + this.radius - 1) + (p[0] + this.radius - 1);
+        return p[1] * this.size + p[0];
     }
 
     public coords(index: number): Point {
-        return [
-            (index % this.dim2d) - this.radius + 1,
-            Math.floor(index / this.dim2d) - this.radius + 1,
-        ];
+        return [index % this.size, Math.floor(index / this.size)];
+    }
+
+    private interpolateVelocityAt(p: Point, cmp: VectorComponent): number {
+        const velVector = cmp === VectorComponent.x ? this.velX : this.velY;
+
+        const minCellP = [Math.floor(p[0]), Math.floor(p[1])];
+        const relToCell = [p[0] - minCellP[0], p[1] - minCellP[1]];
+
+        const range = [0, 1];
+        let weightSum = 0;
+        let resultVel = 0;
+
+        for (const offsetX of range) {
+            for (const offsetY of range) {
+                const neighPos: Point = [
+                    minCellP[0] + offsetX,
+                    minCellP[1] + offsetY,
+                ];
+
+                // on right/bottom we have one additional "virtual" speed cmp
+                // that is on border
+                const cmpOnBorder =
+                    neighPos[0] <= 0 ||
+                    neighPos[0] >= this.size ||
+                    neighPos[1] <= 0 ||
+                    neighPos[1] >= this.size;
+                if (cmpOnBorder) {
+                    continue;
+                }
+                const neighCmpVel = velVector[this.index(neighPos)];
+                const cmpVelWeight =
+                    (offsetX === 0 ? 1 - relToCell[0] : relToCell[0]) *
+                    (offsetY === 0 ? 1 - relToCell[1] : relToCell[1]);
+                weightSum += cmpVelWeight;
+                resultVel += neighCmpVel * cmpVelWeight;
+            }
+        }
+
+        return weightSum === 0 ? 0 : resultVel / weightSum;
     }
 }

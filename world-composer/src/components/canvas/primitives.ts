@@ -19,7 +19,7 @@ type Color = [number, number, number];
 
 const PressureDrawRange = 2;
 const VelocityDrawRange = 2.5;
-const DivergenceDrawRange = 4;
+const DivergenceDrawRange = 0.5;
 
 export function initializeGrid(
     ctx: CanvasRenderingContext2D,
@@ -28,8 +28,8 @@ export function initializeGrid(
 ) {
     ctx.beginPath();
     ctx.strokeStyle = 'rgba(0,0,0,0.25)';
-    for (let i = 0; i < atmo.dim2d; i++) {
-        for (let j = 0; j < atmo.dim2d; j++) {
+    for (let i = 0; i < atmo.size; i++) {
+        for (let j = 0; j < atmo.size; j++) {
             ctx.moveTo(i * fieldSizePx, (j + 1) * fieldSizePx - 1);
             ctx.lineTo(i * fieldSizePx, j * fieldSizePx);
             ctx.lineTo((i + 1) * fieldSizePx - 1, j * fieldSizePx);
@@ -41,27 +41,29 @@ export function initializeGrid(
 export function renderVelocities(
     ctx: CanvasRenderingContext2D,
     atmo: Atmosphere,
-    screenOffsetX: number,
-    screenOffsetY: number,
     fieldSizePx: number
 ) {
     ctx.fillStyle = 'yellow';
     ctx.beginPath();
-    atmo.forEach((node, pos) => {
-        const vel = atmo.interpolateVelocity(add(pos, [0.5, 0.5]));
-        const offsetX =
-            screenOffsetX + fieldSizePx * pos[0] + 0.5 * fieldSizePx;
-        const offsetY =
-            screenOffsetY + fieldSizePx * pos[1] + 0.5 * fieldSizePx;
-        const vPower = constraints(0.1, 1, magnitude(vel));
-        const vNorm = normalize(vel);
-        const v = multiply(vNorm, 0.85 * fieldSizePx * vPower);
+    for (let i = 0; i < atmo.size; i++) {
+        for (let j = 0; j < atmo.size; j++) {
+            const vel = atmo.interpolateVelocity([i, j]);
+            const offset = posToPx([i, j], fieldSizePx, atmo);
+            const vPower = constraints(0.1, 1, magnitude(vel));
+            const vNorm = normalize(vel);
+            const v = multiply(vNorm, 0.85 * fieldSizePx * vPower);
 
-        ctx.moveTo(offsetX + -0.5 * v[0], offsetY + -0.5 * v[1]);
-        ctx.lineTo(offsetX + 0.5 * v[0], offsetY + 0.5 * v[1]);
+            ctx.moveTo(offset[0] + -0.5 * v[0], offset[1] + -0.5 * v[1]);
+            ctx.lineTo(offset[0] + 0.5 * v[0], offset[1] + 0.5 * v[1]);
 
-        ctx.fillRect(offsetX + 0.5 * v[0] - 2, offsetY + 0.5 * v[1] - 2, 4, 4);
-    });
+            ctx.fillRect(
+                offset[0] + 0.5 * v[0] - 2,
+                offset[1] + 0.5 * v[1] - 2,
+                4,
+                4
+            );
+        }
+    }
     ctx.stroke();
 }
 
@@ -70,30 +72,32 @@ export function renderBgTexture(
     atmo: Atmosphere,
     mapType: MapType
 ) {
-    atmo.forEach((node, pos) => {
-        let color: Color;
-        switch (mapType) {
-            case MapType.Velocity:
-                color = velocityColor(
-                    atmo.interpolateVelocity(add(pos, [0.5, 0.5]))
-                );
-                break;
-            case MapType.Divergence:
-                color = divergenceColor(atmo.divergence(pos));
-                break;
-            case MapType.Pressure:
-            default:
-                const ind = atmo.index(pos);
-                color = pressureColor(atmo.pressureVector[ind]);
+    const divVector =
+        mapType === MapType.Divergence ? atmo.divergenceVector() : null;
+    for (let i = 0; i < atmo.size; i++) {
+        for (let j = 0; j < atmo.size; j++) {
+            const pos: Point = [i, j];
+            let color: Color;
+            switch (mapType) {
+                case MapType.Velocity:
+                    color = velocityColor(atmo.interpolateVelocity(pos));
+                    break;
+                case MapType.Divergence:
+                    color = divergenceColor(divVector![atmo.index(pos)]);
+                    break;
+                case MapType.Pressure:
+                default:
+                    const ind = atmo.index(pos);
+                    color = pressureColor(atmo.pressureVector[ind]);
+            }
+            ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+            ctx.fillRect(pos[0], pos[1], 1, 1);
         }
-        ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
-        ctx.fillRect(pos[0], pos[1], 1, 1);
-    });
+    }
 }
 
 export function renderBigBgTexture(
     ctx: CanvasRenderingContext2D,
-    pixelOffset: number,
     canvasSizePx: number,
     fieldSizePx: number,
     atmo: Atmosphere,
@@ -142,10 +146,7 @@ export function pxToAtmoPos(
     fieldSizePx: number,
     atmo: Atmosphere
 ): Point {
-    return [
-        x / fieldSizePx - atmo.radius + 1,
-        y / fieldSizePx - atmo.radius + 1,
-    ];
+    return [x / fieldSizePx - 0.5, y / fieldSizePx - 0.5];
 }
 
 export function posToPx(
@@ -153,8 +154,5 @@ export function posToPx(
     fieldSizePx: number,
     atmo: Atmosphere
 ): Point {
-    return [
-        (p[0] + atmo.radius - 1) * fieldSizePx,
-        (p[1] + atmo.radius - 1) * fieldSizePx,
-    ];
+    return [(p[0] + 0.5) * fieldSizePx, (p[1] + 0.5) * fieldSizePx];
 }
