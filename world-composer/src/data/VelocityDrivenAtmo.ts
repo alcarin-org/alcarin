@@ -122,11 +122,9 @@ export class VelocityDrivenAtmo {
     }
 
     public divergenceVector(deltaTime: number) {
-        const divVector = this.atmo.divergenceVector();
+        const divVector = this.atmo.divergenceVector(1 / deltaTime);
 
-        return divVector
-            .filter((_, ind) => this.atmo.solidsVector[ind] === 0)
-            .map(div => div / deltaTime);
+        return divVector.filter((_, ind) => this.atmo.solidsVector[ind] === 0);
     }
 
     public calculatePressure(deltaTime: number) {

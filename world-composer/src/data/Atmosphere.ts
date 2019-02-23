@@ -58,7 +58,7 @@ export class Atmosphere {
         );
     }
 
-    public divergenceVector(): Float64Array {
+    public divergenceVector(factor: number = 1): Float64Array {
         const divVector = new Float64Array(this.vectorSize);
         // we calculate divergence of given cell by sum of derivative
         // of x and y velocity components around given cell center.
@@ -75,7 +75,7 @@ export class Atmosphere {
             const velX2 = this.velX[iCell + 1];
             const velY2 = this.velY[iCell + this.size];
 
-            divVector[iCell] = velX2 - velX + velY2 - velY;
+            divVector[iCell] = factor * (velX2 - velX + velY2 - velY);
         }
 
         return divVector;

@@ -64,12 +64,18 @@ export function resolveLinearByJacobi(
     //         'Coefficient matrix A has different size that constant matrix B! Can not continue.'
     //     );
     // }
+    // console.profile('Jacobi');
     let x = new Float64Array(B.length); // resultsMatrix
-    // one step
+    const tmpX = new Float64Array(B.length);
+
     for (let step = 0; step < 10; step++) {
-        const localResX = x.slice(0);
         for (let iUnknown = 0; iUnknown < B.length; iUnknown++) {
-            const iUnknownCoefficientOffset = iUnknown * B.length;
+            // const iUnknownCoefficientOffset = iUnknown * B.length;
+            const unknownCoefficients = A.subarray(
+                iUnknown * B.length,
+                iUnknown * B.length + B.length
+            );
+            // const unknownCoefficients = arr[iUnknown];
 
             let iGuess = B[iUnknown];
             // iGuess = (eqA[i] * x[i] + ...) / eqA[iUnknown];
@@ -81,28 +87,19 @@ export function resolveLinearByJacobi(
                 if (iCoefficient === iUnknown) {
                     continue;
                 }
-                iGuess -=
-                    A[iUnknownCoefficientOffset + iCoefficient] *
-                    x[iCoefficient];
+                //  checking for 0 instead of multiplying give better performance ;/
+                //  unknownCoefficients[iCoefficient] === 0
+                const coefficient = unknownCoefficients[iCoefficient];
+                if (coefficient === 0) {
+                    continue;
+                }
+                iGuess -= coefficient * x[iCoefficient];
             }
-            iGuess /= A[iUnknownCoefficientOffset + iUnknown];
-            localResX[iUnknown] = iGuess;
+            iGuess /= unknownCoefficients[iUnknown];
+            tmpX[iUnknown] = iGuess;
         }
-        x = localResX;
+        x = tmpX;
     }
-
-    // const resultB = new Float64Array(B.length);
-    // for (let iEq = 0; iEq < B.length; iEq++) {
-    //     resultB[iEq] = x.reduce(
-    //         (acc, xVal, xInd) => acc + xVal * A[iEq * B.length + xInd],
-    //         0
-    //     );
-    // }
-
-    // console.log('A', A);
-    // console.log('x', x);
-    // console.log("b vs b'", B, resultB);
+    // console.profileEnd('Jacobi');
     return x;
-
-    // return x;
 }
