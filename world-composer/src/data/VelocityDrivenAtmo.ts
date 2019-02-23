@@ -18,6 +18,10 @@ enum VectorComponent {
 }
 
 const relNeightbours: Vector[] = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+type ValueFromPositionFn<T> = (p: Point) => T;
+type ConvectHook = <T>(
+    convectValue: <T>(p: Point, getValue: ValueFromPositionFn<T>) => T
+) => void;
 
 export class VelocityDrivenAtmo {
     public readonly atmo: Atmosphere;
@@ -26,10 +30,18 @@ export class VelocityDrivenAtmo {
 
     public particles: Point[] = [];
 
+    private onConvectHooks: ConvectHook[] = [];
+
+    private fluidSourcePos?: Point;
+
     public constructor(atmo: Atmosphere) {
         this.atmo = atmo;
         this.neightboursMatrix = this.precalcNeightboursMatrix();
         this.atmo.pressureVector = this.calculatePressure(1);
+    }
+
+    public registerConvectHook(hook: ConvectHook) {
+        this.onConvectHooks.push(hook);
     }
 
     public spawnPartcles(count: number) {
@@ -46,28 +58,34 @@ export class VelocityDrivenAtmo {
         );
     }
 
-    public moveParticles(deltaTime: number) {
-        this.particles = this.particles.map(p => {
-            const vel = this.traceBackParticleVelocity(p, deltaTime);
-            return add(p, multiply(vel, deltaTime));
-        });
+    public convectValue<T>(
+        deltaTime: number,
+        p: Point,
+        valueFromPos: (p: Point) => T
+    ) {
+        const vel = this.traceBackParticleVelocity(p, deltaTime);
+        return valueFromPos(add(p, multiply(vel, deltaTime)));
     }
 
     public evolve(deltaTime: number) {
+        this.generateFluid(deltaTime);
+
         this.convectVelocity(deltaTime);
         this.applyExternalForces(deltaTime);
         this.atmo.pressureVector = this.calculatePressure(deltaTime);
         this.adjustVelocityFromPressure(this.atmo.pressureVector, deltaTime);
-        this.moveParticles(deltaTime);
+
+        this.particles = this.particles.map(p =>
+            this.convectValue(deltaTime, p, v => v)
+        );
+        this.onConvectHooks.forEach(hook =>
+            hook((p, getValue) => this.convectValue(deltaTime, p, getValue))
+        );
     }
 
-    public injectVelocity(p: Point, vel: Vector) {
+    public setFluidSource(p: Point) {
         const ind = this.atmo.index(p);
-        if (this.atmo.solidsVector[ind] === 1) {
-            return;
-        }
-        this.atmo.velX[ind] += vel[0];
-        this.atmo.velY[ind] += vel[1];
+        this.fluidSourcePos = this.atmo.solidsVector[ind] === 1 ? undefined : p;
     }
 
     public applyExternalForces(deltaTime: number) {
@@ -94,7 +112,6 @@ export class VelocityDrivenAtmo {
         //     // this.atmo.velY[i] += v[1] * deltaTime;
         //     this.atmo.velY[i] += deltaTime * (this.atmo.coords(i)[1] / this.atmo.size);
         // }
-
         // gravity
         // for (let i = 0; i < this.atmo.vectorSize; i++) {
         //     if (this.atmo.solidsVector[i] === 1) {
@@ -164,6 +181,35 @@ export class VelocityDrivenAtmo {
                 : posPressure - gridPressureVector[ind - this.atmo.size];
             return vel - deltaTime * pressureGradientY;
         });
+    }
+
+    private generateFluid(deltaTime: number) {
+        const p = this.fluidSourcePos;
+        if (!p) {
+            return;
+        }
+        const ind = this.atmo.index(p);
+
+        const FluidPower = 3;
+        const ParticlesPerSec = 200;
+        const SpeadRange = 2;
+
+        const fluidDir = normalize(
+            multiply(add(p, [-this.atmo.size / 2, -this.atmo.size / 2]), -1)
+        );
+        const flow = multiply(fluidDir, FluidPower);
+        this.atmo.velX[ind] += flow[0];
+        this.atmo.velY[ind] += flow[1];
+
+        const newParticles = new Array(Math.floor(deltaTime * ParticlesPerSec))
+            .fill(null)
+            .map(() =>
+                add(p, [
+                    SpeadRange - 2 * SpeadRange * Math.random(),
+                    SpeadRange - 2 * SpeadRange * Math.random(),
+                ])
+            );
+        this.particles = this.particles.concat(newParticles);
     }
 
     private convectVelocity(deltaTime: number) {

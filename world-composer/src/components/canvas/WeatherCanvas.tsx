@@ -26,6 +26,7 @@ import {
     round,
     add,
     floor,
+    Color,
 } from '../../utils/Math';
 
 interface Props {
@@ -65,12 +66,11 @@ export default function WeatherCanvas({
 
     useEffect(() => {
         screenCtxRef.current!.strokeStyle = 'black';
-        // bgCtxRef.current!.translate(atmo.radius - 1, atmo.radius - 1);
         const halfSize = Math.trunc(fieldSizePx / 2);
         cellCtxRef.current!.translate(halfSize, halfSize);
         cellCtxRef.current!.strokeStyle = 'black';
         initializeGrid(gridCtxRef.current!, atmo, fieldSizePx);
-    }, []);
+    });
 
     useEffect(() => {
         function renderAtmosphere() {
@@ -141,7 +141,7 @@ export default function WeatherCanvas({
             fieldSizePx,
             atmo
         );
-        atmoDriver.injectVelocity(floor(pos), [10, 0]);
+        atmoDriver.setFluidSource(round(pos));
         onClick(pos);
     }
 

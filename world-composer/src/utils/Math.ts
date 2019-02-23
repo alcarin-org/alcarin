@@ -1,3 +1,4 @@
+export type Color = [number, number, number];
 export type Vector = [number, number];
 export enum VectorComponent {
     x = 0,
@@ -58,14 +59,14 @@ export function resolveLinearByJacobi(
     // const Afix = new win.Matrix(B.length, B.length, A);
     // const x = win.solve(Afix, B) as Float64Array;
 
-    if (A.length !== B.length ** 2 || (initX && initX.length !== B.length)) {
-        throw new Error(
-            'Coefficient matrix A has different size that constant matrix B! Can not continue.'
-        );
-    }
+    // if (A.length !== B.length ** 2 || (initX && initX.length !== B.length)) {
+    //     throw new Error(
+    //         'Coefficient matrix A has different size that constant matrix B! Can not continue.'
+    //     );
+    // }
     let x = new Float64Array(B.length); // resultsMatrix
     // one step
-    for (let step = 0; step < 15; step++) {
+    for (let step = 0; step < 10; step++) {
         const localResX = x.slice(0);
         for (let iUnknown = 0; iUnknown < B.length; iUnknown++) {
             const iUnknownCoefficientOffset = iUnknown * B.length;

@@ -6,6 +6,7 @@ import {
     magnitude,
     Point,
     add,
+    Color,
 } from '../../utils/Math';
 import { Atmosphere } from '../../data/Atmosphere';
 import { VelocityDrivenAtmo } from '../../data/VelocityDrivenAtmo';
@@ -16,8 +17,6 @@ export enum MapType {
     Divergence,
     Neutral,
 }
-
-type Color = [number, number, number];
 
 const SolidColor: Color = [100, 100, 100];
 const NeutralColor: Color = [50, 50, 50];

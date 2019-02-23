@@ -12,8 +12,8 @@ import Stats from './Stats';
 
 const stepTimeout = 0;
 
-const WorldRadius = 13;
-const DrawFieldSize = 30;
+const WorldRadius = 20;
+const DrawFieldSize = 20;
 
 const atmosphereSample = new Atmosphere(WorldRadius);
 atmosphereSample.randomizeField();
