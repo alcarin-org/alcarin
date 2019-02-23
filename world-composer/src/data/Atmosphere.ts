@@ -131,39 +131,41 @@ export class Atmosphere {
                 () => DefaultRange - 2 * Math.random() * DefaultRange + rand(),
             ],
             // left -> right
-            // [
-            //     ind =>
-            //         (ind % this.size < this.size / 2 ? DefaultRange : 0) +
-            //         rand(),
-            //     () => rand(),
-            // ],
+            [
+                ind =>
+                    (ind % this.size < this.size / 2 ? DefaultRange : 0) +
+                    rand(),
+                () => rand(),
+            ],
             // many circles
-            // [
-            //     ind =>
-            //         Math.cos(
-            //             (2 * Math.PI * (ind % this.size) * DefaultRange) /
-            //                 this.size
-            //         ) + rand(),
-            //     ind =>
-            //         Math.sin(
-            //             (2 *
-            //                 Math.PI *
-            //                 Math.floor(ind / this.size) *
-            //                 DefaultRange) /
-            //                 this.size
-            //         ) + rand(),
-            // ],
+            [
+                ind =>
+                    Math.cos(
+                        (0.2 *
+                            (2 * Math.PI * (ind % this.size) * DefaultRange)) /
+                            this.size
+                    ) + rand(),
+                ind =>
+                    Math.sin(
+                        (0.05 *
+                            (2 *
+                                Math.PI *
+                                Math.floor(ind / this.size) *
+                                DefaultRange)) /
+                            this.size
+                    ) + rand(),
+            ],
             // curl
-            // [
-            //     ind =>
-            //         DefaultRange *
-            //             (-1 + Math.floor(ind / this.size) / (0.5 * this.size)) +
-            //         rand(),
-            //     ind =>
-            //         -DefaultRange *
-            //             (-1 + (ind % this.size) / (0.5 * this.size)) +
-            //         rand(),
-            // ],
+            [
+                ind =>
+                    DefaultRange *
+                        (-1 + Math.floor(ind / this.size) / (0.5 * this.size)) +
+                    rand(),
+                ind =>
+                    -DefaultRange *
+                        (-1 + (ind % this.size) / (0.5 * this.size)) +
+                    rand(),
+            ],
         ];
         const randMethod = methods[Math.floor(Math.random() * methods.length)];
         this.velX = this.velX.map((_, ind) =>
