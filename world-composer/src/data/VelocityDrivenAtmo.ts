@@ -110,7 +110,7 @@ export class VelocityDrivenAtmo {
         //     if (this.atmo.solidsVector[i] === 1) {
         //         continue;
         //     }
-        //     this.atmo.velY[i] += deltaTime * 0.1;
+        //     this.atmo.velY[i] += deltaTime * 1;
         // }
     }
 
@@ -188,8 +188,8 @@ export class VelocityDrivenAtmo {
         const ind = this.atmo.index(p);
 
         const FluidPower = 5;
-        const ParticlesPerSec = 80;
-        const SpeadRange = 1;
+        const ParticlesPerSec = 220;
+        const SpeadRange = 0.5;
 
         const fluidDir = normalize(
             multiply(add(p, [-this.atmo.size / 2, -this.atmo.size / 2]), -1)

@@ -86,8 +86,8 @@ function App() {
             />
             <button onClick={randomizeMap}> Random</button>
             <button onClick={() => setPause(!pause)}>Run</button>
-            <button onClick={() => atmoDriver.spawnPartcles(10000)}>
-                Spawn 10k particles
+            <button onClick={() => atmoDriver.spawnPartcles(5000)}>
+                Spawn 5k particles
             </button>
 
             <label>

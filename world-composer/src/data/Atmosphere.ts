@@ -149,7 +149,7 @@ export class Atmosphere {
             // right - left
             [
                 ind =>
-                    -(ind % this.size < this.size / 2 ? DefaultRange : 0) +
+                    -(ind % this.size > this.size / 2 ? DefaultRange : 0) +
                     rand(),
                 () => rand(),
             ],
