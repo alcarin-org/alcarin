@@ -105,7 +105,9 @@ export default function WeatherCanvas({
                 renderVelocities(screenCtx, atmo, fieldSizePx);
             }
 
-            renderParticles(screenCtx, atmoDriver, fieldSizePx);
+            if (mapType === MapType.Neutral) {
+                renderParticles(screenCtx, atmoDriver, fieldSizePx);
+            }
 
             if (selectedNodePosition) {
                 const pos = round(selectedNodePosition);

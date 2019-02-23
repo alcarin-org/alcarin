@@ -22,9 +22,9 @@ type Color = [number, number, number];
 const SolidColor: Color = [100, 100, 100];
 const NeutralColor: Color = [50, 50, 50];
 
-const PressureDrawRange = 6;
+const PressureDrawRange = 0.5;
 const VelocityDrawRange = 2.5;
-const DivergenceDrawRange = 0.5;
+const DivergenceDrawRange = 0.1;
 
 export function initializeGrid(
     ctx: CanvasRenderingContext2D,
