@@ -24,23 +24,30 @@ export class VelocityDrivenAtmo {
 
     public readonly neightboursMatrix: Int8Array;
 
+    public particles: Point[] = [];
+
     public constructor(atmo: Atmosphere) {
         this.atmo = atmo;
         this.neightboursMatrix = this.precalcNeightboursMatrix();
         this.atmo.pressureVector = this.calculatePressure(1);
-        this.atmo.particles = new Array(10000)
-            .fill(null)
-            .map(
-                () =>
-                    [
-                        1 + Math.random() * (this.atmo.size - 3),
-                        1 + Math.random() * (this.atmo.size - 3),
-                    ] as Point
-            );
+    }
+
+    public spawnPartcles(count: number) {
+        this.particles = this.particles.concat(
+            new Array(count)
+                .fill(null)
+                .map(
+                    () =>
+                        [
+                            1 + Math.random() * (this.atmo.size - 3),
+                            1 + Math.random() * (this.atmo.size - 3),
+                        ] as Point
+                )
+        );
     }
 
     public moveParticles(deltaTime: number) {
-        this.atmo.particles = this.atmo.particles.map(p => {
+        this.particles = this.particles.map(p => {
             const vel = this.traceBackParticleVelocity(p, deltaTime);
             return add(p, multiply(vel, deltaTime));
         });
@@ -54,20 +61,28 @@ export class VelocityDrivenAtmo {
         this.moveParticles(deltaTime);
     }
 
-    public applyExternalForces(deltaTime: number) {
-        const center: Point = [
-            Math.floor(this.atmo.size / 2),
-            Math.floor(this.atmo.size / 2),
-        ];
-        const ind = this.atmo.index(center);
-        const indRight = this.atmo.index([center[0] + 1, center[1]]);
-        const indBottom = this.atmo.index([center[0], center[1] + 1]);
+    public injectVelocity(p: Point, vel: Vector) {
+        const ind = this.atmo.index(p);
+        if (this.atmo.solidsVector[ind] === 1) {
+            return;
+        }
+        this.atmo.velX[ind] += vel[0];
+        this.atmo.velY[ind] += vel[1];
+    }
 
-        const forcePower = 50;
-        this.atmo.velX[ind] -= deltaTime * forcePower + Math.random();
-        this.atmo.velY[ind] -= deltaTime * forcePower + Math.random();
-        this.atmo.velX[indRight] += deltaTime * forcePower + Math.random();
-        this.atmo.velY[indBottom] -= deltaTime * forcePower + Math.random();
+    public applyExternalForces(deltaTime: number) {
+        // const center: Point = [
+        //     Math.floor(this.atmo.size / 2),
+        //     Math.floor(this.atmo.size / 2),
+        // ];
+        // const ind = this.atmo.index(center);
+        // const indRight = this.atmo.index([center[0] + 1, center[1]]);
+        // const indBottom = this.atmo.index([center[0], center[1] + 1]);
+        // const forcePower = 10;
+        // this.atmo.velX[ind] -= deltaTime * forcePower + Math.random();
+        // this.atmo.velY[ind] -= deltaTime * forcePower + Math.random();
+        // this.atmo.velX[indRight] += deltaTime * forcePower + Math.random();
+        // this.atmo.velY[indBottom] -= deltaTime * forcePower + Math.random();
         // const halfP: Point = [-this.atmo.size / 2, -this.atmo.size / 2];
         // for (let i = 0; i < this.atmo.vectorSize; i++) {
         //     if (this.atmo.solidsVector[i] === 1) {
@@ -78,6 +93,14 @@ export class VelocityDrivenAtmo {
         //     // this.atmo.velX[i] += v[0] * deltaTime;
         //     // this.atmo.velY[i] += v[1] * deltaTime;
         //     this.atmo.velY[i] += deltaTime * (this.atmo.coords(i)[1] / this.atmo.size);
+        // }
+
+        // gravity
+        // for (let i = 0; i < this.atmo.vectorSize; i++) {
+        //     if (this.atmo.solidsVector[i] === 1) {
+        //         continue;
+        //     }
+        //     this.atmo.velY[i] += deltaTime * 5;
         // }
     }
 

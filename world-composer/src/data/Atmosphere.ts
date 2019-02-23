@@ -37,7 +37,6 @@ export class Atmosphere {
 
     public readonly size: number;
     public readonly vectorSize: number;
-    public particles: Point[] = [];
 
     public constructor(radius: number) {
         this.radius = radius;
@@ -127,14 +126,17 @@ export class Atmosphere {
         type RandomMethod = [(ind: number) => number, (ind: number) => number];
         const methods: RandomMethod[] = [
             // random
-            // () => [rand(), rand()],
-            // left -> right
             [
-                ind =>
-                    (ind % this.size < this.size / 2 ? DefaultRange : 0) +
-                    rand(),
-                () => rand(),
+                () => DefaultRange - 2 * Math.random() * DefaultRange + rand(),
+                () => DefaultRange - 2 * Math.random() * DefaultRange + rand(),
             ],
+            // left -> right
+            // [
+            //     ind =>
+            //         (ind % this.size < this.size / 2 ? DefaultRange : 0) +
+            //         rand(),
+            //     () => rand(),
+            // ],
             // many circles
             // [
             //     ind =>

@@ -14,8 +14,10 @@ import {
     initializeGrid,
     pxToAtmoPos,
     posToPx,
+    renderParticles,
 } from './primitives';
 import { Atmosphere } from '../../data/Atmosphere';
+import { VelocityDrivenAtmo } from '../../data/VelocityDrivenAtmo';
 import {
     Point,
     Vector,
@@ -23,10 +25,12 @@ import {
     multiply,
     round,
     add,
+    floor,
 } from '../../utils/Math';
 
 interface Props {
     atmosphere: Atmosphere;
+    atmoDriver: VelocityDrivenAtmo;
     fieldSizePx?: number;
     onClick: (p: Point) => void;
     mapType: MapType;
@@ -37,6 +41,7 @@ interface Props {
 
 export default function WeatherCanvas({
     atmosphere,
+    atmoDriver,
     fieldSizePx = 30,
     onClick,
     mapType = MapType.Pressure,
@@ -96,7 +101,11 @@ export default function WeatherCanvas({
                 screenCtx.drawImage(gridCanvasRef.current!, 0, 0);
             }
 
-            renderVelocities(screenCtx, atmo, fieldSizePx);
+            if (mapType === MapType.Velocity) {
+                renderVelocities(screenCtx, atmo, fieldSizePx);
+            }
+
+            renderParticles(screenCtx, atmoDriver, fieldSizePx);
 
             if (selectedNodePosition) {
                 const pos = round(selectedNodePosition);
@@ -130,6 +139,7 @@ export default function WeatherCanvas({
             fieldSizePx,
             atmo
         );
+        atmoDriver.injectVelocity(floor(pos), [10, 0]);
         onClick(pos);
     }
 

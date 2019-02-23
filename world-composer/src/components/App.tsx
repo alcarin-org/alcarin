@@ -17,7 +17,7 @@ const DrawFieldSize = 30;
 
 const atmosphereSample = new Atmosphere(WorldRadius);
 atmosphereSample.randomizeField();
-const pressureAtmoSystem = new VelocityDrivenAtmo(atmosphereSample);
+const atmoDriver = new VelocityDrivenAtmo(atmosphereSample);
 
 function App() {
     useEffect(() => ipcRenderer.send('main-window-ready'), []);
@@ -25,7 +25,7 @@ function App() {
     const [coriolisMagnitude, setCoriolisMagnitude] = useState(0.05);
     const [centrifugalMagnitude, setCentrifugalMagnitude] = useState(0.05);
     const [clickedNodePos, setClickedNodePos] = useState([0, 0] as Point);
-    const [mapType, setMapType] = useState(MapType.Velocity);
+    const [mapType, setMapType] = useState(MapType.Neutral);
     const [drawRealInterpolation, setDrawRealInterpolation] = useState(false);
     const [drawGrid, setDrawGrid] = useState(false);
     const [autoplay, setAutoplay] = useState(true);
@@ -60,7 +60,7 @@ function App() {
 
     function randomizeMap() {
         atmosphereSample.randomizeField();
-        pressureAtmoSystem.calculatePressure(1);
+        atmoDriver.calculatePressure(1);
         forceRedraw(!_);
     }
 
@@ -69,6 +69,7 @@ function App() {
             <WeatherCanvas
                 fieldSizePx={DrawFieldSize}
                 atmosphere={atmo}
+                atmoDriver={atmoDriver}
                 onClick={onAtmoClick}
                 mapType={mapType}
                 drawRealInterpolation={drawRealInterpolation}
@@ -78,6 +79,9 @@ function App() {
             <Stats atmosphere={atmo} mouseOver={clickedNodePos} fps={fps} />
             <button onClick={randomizeMap}> Random</button>
             <button onClick={() => setPause(!pause)}>Run</button>
+            <button onClick={() => atmoDriver.spawnPartcles(10000)}>
+                Spawn 10k particles
+            </button>
 
             <label>
                 <input
@@ -88,6 +92,7 @@ function App() {
                 Auto Play
             </label>
             <div className="app__control-panel">
+                Map Type:
                 <div className="app__input-group">
                     <label>
                         <input
@@ -98,6 +103,16 @@ function App() {
                             onChange={onMapTypeChange}
                         />{' '}
                         Pressure
+                    </label>
+                    <label>
+                        <input
+                            type="radio"
+                            name="mapType[]"
+                            value={MapType.Neutral}
+                            checked={mapType === MapType.Neutral}
+                            onChange={onMapTypeChange}
+                        />{' '}
+                        Neutral
                     </label>
                     <label>
                         <input
@@ -215,7 +230,7 @@ function useEvolveEngine(
                     setFpsAcc(last => last + timePass);
                     setFpsCounter(counter => counter + 1);
                 }
-                pressureAtmoSystem.evolve(timePass);
+                atmoDriver.evolve(timePass);
                 if (!autoplay) {
                     setPaused(true);
                 }

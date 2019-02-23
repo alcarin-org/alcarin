@@ -8,16 +8,19 @@ import {
     add,
 } from '../../utils/Math';
 import { Atmosphere } from '../../data/Atmosphere';
+import { VelocityDrivenAtmo } from '../../data/VelocityDrivenAtmo';
 
 export enum MapType {
     Pressure,
     Velocity,
     Divergence,
+    Neutral,
 }
 
 type Color = [number, number, number];
 
 const SolidColor: Color = [100, 100, 100];
+const NeutralColor: Color = [50, 50, 50];
 
 const PressureDrawRange = 6;
 const VelocityDrawRange = 2.5;
@@ -52,8 +55,8 @@ export function renderVelocities(
         ctx.fillRect(to[0] - 2, to[1] - 2, 4, 4);
     }
 
-    ctx.fillStyle = 'yellow';
     ctx.beginPath();
+    ctx.fillStyle = 'yellow';
     ctx.strokeStyle = 'black';
     // atmo.velX.forEach((vel, ind) => {
     //     const offset = posToPx(atmo.coords(ind), fieldSizePx, atmo);
@@ -73,33 +76,41 @@ export function renderVelocities(
     //         [offset[0], offset[1] - 0.5 * fieldSizePx + v]
     //     );
     // });
-    // for (let i = 0; i < atmo.size; i++) {
-    //     for (let j = 0; j < atmo.size; j++) {
-    //         const ind = atmo.index([i, j]);
-    //         if (atmo.solidsVector[ind] === 1) {
-    //             continue;
-    //         }
-    //         const vel = atmo.interpolateVelocity([i, j]);
-    //         const offset = posToPx([i, j], fieldSizePx, atmo);
-    //         const vPower = clamp(0.1, 1, magnitude(vel));
-    //         const vNorm = normalize(vel);
-    //         const v = multiply(vNorm, 0.85 * fieldSizePx * vPower);
-    //         drawVectorFromTo(
-    //             [offset[0] + -0.5 * v[0], offset[1] + -0.5 * v[1]],
-    //             [offset[0] + 0.5 * v[0], offset[1] + 0.5 * v[1]]
-    //         );
-    //     }
-    // }
+    for (let i = 0; i < atmo.size; i++) {
+        for (let j = 0; j < atmo.size; j++) {
+            const ind = atmo.index([i, j]);
+            if (atmo.solidsVector[ind] === 1) {
+                continue;
+            }
+            const vel = atmo.interpolateVelocity([i, j]);
+            const offset = posToPx([i, j], fieldSizePx, atmo);
+            const vPower = clamp(0.1, 1, magnitude(vel));
+            const vNorm = normalize(vel);
+            const v = multiply(vNorm, 0.85 * fieldSizePx * vPower);
+            drawVectorFromTo(
+                [offset[0] + -0.5 * v[0], offset[1] + -0.5 * v[1]],
+                [offset[0] + 0.5 * v[0], offset[1] + 0.5 * v[1]]
+            );
+        }
+    }
+    ctx.stroke();
+}
+
+export function renderParticles(
+    ctx: CanvasRenderingContext2D,
+    atmoDriver: VelocityDrivenAtmo,
+    fieldSizePx: number
+) {
     ctx.stroke();
     ctx.beginPath();
     ctx.strokeStyle = 'yellow';
-    atmo.particles.forEach(p => {
-        const offset = posToPx(p, fieldSizePx, atmo);
-        ctx.moveTo(offset[0], offset[1]);
-        ctx.lineTo(offset[0] + 1, offset[1]);
-        ctx.moveTo(offset[0], offset[1] + 1);
-        ctx.lineTo(offset[0] + 1, offset[1] + 1);
-        // ctx.fillRect(offset[0] - 1, offset[1] - 1, 2, 2);
+    const particleRadius = 1;
+    atmoDriver.particles.forEach(p => {
+        const offset = posToPx(p, fieldSizePx, atmoDriver.atmo);
+        ctx.moveTo(offset[0] - particleRadius, offset[1] - particleRadius);
+        ctx.lineTo(offset[0] + particleRadius, offset[1] - particleRadius);
+        ctx.moveTo(offset[0] - particleRadius, offset[1] + particleRadius);
+        ctx.lineTo(offset[0] + particleRadius, offset[1] + particleRadius);
     });
 
     ctx.stroke();
@@ -123,8 +134,10 @@ function bgColorFromPoint(
             return divergenceColor(divVector![atmo.index(pos)]);
             break;
         case MapType.Pressure:
-        default:
             return pressureColor(atmo.pressureVector[ind]);
+        case MapType.Neutral:
+        default:
+            return atmo.solidsVector[ind] === 1 ? SolidColor : NeutralColor;
     }
 }
 
