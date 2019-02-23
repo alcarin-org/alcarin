@@ -55,6 +55,9 @@ export class VelocityDrivenAtmo {
                             1 + Math.random() * (this.atmo.size - 3),
                         ] as Point
                 )
+                .filter(
+                    p => this.atmo.solidsVector[this.atmo.index(round(p))] === 0
+                )
         );
     }
 
@@ -64,7 +67,9 @@ export class VelocityDrivenAtmo {
         valueFromPos: (p: Point) => T
     ) {
         const vel = this.traceBackParticleVelocity(p, deltaTime);
-        return valueFromPos(add(p, multiply(vel, deltaTime)));
+        const pos = add(p, multiply(vel, deltaTime));
+
+        return valueFromPos(pos);
     }
 
     public evolve(deltaTime: number) {
@@ -75,12 +80,7 @@ export class VelocityDrivenAtmo {
         this.atmo.pressureVector = this.calculatePressure(deltaTime);
         this.adjustVelocityFromPressure(this.atmo.pressureVector, deltaTime);
 
-        this.particles = this.particles.map(p =>
-            this.convectValue(deltaTime, p, v => v)
-        );
-        this.onConvectHooks.forEach(hook =>
-            hook((p, getValue) => this.convectValue(deltaTime, p, getValue))
-        );
+        this.updateParticles(deltaTime);
     }
 
     public setFluidSource(p: Point) {
@@ -94,36 +94,24 @@ export class VelocityDrivenAtmo {
     }
 
     public applyExternalForces(deltaTime: number) {
-        // const center: Point = [
-        //     Math.floor(this.atmo.size / 2),
-        //     Math.floor(this.atmo.size / 2),
-        // ];
-        // const ind = this.atmo.index(center);
-        // const indRight = this.atmo.index([center[0] + 1, center[1]]);
-        // const indBottom = this.atmo.index([center[0], center[1] + 1]);
-        // const forcePower = 10;
-        // this.atmo.velX[ind] -= deltaTime * forcePower + Math.random();
-        // this.atmo.velY[ind] -= deltaTime * forcePower + Math.random();
-        // this.atmo.velX[indRight] += deltaTime * forcePower + Math.random();
-        // this.atmo.velY[indBottom] -= deltaTime * forcePower + Math.random();
         // const halfP: Point = [-this.atmo.size / 2, -this.atmo.size / 2];
         // for (let i = 0; i < this.atmo.vectorSize; i++) {
         //     if (this.atmo.solidsVector[i] === 1) {
         //         continue;
         //     }
         //     const p = add(this.atmo.coords(i), halfP);
-        //     const v = multiply(perpendicular(p), 0 * 1 / this.atmo.size);
-        //     // this.atmo.velX[i] += v[0] * deltaTime;
-        //     // this.atmo.velY[i] += v[1] * deltaTime;
-        //     this.atmo.velY[i] += deltaTime * (this.atmo.coords(i)[1] / this.atmo.size);
+        //     const cor = multiply(normalize(perpendicular(p)), 0.05 * deltaTime);
+        //     const centr = multiply(normalize(p), 0 * deltaTime);
+        //     this.atmo.velX[i] += cor[0] + centr[0];
+        //     this.atmo.velY[i] += cor[1] + centr[1];
         // }
         // gravity
-        for (let i = 0; i < this.atmo.vectorSize; i++) {
-            if (this.atmo.solidsVector[i] === 1) {
-                continue;
-            }
-            this.atmo.velY[i] += deltaTime * 0.1;
-        }
+        // for (let i = 0; i < this.atmo.vectorSize; i++) {
+        //     if (this.atmo.solidsVector[i] === 1) {
+        //         continue;
+        //     }
+        //     this.atmo.velY[i] += deltaTime * 0.1;
+        // }
     }
 
     public divergenceVector(deltaTime: number) {
@@ -186,6 +174,12 @@ export class VelocityDrivenAtmo {
         });
     }
 
+    private updateParticles(deltaTime: number) {
+        this.particles = this.particles.map(p =>
+            this.convectValue(deltaTime, p, v => v)
+        );
+    }
+
     private generateFluid(deltaTime: number) {
         const p = this.fluidSourcePos;
         if (!p) {
@@ -193,9 +187,9 @@ export class VelocityDrivenAtmo {
         }
         const ind = this.atmo.index(p);
 
-        const FluidPower = 3;
-        const ParticlesPerSec = 200;
-        const SpeadRange = 2;
+        const FluidPower = 5;
+        const ParticlesPerSec = 80;
+        const SpeadRange = 1;
 
         const fluidDir = normalize(
             multiply(add(p, [-this.atmo.size / 2, -this.atmo.size / 2]), -1)

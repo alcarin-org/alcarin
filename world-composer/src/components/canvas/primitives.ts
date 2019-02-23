@@ -31,7 +31,7 @@ export function initializeGrid(
     fieldSizePx: number
 ) {
     ctx.beginPath();
-    ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
     for (let i = 0; i < atmo.size; i++) {
         for (let j = 0; j < atmo.size; j++) {
             ctx.moveTo(i * fieldSizePx, (j + 1) * fieldSizePx - 1);
@@ -94,25 +94,31 @@ export function renderVelocities(
     }
     ctx.stroke();
 }
-
 export function renderParticles(
+    ctx: CanvasRenderingContext2D,
+    cellCanvas: CanvasImageSource,
+    atmoDriver: VelocityDrivenAtmo,
+    fieldSizePx: number
+) {
+    atmoDriver.particles.forEach(p => {
+        const offset = posToPx(p, fieldSizePx, atmoDriver.atmo);
+        ctx.drawImage(cellCanvas, offset[0] - 4, offset[1] - 4);
+    });
+}
+
+export function renderParticleTo(
     ctx: CanvasRenderingContext2D,
     atmoDriver: VelocityDrivenAtmo,
     fieldSizePx: number
 ) {
-    ctx.stroke();
+    ctx.strokeStyle = '#005b80';
+    ctx.fillStyle = '#0080b3';
+    const particleRadius = 4;
     ctx.beginPath();
-    ctx.strokeStyle = 'yellow';
-    const particleRadius = 1;
-    atmoDriver.particles.forEach(p => {
-        const offset = posToPx(p, fieldSizePx, atmoDriver.atmo);
-        ctx.moveTo(offset[0] - particleRadius, offset[1] - particleRadius);
-        ctx.lineTo(offset[0] + particleRadius, offset[1] - particleRadius);
-        ctx.moveTo(offset[0] - particleRadius, offset[1] + particleRadius);
-        ctx.lineTo(offset[0] + particleRadius, offset[1] + particleRadius);
-    });
-
+    ctx.arc(0, 0, particleRadius, 0, 2 * Math.PI);
     ctx.stroke();
+    ctx.fill();
+    ctx.closePath();
 }
 
 function bgColorFromPoint(

@@ -15,6 +15,7 @@ import {
     pxToAtmoPos,
     posToPx,
     renderParticles,
+    renderParticleTo,
 } from './primitives';
 import { Atmosphere } from '../../data/Atmosphere';
 import { VelocityDrivenAtmo } from '../../data/VelocityDrivenAtmo';
@@ -62,15 +63,14 @@ export default function WeatherCanvas({
     const [gridCanvasRef, gridCtxRef] = useCanvas(canvasSizePx, canvasSizePx);
     const [bgCanvasRef, bgCtxRef] = useCanvas(atmo.size, atmo.size);
 
-    const [cellCanvasRef, cellCtxRef] = useCanvas(fieldSizePx, fieldSizePx);
+    const [cellCanvasRef, cellCtxRef] = useCanvas(10, 10);
 
     useEffect(() => {
         screenCtxRef.current!.strokeStyle = 'black';
-        const halfSize = Math.trunc(fieldSizePx / 2);
-        cellCtxRef.current!.translate(halfSize, halfSize);
-        cellCtxRef.current!.strokeStyle = 'black';
+        cellCtxRef.current!.translate(5, 5);
         initializeGrid(gridCtxRef.current!, atmo, fieldSizePx);
-    });
+        renderParticleTo(cellCtxRef.current!, atmoDriver, fieldSizePx);
+    }, []);
 
     useEffect(() => {
         function renderAtmosphere() {
@@ -97,16 +97,21 @@ export default function WeatherCanvas({
                 );
             }
 
-            if (drawGrid) {
-                screenCtx.drawImage(gridCanvasRef.current!, 0, 0);
-            }
-
             if (mapType === MapType.Velocity) {
                 renderVelocities(screenCtx, atmo, fieldSizePx);
             }
 
             if (mapType === MapType.Neutral) {
-                renderParticles(screenCtx, atmoDriver, fieldSizePx);
+                renderParticles(
+                    screenCtx,
+                    cellCanvasRef.current!,
+                    atmoDriver,
+                    fieldSizePx
+                );
+            }
+
+            if (drawGrid) {
+                screenCtx.drawImage(gridCanvasRef.current!, 0, 0);
             }
 
             if (selectedNodePosition) {

@@ -12,11 +12,10 @@ import Stats from './Stats';
 
 const stepTimeout = 0;
 
-const WorldRadius = 20;
-const DrawFieldSize = 20;
+const WorldRadius = 14;
+const DrawFieldSize = 30;
 
 const atmosphereSample = new Atmosphere(WorldRadius);
-atmosphereSample.randomizeField();
 const atmoDriver = new VelocityDrivenAtmo(atmosphereSample);
 
 function App() {
@@ -46,6 +45,7 @@ function App() {
 
     function onAtmoClick(p: Point) {
         setClickedNodePos(p);
+        setPause(false);
     }
 
     function onAutoplay(ev: FormEvent<HTMLInputElement>) {

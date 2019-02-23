@@ -5,6 +5,7 @@ import {
     multiply,
     VectorComponent,
     normalize,
+    floor,
 } from '../utils/Math';
 
 const Center: Point = [0, 0];
@@ -48,14 +49,22 @@ export class Atmosphere {
         this.pressureVector = new Float64Array(this.vectorSize);
         this.velX = new Float64Array(this.vectorSize);
         this.velY = new Float64Array(this.vectorSize);
-        this.solidsVector = new Int8Array(this.vectorSize).map((_, ind) =>
-            Math.floor(ind / this.size) === 0 ||
-            Math.floor(ind / this.size) === this.size - 1 ||
-            ind % this.size === 0 ||
-            ind % this.size === this.size - 1
+
+        const center = floor([this.size / 2, this.size / 2]);
+        this.solidsVector = new Int8Array(this.vectorSize).map((_, ind) => {
+            const x = ind % this.size;
+            const y = Math.floor(ind / this.size);
+            return y === 0 ||
+                y === this.size - 1 ||
+                x === 0 ||
+                x === this.size - 1 ||
+                (x === 12 && y < 12) ||
+                (x === this.size - 12 && y < this.size - 4 && y > 16) ||
+                (x > 2 && x < 15 && y === this.size - 10) ||
+                (x === center[0] && y === center[1])
                 ? 1
-                : 0
-        );
+                : 0;
+        });
     }
 
     public divergenceVector(factor: number = 1): Float64Array {
@@ -137,23 +146,12 @@ export class Atmosphere {
                     rand(),
                 () => rand(),
             ],
-            // many circles
+            // right - left
             [
                 ind =>
-                    Math.cos(
-                        (0.2 *
-                            (2 * Math.PI * (ind % this.size) * DefaultRange)) /
-                            this.size
-                    ) + rand(),
-                ind =>
-                    Math.sin(
-                        (0.05 *
-                            (2 *
-                                Math.PI *
-                                Math.floor(ind / this.size) *
-                                DefaultRange)) /
-                            this.size
-                    ) + rand(),
+                    -(ind % this.size < this.size / 2 ? DefaultRange : 0) +
+                    rand(),
+                () => rand(),
             ],
             // curl
             [

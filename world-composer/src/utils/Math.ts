@@ -52,19 +52,13 @@ export function round(p: Point): Point {
 // fully separated cell, there will be no 0s on main diagonal
 export function resolveLinearByJacobi(
     A: Int8Array, // coefficient matrix A
-    B: Float64Array, // constants matrix B
-    initX?: Float64Array
+    B: Float64Array // constants matrix B
 ): Float64Array {
-    // const win = window as any;
-    // const Afix = new win.Matrix(B.length, B.length, A);
-    // const x = win.solve(Afix, B) as Float64Array;
-
     // if (A.length !== B.length ** 2 || (initX && initX.length !== B.length)) {
     //     throw new Error(
     //         'Coefficient matrix A has different size that constant matrix B! Can not continue.'
     //     );
     // }
-    // console.profile('Jacobi');
     let x = new Float64Array(B.length); // resultsMatrix
     const tmpX = new Float64Array(B.length);
 

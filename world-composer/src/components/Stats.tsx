@@ -13,7 +13,12 @@ interface Props {
     fps: number;
 }
 
-export default function Stats({ atmosphere, atmoDriver, mouseOver, fps }: Props) {
+export default function Stats({
+    atmosphere,
+    atmoDriver,
+    mouseOver,
+    fps,
+}: Props) {
     const divVector = atmosphere.divergenceVector();
     const length = atmosphere.size ** 2;
     let pressure = 0;
