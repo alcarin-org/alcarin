@@ -20,8 +20,8 @@ export default function Stats({ atmosphere, mouseOver, fps }: Props) {
     let totalDivergence = 0;
     for (let i = 0; i < atmosphere.vectorSize; i++) {
         totalVelocity = add(totalVelocity, [
-            atmosphere.velX[0],
-            atmosphere.velX[1],
+            atmosphere.velX[i],
+            atmosphere.velY[i],
         ]);
         pressure += atmosphere.pressureVector[i];
         totalDivergence += divVector[i];
@@ -32,12 +32,17 @@ export default function Stats({ atmosphere, mouseOver, fps }: Props) {
 
     const mouseOverCell = round(mouseOver);
     const selectedInd = atmosphere.index(mouseOverCell);
-    const clickedInterpolatedVel = atmosphere.interpolateVelocity(mouseOver);
+    const isSolid = atmosphere.solidsVector[selectedInd] === 1;
+    const clickedInterpolatedVel = isSolid
+        ? [0, 0]
+        : atmosphere.interpolateVelocity(mouseOver);
     const clickedDivergence = divVector[selectedInd];
     const ind = atmosphere.index(mouseOverCell);
 
     const selectedNodePressure = atmosphere.pressureVector[ind];
-    const clickedInterpolatedPress = atmosphere.interpolatePressure(mouseOver);
+    const clickedInterpolatedPress = isSolid
+        ? NaN
+        : atmosphere.interpolatePressure(mouseOver);
     return (
         <div className="stats">
             <dl>

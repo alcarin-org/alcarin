@@ -18,7 +18,7 @@ export function magnitude(v: Vector) {
     return Math.sqrt(v[0] ** 2 + v[1] ** 2);
 }
 
-export function constraints(from: number, to: number, val: number) {
+export function clamp(from: number, to: number, val: number) {
     return Math.min(Math.max(from, val), to);
 }
 
@@ -55,7 +55,6 @@ export function resolveLinearByJacobi(
     initX?: Float64Array
 ): Float64Array {
     // const win = window as any;
-    // console.log(new win.Matrix(2, 2, [[1, 2], [3, 4]]));
     // const Afix = new win.Matrix(B.length, B.length, A);
     // const x = win.solve(Afix, B) as Float64Array;
 
@@ -66,7 +65,7 @@ export function resolveLinearByJacobi(
     }
     let x = new Float64Array(B.length); // resultsMatrix
     // one step
-    for (let step = 0; step < 100; step++) {
+    for (let step = 0; step < 15; step++) {
         const localResX = x.slice(0);
         for (let iUnknown = 0; iUnknown < B.length; iUnknown++) {
             const iUnknownCoefficientOffset = iUnknown * B.length;

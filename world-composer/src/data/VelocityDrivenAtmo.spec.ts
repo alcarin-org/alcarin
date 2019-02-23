@@ -1,11 +1,10 @@
-test('test', () => undefined);
 // import { Atmosphere } from './Atmosphere';
-// import { VelocityDrivenAtmo } from './VelocityDrivenAtmo';
+import { VelocityDrivenAtmo } from './VelocityDrivenAtmo';
 
-// import { Vector } from '../utils/Math';
-// import { atmoFromVelocityArray } from '../utils/SpecHelpers';
+import { Vector } from '../utils/Math';
+import { atmoFromVelocityArray } from '../utils/SpecHelpers';
 
-// const V0: Vector = [0, 0];
+const V0: Vector = [0, 0];
 
 // // prettier-ignore
 // const exampleAtmo = () => atmoFromVelocityArray([
@@ -16,12 +15,12 @@ test('test', () => undefined);
 //     [V0, V0,     V0,     V0, [4, 1]],
 // ]);
 
-// // prettier-ignore
-// const smallAtmo = () => atmoFromVelocityArray([
-//     [[1, 0], [-1, 0], V0],
-//     [V0,     V0,      V0],
-//     [V0,     V0,      V0],
-// ]);
+// prettier-ignore
+const smallAtmo = () => atmoFromVelocityArray([
+    [1, 0], [-1, 0], V0,
+    V0,     V0,      V0,
+    V0,     V0,      V0,
+]);
 
 // test('Should calculate pressure based on given velocities that effect with 0 divergence', () => {
 //     const driver = new VelocityDrivenAtmo(smallAtmo());
@@ -65,44 +64,45 @@ test('test', () => undefined);
 //     ]);
 // });
 
-// test('Should properly prepare neigbours matrix', () => {
-//     const driver = new VelocityDrivenAtmo(smallAtmo());
-//     // prettier-ignore
-//     expect(Array.from(driver.neightboursMatrix)).toEqual([
-//         -2, 1, 0,
-//         1, 0, 0,
-//         0, 0, 0,
+test.only('Should properly prepare neigbours matrix', () => {
+    const driver = new VelocityDrivenAtmo(smallAtmo());
+    // prettier-ignore
+    console.log(driver.neightboursMatrix.length);
+    expect(Array.from(driver.neightboursMatrix)).toEqual([
+        -2, 1, 0,
+        1, 0, 0,
+        0, 0, 0,
 
-//         1, -3, 1,
-//         0, 1, 0,
-//         0, 0, 0,
+        1, -3, 1,
+        0, 1, 0,
+        0, 0, 0,
 
-//         0, 1, -2,
-//         0, 0, 1,
-//         0, 0, 0,
+        0, 1, -2,
+        0, 0, 1,
+        0, 0, 0,
 
-//         1, 0, 0,
-//         -3, 1, 0,
-//         1, 0, 0,
+        1, 0, 0,
+        -3, 1, 0,
+        1, 0, 0,
 
-//         0, 1, 0,
-//         1, -4, 1,
-//         0, 1, 0,
+        0, 1, 0,
+        1, -4, 1,
+        0, 1, 0,
 
-//         0, 0, 1,
-//         0, 1, -3,
-//         0, 0, 1,
+        0, 0, 1,
+        0, 1, -3,
+        0, 0, 1,
 
-//         0, 0, 0,
-//         1, 0, 0,
-//         -2, 1, 0,
+        0, 0, 0,
+        1, 0, 0,
+        -2, 1, 0,
 
-//         0, 0, 0,
-//         0, 1, 0,
-//         1, -3, 1,
+        0, 0, 0,
+        0, 1, 0,
+        1, -3, 1,
 
-//         0, 0, 0,
-//         0, 0, 1,
-//         0, 1, -2,
-//     ]);
-// });
+        0, 0, 0,
+        0, 0, 1,
+        0, 1, -2,
+    ]);
+});

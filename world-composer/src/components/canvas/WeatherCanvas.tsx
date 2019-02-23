@@ -19,7 +19,6 @@ import { Atmosphere } from '../../data/Atmosphere';
 import {
     Point,
     Vector,
-    constraints,
     normalize,
     multiply,
     round,

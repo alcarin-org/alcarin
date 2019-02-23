@@ -10,9 +10,14 @@ import {
 const Center: Point = [0, 0];
 const Vector0: Vector = [0, 0];
 
-const RandomRange = 0;
-const DefaultRange = 1;
+const RandomRange = 0.1;
+const DefaultRange = 5;
 
+// function assert(condition, message) {
+//     if (!condition) {
+//         throw message || "Assertion failed";
+//     }
+// }
 export class Atmosphere {
     // coded as MAC grid with cell size 1.
     // integer point ((px, py)) represent center of a cell
@@ -20,8 +25,10 @@ export class Atmosphere {
     // velocity X is on the middle of the left face (px - 0.5, py)
     // velocity Y is on the middle of the top face (px, py - 0.5),
     // e.g. velX: (-0.5, 0), velY: (0, -0.5)
+    // the map is surronded by 1 cell solids buffer
 
     public readonly radius: number;
+    public readonly solidsVector: Int8Array;
     public pressureVector: Float64Array;
     // X velocities component, stored on (x-0.5, y) from center of every cell
     public velX: Float64Array;
@@ -30,16 +37,26 @@ export class Atmosphere {
 
     public readonly size: number;
     public readonly vectorSize: number;
+    public particles: Point[] = [];
 
     public constructor(radius: number) {
         this.radius = radius;
 
-        this.size = 2 * this.radius - 1;
+        // we create additionall buffer of solids around our map
+        this.size = 2 * (this.radius + 1) - 1;
         this.vectorSize = this.size ** 2;
 
         this.pressureVector = new Float64Array(this.vectorSize);
         this.velX = new Float64Array(this.vectorSize);
         this.velY = new Float64Array(this.vectorSize);
+        this.solidsVector = new Int8Array(this.vectorSize).map((_, ind) =>
+            Math.floor(ind / this.size) === 0 ||
+            Math.floor(ind / this.size) === this.size - 1 ||
+            ind % this.size === 0 ||
+            ind % this.size === this.size - 1
+                ? 1
+                : 0
+        );
     }
 
     public divergenceVector(): Float64Array {
@@ -48,17 +65,16 @@ export class Atmosphere {
         // of x and y velocity components around given cell center.
         // we treat velocity as 0 when it's between solid/fluid cells,
         // as nothing can flow between the walls
+        const lastFieldPos = this.size - 1;
         for (let iCell = 0; iCell < this.vectorSize; iCell++) {
-            const velX = iCell % this.size === 0 ? 0 : this.velX[iCell];
-            const velY =
-                Math.trunc(iCell / this.size) === 0 ? 0 : this.velY[iCell];
+            if (this.solidsVector[iCell] === 1) {
+                continue;
+            }
+            const velX = this.velX[iCell];
+            const velY = this.velY[iCell];
 
-            const rightBorder = iCell % this.size === this.size - 1;
-            const bottomBorder =
-                Math.trunc(iCell / this.size) === this.size - 1;
-
-            const velX2 = rightBorder ? 0 : this.velX[iCell + 1];
-            const velY2 = bottomBorder ? 0 : this.velY[iCell + this.size];
+            const velX2 = this.velX[iCell + 1];
+            const velY2 = this.velY[iCell + this.size];
 
             divVector[iCell] = velX2 - velX + velY2 - velY;
         }
@@ -80,14 +96,17 @@ export class Atmosphere {
                     minCellP[0] + offsetX,
                     minCellP[1] + offsetY,
                 ];
-                if (!this.contains(neighPos)) {
+                this.assert(neighPos);
+
+                const ind = this.index(neighPos);
+                if (this.solidsVector[ind] === 1) {
                     continue;
                 }
-                const ind = this.index(neighPos);
                 const neighPressure = this.pressureVector[ind];
                 const velWeight =
                     (offsetX === 0 ? 1 - relToCenter[0] : relToCenter[0]) *
                     (offsetY === 0 ? 1 - relToCenter[1] : relToCenter[1]);
+
                 weightSum += velWeight;
                 resultPressure = resultPressure + neighPressure * velWeight;
             }
@@ -98,8 +117,8 @@ export class Atmosphere {
 
     public interpolateVelocity(p: Point): Vector {
         return [
-            this.interpolateVelocityAt([p[0], p[1] - 0.5], VectorComponent.x),
-            this.interpolateVelocityAt([p[0] - 0.5, p[1]], VectorComponent.y),
+            this.interpolateVelocityAt([p[0] + 0.5, p[1]], VectorComponent.x),
+            this.interpolateVelocityAt([p[0], p[1] + 0.5], VectorComponent.y),
         ];
     }
 
@@ -111,44 +130,51 @@ export class Atmosphere {
             // () => [rand(), rand()],
             // left -> right
             [
-                ind => (ind % this.size < 0 ? DefaultRange : 0) + rand(),
+                ind =>
+                    (ind % this.size < this.size / 2 ? DefaultRange : 0) +
+                    rand(),
                 () => rand(),
             ],
             // many circles
-            [
-                ind =>
-                    Math.cos(
-                        (2 * Math.PI * (ind % this.size) * DefaultRange) /
-                            this.size
-                    ) + rand(),
-                ind =>
-                    Math.sin(
-                        (2 *
-                            Math.PI *
-                            Math.floor(ind / this.size) *
-                            DefaultRange) /
-                            this.size
-                    ) + rand(),
-            ],
+            // [
+            //     ind =>
+            //         Math.cos(
+            //             (2 * Math.PI * (ind % this.size) * DefaultRange) /
+            //                 this.size
+            //         ) + rand(),
+            //     ind =>
+            //         Math.sin(
+            //             (2 *
+            //                 Math.PI *
+            //                 Math.floor(ind / this.size) *
+            //                 DefaultRange) /
+            //                 this.size
+            //         ) + rand(),
+            // ],
             // curl
-            [
-                ind => DefaultRange * Math.floor(ind / this.size) + rand(),
-                ind => DefaultRange * (-ind % this.size) + rand(),
-            ],
+            // [
+            //     ind =>
+            //         DefaultRange *
+            //             (-1 + Math.floor(ind / this.size) / (0.5 * this.size)) +
+            //         rand(),
+            //     ind =>
+            //         -DefaultRange *
+            //             (-1 + (ind % this.size) / (0.5 * this.size)) +
+            //         rand(),
+            // ],
         ];
         const randMethod = methods[Math.floor(Math.random() * methods.length)];
-        this.velX = this.velX.map((_, ind) => randMethod[0](ind));
-        this.velY = this.velY.map((_, ind) => randMethod[1](ind));
-    }
-
-    // public forEach(callback: (node: AtmosphereNode, p: Point) => void) {
-    //     this.nodes.forEach((node, index) => {
-    //         callback(node, this.coords(index));
-    //     });
-    // }
-
-    public contains(p: Point): boolean {
-        return p[0] >= 0 && p[0] < this.size && p[1] >= 0 && p[1] < this.size;
+        this.velX = this.velX.map((_, ind) =>
+            this.solidsVector[ind] === 1 || this.solidsVector[ind - 1] === 1
+                ? 0
+                : randMethod[0](ind)
+        );
+        this.velY = this.velY.map((_, ind) =>
+            this.solidsVector[ind] === 1 ||
+            this.solidsVector[ind - this.size] === 1
+                ? 0
+                : randMethod[1](ind)
+        );
     }
 
     public index(p: Point) {
@@ -157,6 +183,24 @@ export class Atmosphere {
 
     public coords(index: number): Point {
         return [index % this.size, Math.floor(index / this.size)];
+    }
+
+    // assert given point have proper coords inside our map coords.
+    // it should always be true, but I use the function for
+    // debugging purposes. it's body should be empty in final code
+    public assert(p: Point) {
+        if (
+            p[0] < -0.5 ||
+            p[0] > this.size - 0.5 ||
+            p[1] < -0.5 ||
+            p[1] > this.size - 0.5
+        ) {
+            throw new Error(
+                `Point (${p[0]}, ${
+                    p[1]
+                }) is outside legal map coords. There must be an error in the code.`
+            );
+        }
     }
 
     private interpolateVelocityAt(p: Point, cmp: VectorComponent): number {
@@ -176,17 +220,11 @@ export class Atmosphere {
                     minCellP[1] + offsetY,
                 ];
 
-                // on right/bottom we have one additional "virtual" speed cmp
-                // that is on border
-                const cmpOnBorder =
-                    neighPos[0] <= 0 ||
-                    neighPos[0] >= this.size ||
-                    neighPos[1] <= 0 ||
-                    neighPos[1] >= this.size;
-                if (cmpOnBorder) {
-                    continue;
-                }
-                const neighCmpVel = velVector[this.index(neighPos)];
+                this.assert(neighPos);
+
+                const neighInd = this.index(neighPos);
+
+                const neighCmpVel = velVector[neighInd];
                 const cmpVelWeight =
                     (offsetX === 0 ? 1 - relToCell[0] : relToCell[0]) *
                     (offsetY === 0 ? 1 - relToCell[1] : relToCell[1]);
