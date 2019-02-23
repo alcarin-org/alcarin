@@ -3,16 +3,17 @@ import './Stats.scss';
 import React from 'react';
 
 import { Atmosphere } from '../data/Atmosphere';
-// import { divergence } from '../data/AtmoMotion';
+import { VelocityDrivenAtmo } from '../data/VelocityDrivenAtmo';
 import { Vector, Point, magnitude, add, multiply, round } from '../utils/Math';
 
 interface Props {
     atmosphere: Atmosphere;
+    atmoDriver: VelocityDrivenAtmo;
     mouseOver: Point;
     fps: number;
 }
 
-export default function Stats({ atmosphere, mouseOver, fps }: Props) {
+export default function Stats({ atmosphere, atmoDriver, mouseOver, fps }: Props) {
     const divVector = atmosphere.divergenceVector();
     const length = atmosphere.size ** 2;
     let pressure = 0;
@@ -79,6 +80,8 @@ export default function Stats({ atmosphere, mouseOver, fps }: Props) {
                 <dd>{clickedDivergence.toFixed(3)}</dd>
                 <dt>fps</dt>
                 <dd>{fps}</dd>
+                <dt>Particles</dt>
+                <dd>{atmoDriver.particles.length}</dd>
             </dl>
         </div>
     );

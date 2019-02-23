@@ -85,7 +85,12 @@ export class VelocityDrivenAtmo {
 
     public setFluidSource(p: Point) {
         const ind = this.atmo.index(p);
-        this.fluidSourcePos = this.atmo.solidsVector[ind] === 1 ? undefined : p;
+        const itsSamePoint =
+            this.fluidSourcePos &&
+            p[0] === this.fluidSourcePos[0] &&
+            p[1] === this.fluidSourcePos[1];
+        this.fluidSourcePos =
+            itsSamePoint || this.atmo.solidsVector[ind] === 1 ? undefined : p;
     }
 
     public applyExternalForces(deltaTime: number) {
@@ -113,12 +118,12 @@ export class VelocityDrivenAtmo {
         //     this.atmo.velY[i] += deltaTime * (this.atmo.coords(i)[1] / this.atmo.size);
         // }
         // gravity
-        // for (let i = 0; i < this.atmo.vectorSize; i++) {
-        //     if (this.atmo.solidsVector[i] === 1) {
-        //         continue;
-        //     }
-        //     this.atmo.velY[i] += deltaTime * 5;
-        // }
+        for (let i = 0; i < this.atmo.vectorSize; i++) {
+            if (this.atmo.solidsVector[i] === 1) {
+                continue;
+            }
+            this.atmo.velY[i] += deltaTime * 0.1;
+        }
     }
 
     public divergenceVector(deltaTime: number) {
@@ -206,6 +211,9 @@ export class VelocityDrivenAtmo {
                     SpeadRange - 2 * SpeadRange * Math.random(),
                     SpeadRange - 2 * SpeadRange * Math.random(),
                 ])
+            )
+            .filter(
+                p => this.atmo.solidsVector[this.atmo.index(round(p))] === 0
             );
         this.particles = this.particles.concat(newParticles);
     }

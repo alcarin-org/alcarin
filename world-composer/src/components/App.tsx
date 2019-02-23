@@ -26,6 +26,7 @@ function App() {
     const [centrifugalMagnitude, setCentrifugalMagnitude] = useState(0.05);
     const [clickedNodePos, setClickedNodePos] = useState([0, 0] as Point);
     const [mapType, setMapType] = useState(MapType.Neutral);
+    const [timeStep, setTimeStep] = useState(1);
     const [drawRealInterpolation, setDrawRealInterpolation] = useState(false);
     const [drawGrid, setDrawGrid] = useState(false);
     const [autoplay, setAutoplay] = useState(true);
@@ -35,6 +36,7 @@ function App() {
     const [atmo, pause, setPause, fps] = useEvolveEngine(
         centrifugalMagnitude,
         coriolisMagnitude,
+        timeStep,
         autoplay
     );
 
@@ -76,7 +78,12 @@ function App() {
                 drawGrid={drawGrid}
                 selectedNodePosition={clickedNodePos}
             />
-            <Stats atmosphere={atmo} mouseOver={clickedNodePos} fps={fps} />
+            <Stats
+                atmoDriver={atmoDriver}
+                atmosphere={atmo}
+                mouseOver={clickedNodePos}
+                fps={fps}
+            />
             <button onClick={randomizeMap}> Random</button>
             <button onClick={() => setPause(!pause)}>Run</button>
             <button onClick={() => atmoDriver.spawnPartcles(10000)}>
@@ -151,6 +158,21 @@ function App() {
                     />
                 </label>
                 <label>
+                    Time step
+                    <input
+                        type="range"
+                        min={1}
+                        max={50}
+                        step={5}
+                        value={timeStep * 10}
+                        onChange={ev =>
+                            setTimeStep(
+                                parseInt(ev.currentTarget.value, 10) / 10
+                            )
+                        }
+                    />
+                </label>
+                <label>
                     Coriolis Force
                     <input
                         type="range"
@@ -204,6 +226,7 @@ function usePause(
 function useEvolveEngine(
     centrifugalMagnitude: number,
     coriolisMagnitude: number,
+    timeStep: number,
     autoplay: boolean
 ): [Atmosphere, boolean, (val: boolean) => void, number] {
     const [pausedNow, setPaused, lastPlayDate, setLastPlayDate] = usePause(
@@ -230,7 +253,7 @@ function useEvolveEngine(
                     setFpsAcc(last => last + timePass);
                     setFpsCounter(counter => counter + 1);
                 }
-                atmoDriver.evolve(timePass);
+                atmoDriver.evolve(timePass * timeStep);
                 if (!autoplay) {
                     setPaused(true);
                 }
