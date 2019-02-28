@@ -1,63 +1,101 @@
-import React, { useRef, useEffect } from 'react';
-import { ImageDataContainer } from '../utils/ImageDataUtils';
-import { useCanvas } from '../utils/CanvasUtils';
+import React, { useState, useEffect } from 'react';
+
+import { Atmosphere } from '../../../data/Atmosphere';
+import { VelocityDrivenAtmo } from '../../../data/VelocityDrivenAtmo';
+import { magnitude } from '../../../utils/Math';
+import { DataContainer } from '../../../utils/Immutable';
+
+import { MapType } from '../utils/CanvasUtils';
+
+import { PressureBackground } from './PressureBackground';
+import { DivergenceBackground } from './DivergenceBackground';
+import { VelocityBackground } from './VelocityBackground';
 
 interface Props {
-    pixels: ImageDataContainer;
+    atmo: Atmosphere;
+    driver: VelocityDrivenAtmo;
+    mapType: MapType;
     width: number;
     height: number;
-    smoothingEnabled: boolean;
 }
 
 export function BackgroundRenderer({
-    pixels,
+    atmo,
+    driver,
+    mapType,
     width,
     height,
-    smoothingEnabled,
 }: Props) {
-    const domCanvasRef = useRef<HTMLCanvasElement>(null);
-    const [displayCanvas, displayCtx] = useCanvas(width, height, domCanvasRef);
-
-    const [pixelCanvas, pixelCtx] = useCanvas(
-        pixels.imageData.width,
-        pixels.imageData.height
-    );
-
-    useEffect(
-        () => {
-            displayCtx.current!.imageSmoothingEnabled = smoothingEnabled;
-        },
-        [width, height, smoothingEnabled]
-    );
+    const [pressureContainer, setPressureContainer] = useState({
+        value: atmo.pressureVector,
+    });
+    const [divergenceContainer, setDivergenceContainer] = useState({
+        value: driver.lastDivergenceVector,
+    });
+    const [velocityMagnitudeField, setVelocityMagnitudeField] = useState<
+        DataContainer<Float64Array>
+    >({ value: getAtmoVelocityMagnitudeVector(atmo) });
 
     useEffect(
         () => {
-            console.log('rerendering background');
-
-            pixelCtx.current!.clearRect(
-                0,
-                0,
-                pixels.imageData.width,
-                pixels.imageData.height
-            );
-            const orig = pixelCtx.current!.getImageData(
-                0,
-                0,
-                pixels.imageData.width,
-                pixels.imageData.height
-            );
-            orig.data.set(pixels.imageData.data);
-            pixelCtx.current!.putImageData(orig, 0, 0);
-            displayCtx.current!.drawImage(
-                pixelCanvas.current!,
-                0,
-                0,
-                width,
-                height
-            );
+            switch (mapType) {
+                case MapType.Pressure:
+                    setPressureContainer({
+                        value: atmo.pressureVector,
+                    });
+                case MapType.Divergence:
+                    setDivergenceContainer({
+                        value: driver.lastDivergenceVector,
+                    });
+                case MapType.Velocity:
+                    setVelocityMagnitudeField({
+                        value: getAtmoVelocityMagnitudeVector(atmo),
+                    });
+            }
         },
-        [pixels]
+        [driver.step]
     );
 
-    return <canvas width={width} height={height} ref={domCanvasRef} />;
+    switch (mapType) {
+        case MapType.Pressure:
+            return (
+                <PressureBackground
+                    pressure={pressureContainer}
+                    canvasWidth={width}
+                    canvasHeight={height}
+                    bgWidth={atmo.size}
+                    bgHeight={atmo.size}
+                />
+            );
+        case MapType.Velocity:
+            return (
+                <VelocityBackground
+                    velocityMagnitudeField={velocityMagnitudeField}
+                    canvasWidth={width}
+                    canvasHeight={height}
+                    bgWidth={atmo.size}
+                    bgHeight={atmo.size}
+                />
+            );
+        case MapType.Divergence:
+            return (
+                <DivergenceBackground
+                    divergence={divergenceContainer}
+                    canvasWidth={width}
+                    canvasHeight={height}
+                    bgWidth={atmo.size}
+                    bgHeight={atmo.size}
+                />
+            );
+        default:
+            return null;
+    }
+}
+
+function getAtmoVelocityMagnitudeVector(atmo: Atmosphere) {
+    return atmo.pressureVector.map((_, ind) =>
+        atmo.solidsVector[ind] === 1
+            ? 0
+            : magnitude(atmo.interpolateVelocity(atmo.coords(ind)))
+    );
 }

@@ -49,7 +49,10 @@
 }
 
 .map-renderer {
+    display: inline-block;
     position: relative;
+    background-color: rgb(50, 50, 50);
+
     canvas:not(:last-child) {
         position: absolute;
     }

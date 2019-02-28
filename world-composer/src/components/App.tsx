@@ -1,10 +1,10 @@
-import React, { useEffect, useState, MouseEvent, FormEvent } from 'react';
+import React, { useEffect, useState, FormEvent } from 'react';
 
 import './App.scss';
-import WeatherCanvas from './canvas/WeatherCanvas';
-import { MapType } from './canvas/primitives';
+import MapRenderer from './canvas/MapRenderer';
+import { MapType } from './canvas/utils/CanvasUtils';
 import { Atmosphere } from '../data/Atmosphere';
-import { Vector, Point } from '../utils/Math';
+// import { Point } from '../utils/Math';
 // import { interpolateVelocityAt, evolve, divergence } from '../data/AtmoMotion';
 import { VelocityDrivenAtmo } from '../data/VelocityDrivenAtmo';
 import { ipcRenderer } from '../electron-bridge';
@@ -23,11 +23,11 @@ function App() {
 
     const [coriolisMagnitude, setCoriolisMagnitude] = useState(0.05);
     const [centrifugalMagnitude, setCentrifugalMagnitude] = useState(0.05);
-    const [clickedNodePos, setClickedNodePos] = useState([0, 0] as Point);
+    // const [clickedNodePos, setClickedNodePos] = useState([0, 0] as Point);
     const [mapType, setMapType] = useState(MapType.Neutral);
     const [timeStep, setTimeStep] = useState(1);
-    const [drawRealInterpolation, setDrawRealInterpolation] = useState(false);
-    const [drawGrid, setDrawGrid] = useState(false);
+    // const [drawRealInterpolation, setDrawRealInterpolation] = useState(false);
+    // const [drawGrid, setDrawGrid] = useState(false);
     const [autoplay, setAutoplay] = useState(true);
 
     const [_, forceRedraw] = useState(true);
@@ -43,21 +43,21 @@ function App() {
         setMapType(parseInt(ev.currentTarget.value, 10));
     }
 
-    function onAtmoClick(p: Point) {
-        setClickedNodePos(p);
-        setPause(false);
-    }
+    // function onAtmoClick(p: Point) {
+    //     setClickedNodePos(p);
+    //     setPause(false);
+    // }
 
     function onAutoplay(ev: FormEvent<HTMLInputElement>) {
         setAutoplay(ev.currentTarget.checked);
     }
 
     function onDrawRealInterpoltation(ev: FormEvent<HTMLInputElement>) {
-        setDrawRealInterpolation(ev.currentTarget.checked);
+        // setDrawRealInterpolation(ev.currentTarget.checked);
     }
 
     function onDrawGrid(ev: FormEvent<HTMLInputElement>) {
-        setDrawGrid(ev.currentTarget.checked);
+        // setDrawGrid(ev.currentTarget.checked);
     }
 
     function randomizeMap() {
@@ -68,20 +68,16 @@ function App() {
 
     return (
         <div className="app">
-            <WeatherCanvas
-                fieldSizePx={DrawFieldSize}
+            <MapRenderer
                 atmosphere={atmo}
                 atmoDriver={atmoDriver}
-                onClick={onAtmoClick}
+                fieldSizePx={DrawFieldSize}
                 mapType={mapType}
-                drawRealInterpolation={drawRealInterpolation}
-                drawGrid={drawGrid}
-                selectedNodePosition={clickedNodePos}
             />
             <Stats
                 atmoDriver={atmoDriver}
                 atmosphere={atmo}
-                mouseOver={clickedNodePos}
+                mouseOver={[0, 0]}
                 fps={fps}
             />
             <button onClick={randomizeMap}> Random</button>

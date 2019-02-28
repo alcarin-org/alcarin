@@ -1,15 +1,9 @@
 import {
     Vector,
     Point,
-    add,
-    multiply,
     VectorComponent,
-    normalize,
     floor,
 } from '../utils/Math';
-
-const Center: Point = [0, 0];
-const Vector0: Vector = [0, 0];
 
 const RandomRange = 0.1;
 const DefaultRange = 5;
@@ -73,7 +67,6 @@ export class Atmosphere {
         // of x and y velocity components around given cell center.
         // we treat velocity as 0 when it's between solid/fluid cells,
         // as nothing can flow between the walls
-        const lastFieldPos = this.size - 1;
         for (let iCell = 0; iCell < this.vectorSize; iCell++) {
             if (this.solidsVector[iCell] === 1) {
                 continue;

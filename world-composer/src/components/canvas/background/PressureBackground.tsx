@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 
 import { ImageDataCanvas } from './ImageDataCanvas';
 import { create, ImageDataContainer } from '../utils/ImageDataUtils';
+import { DataContainer } from '../../../utils/Immutable';
 import { Color } from '../utils/CanvasUtils';
 
 interface Props {
-    solids: Int8Array;
+    pressure: DataContainer<Float64Array>;
     bgWidth: number;
     bgHeight: number;
 
@@ -13,11 +14,15 @@ interface Props {
     canvasHeight: number;
 }
 
-const SolidColor: Color = [100, 100, 100, 255];
-const TransparentColor: Color = [0, 0, 0, 0];
+const PressureDrawRange = 0.5;
 
-export function SolidBackground({
-    solids,
+function pressureColor(pressure: number): Color {
+    const factor = (pressure + PressureDrawRange) / (2 * PressureDrawRange);
+    return [255 * factor, 0, 255 * (1 - factor), 255];
+}
+
+export function PressureBackground({
+    pressure,
     bgWidth,
     bgHeight,
     canvasWidth,
@@ -34,26 +39,26 @@ export function SolidBackground({
 
             const imageDataPixels = dataContainer.value.data;
 
-            solids.forEach((isSolid, ind) => {
+            pressure.value.forEach((pressureValue, ind) => {
                 const imageDataOffset = ind * 4;
                 imageDataPixels.set(
-                    isSolid === 1 ? SolidColor : TransparentColor,
+                    pressureColor(pressureValue),
                     imageDataOffset
                 );
             });
+
             setImageDataContainer({
-                // new container, but same, mutated data inside (for performance)
                 value: dataContainer.value,
             });
         },
-        [solids]
+        [pressure]
     );
 
     return imageDataContainer ? (
         <ImageDataCanvas
-            id="solid-canvas"
+            id="pressure-canvas"
             pixels={imageDataContainer}
-            smoothingEnabled={false}
+            smoothingEnabled={true}
             width={canvasWidth}
             height={canvasHeight}
         />

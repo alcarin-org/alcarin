@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, Event, IpcMain } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog, Event } from 'electron';
 import { join } from 'path';
 
 // TODO: add support for remembering window custum size and position: https://github.com/mawie81/electron-window-state

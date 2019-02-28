@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 
 import { ImageDataCanvas } from './ImageDataCanvas';
 import { create, ImageDataContainer } from '../utils/ImageDataUtils';
+import { DataContainer } from '../../../utils/Immutable';
 import { Color } from '../utils/CanvasUtils';
 
 interface Props {
-    solids: Int8Array;
+    velocityMagnitudeField: DataContainer<Float64Array>;
     bgWidth: number;
     bgHeight: number;
 
@@ -13,11 +14,16 @@ interface Props {
     canvasHeight: number;
 }
 
-const SolidColor: Color = [100, 100, 100, 255];
-const TransparentColor: Color = [0, 0, 0, 0];
+const VelocityDrawRange = 2.5;
 
-export function SolidBackground({
-    solids,
+function velocityColor(velocityMagnitude: number): Color {
+    const factor =
+        (velocityMagnitude + VelocityDrawRange) / (2 * VelocityDrawRange);
+    return [255 * factor, 0, 255 * (1 - factor), 255];
+}
+
+export function VelocityBackground({
+    velocityMagnitudeField,
     bgWidth,
     bgHeight,
     canvasWidth,
@@ -34,26 +40,28 @@ export function SolidBackground({
 
             const imageDataPixels = dataContainer.value.data;
 
-            solids.forEach((isSolid, ind) => {
-                const imageDataOffset = ind * 4;
-                imageDataPixels.set(
-                    isSolid === 1 ? SolidColor : TransparentColor,
-                    imageDataOffset
-                );
-            });
+            velocityMagnitudeField.value.forEach(
+                (velocityMagnitudeValue, ind) => {
+                    const imageDataOffset = ind * 4;
+                    imageDataPixels.set(
+                        velocityColor(velocityMagnitudeValue),
+                        imageDataOffset
+                    );
+                }
+            );
+
             setImageDataContainer({
-                // new container, but same, mutated data inside (for performance)
                 value: dataContainer.value,
             });
         },
-        [solids]
+        [velocityMagnitudeField]
     );
 
     return imageDataContainer ? (
         <ImageDataCanvas
-            id="solid-canvas"
+            id="velocity-canvas"
             pixels={imageDataContainer}
-            smoothingEnabled={false}
+            smoothingEnabled={true}
             width={canvasWidth}
             height={canvasHeight}
         />

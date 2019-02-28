@@ -2,20 +2,12 @@ import { Atmosphere } from './Atmosphere';
 import {
     Point,
     Vector,
-    interpolate,
     multiply,
     add,
     round,
     resolveLinearByJacobi,
     normalize,
-    magnitude,
-    perpendicular,
 } from '../utils/Math';
-
-enum VectorComponent {
-    x = 0,
-    y = 1,
-}
 
 const relNeightbours: Vector[] = [[-1, 0], [1, 0], [0, -1], [0, 1]];
 type ValueFromPositionFn<T> = (p: Point) => T;
@@ -30,6 +22,10 @@ export class VelocityDrivenAtmo {
 
     public particles: Point[] = [];
 
+    public lastDivergenceVector: Float64Array;
+
+    public step: number = 0;
+
     private onConvectHooks: ConvectHook[] = [];
 
     private fluidSourcePos?: Point;
@@ -37,6 +33,7 @@ export class VelocityDrivenAtmo {
     public constructor(atmo: Atmosphere) {
         this.atmo = atmo;
         this.neightboursMatrix = this.precalcNeightboursMatrix();
+        this.lastDivergenceVector = new Float64Array(this.atmo.size ** 2);
         this.atmo.pressureVector = this.calculatePressure(1);
     }
 
@@ -81,6 +78,7 @@ export class VelocityDrivenAtmo {
         this.adjustVelocityFromPressure(this.atmo.pressureVector, deltaTime);
 
         this.updateParticles(deltaTime);
+        this.step++;
     }
 
     public setFluidSource(p: Point) {
@@ -116,6 +114,7 @@ export class VelocityDrivenAtmo {
 
     public divergenceVector(deltaTime: number) {
         const divVector = this.atmo.divergenceVector(1 / deltaTime);
+        this.lastDivergenceVector = divVector;
 
         return divVector.filter((_, ind) => this.atmo.solidsVector[ind] === 0);
     }
