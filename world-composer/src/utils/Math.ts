@@ -1,4 +1,3 @@
-export type Color = [number, number, number];
 export type Vector = [number, number];
 export enum VectorComponent {
     x = 0,
@@ -62,7 +61,7 @@ export function resolveLinearByJacobi(
     let x = new Float64Array(B.length); // resultsMatrix
     const tmpX = new Float64Array(B.length);
 
-    for (let step = 0; step < 8; step++) {
+    for (let step = 0; step < 50; step++) {
         for (let iUnknown = 0; iUnknown < B.length; iUnknown++) {
             // const iUnknownCoefficientOffset = iUnknown * B.length;
             const unknownCoefficients = A.subarray(

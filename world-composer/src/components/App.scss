@@ -47,3 +47,10 @@
         transform: rotate(360deg);
     }
 }
+
+.map-renderer {
+    position: relative;
+    canvas:not(:last-child) {
+        position: absolute;
+    }
+}

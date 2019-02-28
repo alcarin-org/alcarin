@@ -17,6 +17,9 @@ import {
     renderParticles,
     renderParticleTo,
 } from './primitives';
+import { SolidBackground } from './background/SolidBackground';
+import { Color } from './utils/DrawUtils';
+import { useCanvas } from './utils/CanvasUtils';
 import { Atmosphere } from '../../data/Atmosphere';
 import { VelocityDrivenAtmo } from '../../data/VelocityDrivenAtmo';
 import {
@@ -27,7 +30,6 @@ import {
     round,
     add,
     floor,
-    Color,
 } from '../../utils/Math';
 
 interface Props {
@@ -78,24 +80,24 @@ export default function WeatherCanvas({
             screenCtx.strokeStyle = 'black';
             screenCtx.setLineDash([]);
 
-            if (drawRealInterpolation) {
-                renderBigBgTexture(
-                    screenCtx,
-                    canvasSizePx,
-                    fieldSizePx,
-                    atmo,
-                    mapType
-                );
-            } else {
-                renderBgTexture(bgCtxRef.current!, atmo, mapType);
-                screenCtx.drawImage(
-                    bgCanvasRef.current!,
-                    0,
-                    0,
-                    canvasSizePx,
-                    canvasSizePx
-                );
-            }
+            // if (drawRealInterpolation) {
+            //     renderBigBgTexture(
+            //         screenCtx,
+            //         canvasSizePx,
+            //         fieldSizePx,
+            //         atmo,
+            //         mapType
+            //     );
+            // } else {
+            //     renderBgTexture(bgCtxRef.current!, atmo, mapType);
+            //     screenCtx.drawImage(
+            //         bgCanvasRef.current!,
+            //         0,
+            //         0,
+            //         canvasSizePx,
+            //         canvasSizePx
+            //     );
+            // }
 
             if (mapType === MapType.Velocity) {
                 renderVelocities(screenCtx, atmo, fieldSizePx);
@@ -151,32 +153,20 @@ export default function WeatherCanvas({
     }
 
     return (
-        <canvas
-            onClick={onAtmoClick}
-            ref={displayCanvasRef}
-            width={canvasSizePx}
-            height={canvasSizePx}
-        />
+        <div className="map-renderer">
+            <SolidBackground
+                solids={atmo.solidsVector}
+                solidsWidth={atmo.size}
+                solidsHeight={atmo.size}
+                canvasWidth={canvasSizePx}
+                canvasHeight={canvasSizePx}
+            />
+            <canvas
+                onClick={onAtmoClick}
+                ref={displayCanvasRef}
+                width={canvasSizePx}
+                height={canvasSizePx}
+            />
+        </div>
     );
-}
-
-function useCanvas(
-    width: number,
-    height: number,
-    sourceCanvasRef?: RefObject<HTMLCanvasElement>
-): [RefObject<HTMLCanvasElement>, RefObject<CanvasRenderingContext2D>] {
-    const canvasRef = useRef<HTMLCanvasElement | null>(null);
-    const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
-    useEffect(() => {
-        const canvas = sourceCanvasRef
-            ? sourceCanvasRef.current!
-            : document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d')!;
-        canvasRef.current = canvas;
-        ctxRef.current = ctx;
-    }, []);
-
-    return [canvasRef, ctxRef];
 }

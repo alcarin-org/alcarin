@@ -6,8 +6,9 @@ import {
     magnitude,
     Point,
     add,
-    Color,
 } from '../../utils/Math';
+
+import {Color} from './utils/DrawUtils';
 import { Atmosphere } from '../../data/Atmosphere';
 import { VelocityDrivenAtmo } from '../../data/VelocityDrivenAtmo';
 
