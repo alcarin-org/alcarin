@@ -15,6 +15,7 @@ type ConvectHook = <T>(
     convectValue: <T>(p: Point, getValue: ValueFromPositionFn<T>) => T
 ) => void;
 
+const StepDelaySec = 0.05;
 export class VelocityDrivenAtmo {
     public readonly atmo: Atmosphere;
 
@@ -29,6 +30,8 @@ export class VelocityDrivenAtmo {
     private onConvectHooks: ConvectHook[] = [];
 
     private fluidSourcePos?: Point;
+
+    private deltaTimeAcc: DOMHighResTimeStamp = 0;
 
     public constructor(atmo: Atmosphere) {
         this.atmo = atmo;
@@ -59,7 +62,7 @@ export class VelocityDrivenAtmo {
     }
 
     public convectValue<T>(
-        deltaTime: number,
+        deltaTime: DOMHighResTimeStamp,
         p: Point,
         valueFromPos: (p: Point) => T
     ) {
@@ -69,15 +72,23 @@ export class VelocityDrivenAtmo {
         return valueFromPos(pos);
     }
 
-    public evolve(deltaTime: number) {
+    public update(deltaTimeSec: DOMHighResTimeStamp) {
+        this.deltaTimeAcc += deltaTimeSec;
+        if (this.deltaTimeAcc >= StepDelaySec) {
+            this.evolve(this.deltaTimeAcc);
+            this.deltaTimeAcc = 0;
+        }
+
+        this.updateParticles(deltaTimeSec);
+    }
+
+    private evolve(deltaTime: DOMHighResTimeStamp) {
         this.generateFluid(deltaTime);
 
         this.convectVelocity(deltaTime);
         this.applyExternalForces(deltaTime);
         this.atmo.pressureVector = this.calculatePressure(deltaTime);
         this.adjustVelocityFromPressure(this.atmo.pressureVector, deltaTime);
-
-        this.updateParticles(deltaTime);
         this.step++;
     }
 
@@ -91,7 +102,7 @@ export class VelocityDrivenAtmo {
             itsSamePoint || this.atmo.solidsVector[ind] === 1 ? undefined : p;
     }
 
-    public applyExternalForces(deltaTime: number) {
+    public applyExternalForces(deltaTime: DOMHighResTimeStamp) {
         // const halfP: Point = [-this.atmo.size / 2, -this.atmo.size / 2];
         // for (let i = 0; i < this.atmo.vectorSize; i++) {
         //     if (this.atmo.solidsVector[i] === 1) {
@@ -112,14 +123,14 @@ export class VelocityDrivenAtmo {
         // }
     }
 
-    public divergenceVector(deltaTime: number) {
+    public divergenceVector(deltaTime: DOMHighResTimeStamp) {
         const divVector = this.atmo.divergenceVector(1 / deltaTime);
         this.lastDivergenceVector = divVector;
 
         return divVector.filter((_, ind) => this.atmo.solidsVector[ind] === 0);
     }
 
-    public calculatePressure(deltaTime: number) {
+    public calculatePressure(deltaTime: DOMHighResTimeStamp) {
         const neighboursMatrixA = this.neightboursMatrix;
         const divergenceVectorB = this.divergenceVector(deltaTime);
         const fluidPressureSolveVector = resolveLinearByJacobi(
@@ -137,7 +148,7 @@ export class VelocityDrivenAtmo {
 
     public adjustVelocityFromPressure(
         gridPressureVector: Float64Array,
-        deltaTime: number
+        deltaTime: DOMHighResTimeStamp
     ) {
         this.atmo.velX = this.atmo.velX.map((vel, ind) => {
             if (this.atmo.solidsVector[ind] === 1) {
@@ -173,13 +184,13 @@ export class VelocityDrivenAtmo {
         });
     }
 
-    private updateParticles(deltaTime: number) {
+    private updateParticles(deltaTime: DOMHighResTimeStamp) {
         this.particles = this.particles.map(p =>
             this.convectValue(deltaTime, p, v => v)
         );
     }
 
-    private generateFluid(deltaTime: number) {
+    private generateFluid(deltaTime: DOMHighResTimeStamp) {
         const p = this.fluidSourcePos;
         if (!p) {
             return;
@@ -211,7 +222,7 @@ export class VelocityDrivenAtmo {
         this.particles = this.particles.concat(newParticles);
     }
 
-    private convectVelocity(deltaTime: number) {
+    private convectVelocity(deltaTime: DOMHighResTimeStamp) {
         const newVelX = this.atmo.velX.map((_, ind) => {
             const p = this.atmo.coords(ind);
 
@@ -275,7 +286,10 @@ export class VelocityDrivenAtmo {
         );
     }
 
-    private traceBackParticleVelocity(p: Point, deltaTime: number): Point {
+    private traceBackParticleVelocity(
+        p: Point,
+        deltaTime: DOMHighResTimeStamp
+    ): Point {
         const v = this.atmo.interpolateVelocity(p);
         const lastKnownP: Point = add(p, multiply(v, -0.5 * deltaTime));
         const avVelocity = this.atmo.interpolateVelocity(lastKnownP);

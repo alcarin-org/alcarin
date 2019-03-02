@@ -19,7 +19,8 @@ interface Props {
     driver: VelocityDrivenAtmo;
 
     settings: MapSettings;
-    onStatsTick?: (stats: MapStats) => void;
+    onTick?: (deltaTime: DOMHighResTimeStamp) => void;
+    onStatsUpdated?: (stats: MapStats) => void;
 }
 
 interface FpsCalc {
@@ -28,7 +29,13 @@ interface FpsCalc {
     fpsAcc: number;
 }
 
-export function InteractiveMap({ atmo, driver, settings, onStatsTick }: Props) {
+export function InteractiveMap({
+    atmo,
+    driver,
+    settings,
+    onTick,
+    onStatsUpdated,
+}: Props) {
     const fpsRef = useRef<FpsCalc>({
         fps: 0,
         timeAcc: 0,
@@ -36,9 +43,13 @@ export function InteractiveMap({ atmo, driver, settings, onStatsTick }: Props) {
     });
 
     const onRender = useCallback(
-        (deltaTime: DOMHighResTimeStamp) =>
-            calculateFps(fpsRef, deltaTime, onStatsTick),
-        [atmo, driver, onStatsTick]
+        (deltaTime: DOMHighResTimeStamp) => {
+            if (onTick) {
+                onTick(deltaTime);
+            }
+            calculateFps(fpsRef, deltaTime, onStatsUpdated);
+        },
+        [atmo, driver, onTick]
     );
 
     return (
@@ -55,7 +66,7 @@ export function InteractiveMap({ atmo, driver, settings, onStatsTick }: Props) {
 function calculateFps(
     fpsCalcRef: MutableRefObject<FpsCalc>,
     deltaTime: DOMHighResTimeStamp,
-    onStatsTick: Props['onStatsTick']
+    onStatsUpdated: Props['onStatsUpdated']
 ) {
     const fpsObj = fpsCalcRef.current;
     fpsObj.timeAcc += deltaTime;
@@ -63,12 +74,11 @@ function calculateFps(
         fpsObj.fps = fpsObj.fpsAcc;
         fpsObj.fpsAcc = 0;
         fpsObj.timeAcc = fpsObj.timeAcc % 1000;
-        if (onStatsTick) {
-            onStatsTick({
+        if (onStatsUpdated) {
+            onStatsUpdated({
                 renderFps: fpsObj.fps,
             });
         }
-        console.log('fps', fpsObj.fps);
     }
     fpsObj.fpsAcc++;
 }

@@ -1,6 +1,6 @@
 import React, {
     useEffect,
-    // useState,
+    useState,
     useRef,
     // MouseEventHandler,
     // RefObject,
@@ -9,6 +9,7 @@ import React, {
 import { BackgroundRenderer } from './background/BackgroundRenderer';
 import { SolidBackground } from './background/SolidBackground';
 import { VelocityFieldRenderer } from './VelocityFieldRenderer';
+import { ParticlesRenderer } from './ParticlesRenderer';
 import { MapType } from './utils/CanvasUtils';
 import { Atmosphere } from '../../data/Atmosphere';
 import { VelocityDrivenAtmo } from '../../data/VelocityDrivenAtmo';
@@ -40,28 +41,26 @@ export function MapRenderer({
     const canvasSizePx = fieldSizePx * atmo.size;
 
     const lastRenderRef = useRef<DOMHighResTimeStamp | null>(null);
+    // temporary solution, the atmo/driver system waiting for refactor
+    const [renderCounter, setRenderCount] = useState(0);
 
-    useEffect(
-        () => {
-            console.log('here');
-            let requestAnimFrameId = requestAnimationFrame(renderAtmosphere);
+    useEffect(() => {
+        const requestAnimFrameId = requestAnimationFrame(renderAtmosphere);
 
-            function renderAtmosphere(timestamp: DOMHighResTimeStamp) {
-                if (lastRenderRef.current !== null) {
-                    const deltaTime = timestamp - lastRenderRef.current;
-                    if (onRender) {
-                        onRender(deltaTime);
-                    }
+        function renderAtmosphere(timestamp: DOMHighResTimeStamp) {
+            if (lastRenderRef.current !== null) {
+                const deltaTime = timestamp - lastRenderRef.current;
+                if (onRender) {
+                    onRender(deltaTime);
                 }
-                // this force rerender
-                lastRenderRef.current = timestamp;
-                requestAnimFrameId = requestAnimationFrame(renderAtmosphere);
             }
+            // this force rerender
+            setRenderCount(renderCounter + 1);
+            lastRenderRef.current = timestamp;
+        }
 
-            return () => cancelAnimationFrame(requestAnimFrameId);
-        },
-        [atmo, driver]
-    );
+        return () => cancelAnimationFrame(requestAnimFrameId);
+    });
 
     return (
         <div
@@ -82,12 +81,22 @@ export function MapRenderer({
                 bgWidth={atmo.size}
                 bgHeight={atmo.size}
             />
-            <VelocityFieldRenderer
-                atmo={atmo}
-                driver={driver}
-                width={canvasSizePx}
-                height={canvasSizePx}
-            />
+            {mapType !== MapType.Neutral && (
+                <VelocityFieldRenderer
+                    atmo={atmo}
+                    driver={driver}
+                    width={canvasSizePx}
+                    height={canvasSizePx}
+                />
+            )}
+            {mapType === MapType.Neutral && (
+                <ParticlesRenderer
+                    width={canvasSizePx}
+                    height={canvasSizePx}
+                    atmo={atmo}
+                    particles={driver.particles}
+                />
+            )}
         </div>
     );
 }

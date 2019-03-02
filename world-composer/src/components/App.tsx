@@ -1,7 +1,7 @@
 import React, { useEffect, useState, FormEvent } from 'react';
 
 import './App.scss';
-import { InteractiveMap, MapSettings } from './map/InteractiveMap';
+import { InteractiveMap, MapSettings, MapStats } from './map/InteractiveMap';
 import { MapType } from './canvas/utils/CanvasUtils';
 import { Atmosphere } from '../data/Atmosphere';
 import { VelocityDrivenAtmo } from '../data/VelocityDrivenAtmo';
@@ -10,12 +10,10 @@ import { VelocityDrivenAtmo } from '../data/VelocityDrivenAtmo';
 import { ipcRenderer } from '../electron-bridge';
 import Stats from './Stats';
 
-const stepTimeout = 0;
-
 const WorldRadius = 14;
 
-const atmosphereSample = new Atmosphere(WorldRadius);
-const atmoDriver = new VelocityDrivenAtmo(atmosphereSample);
+const atmo = new Atmosphere(WorldRadius);
+const atmoDriver = new VelocityDrivenAtmo(atmo);
 
 function App() {
     useEffect(() => ipcRenderer.send('main-window-ready'), []);
@@ -34,12 +32,8 @@ function App() {
 
     const [_, forceRedraw] = useState(true);
 
-    const [atmo, pause, setPause, fps] = useEvolveEngine(
-        centrifugalMagnitude,
-        coriolisMagnitude,
-        timeStep,
-        autoplay
-    );
+    const [renderFps, setRenderFps] = useState(0);
+    const [pause, setPause] = useState(true);
 
     function onMapTypeChange(ev: FormEvent<HTMLInputElement>) {
         const mapType = parseInt(ev.currentTarget.value, 10);
@@ -64,9 +58,17 @@ function App() {
     }
 
     function randomizeMap() {
-        atmosphereSample.randomizeField();
+        atmo.randomizeField();
         atmoDriver.calculatePressure(1);
         forceRedraw(!_);
+    }
+
+    function onMapRenderTick(deltaTime: DOMHighResTimeStamp) {
+        atmoDriver.update(deltaTime / 1000);
+    }
+
+    function onMapStatsUpdated(stats: MapStats) {
+        setRenderFps(stats.renderFps);
     }
 
     return (
@@ -75,12 +77,14 @@ function App() {
                 atmo={atmo}
                 driver={atmoDriver}
                 settings={mapSettings}
+                onTick={onMapRenderTick}
+                onStatsUpdated={onMapStatsUpdated}
             />
             <Stats
                 atmoDriver={atmoDriver}
                 atmosphere={atmo}
                 mouseOver={[0, 0]}
-                fps={fps}
+                fps={renderFps}
             />
             <button onClick={randomizeMap}> Random</button>
             <button onClick={() => setPause(!pause)}>Run</button>
@@ -203,66 +207,66 @@ function App() {
     );
 }
 
-function usePause(
-    defPause: boolean
-): [boolean, (val: boolean) => void, Date, (val: Date) => void] {
-    const [pausedNow, setPaused] = useState(defPause);
-    const [lastPlayDate, setLastPlayDate] = useState(new Date());
-    function setPause(pause: boolean) {
-        if (pause === pausedNow) {
-            return;
-        }
+// function usePause(
+//     defPause: boolean
+// ): [boolean, (val: boolean) => void, Date, (val: Date) => void] {
+//     const [pausedNow, setPaused] = useState(defPause);
+//     const [lastPlayDate, setLastPlayDate] = useState(new Date());
+//     function setPause(pause: boolean) {
+//         if (pause === pausedNow) {
+//             return;
+//         }
 
-        setPaused(pause);
-        if (!pause) {
-            setLastPlayDate(new Date());
-        }
-    }
-    return [pausedNow, setPause, lastPlayDate, setLastPlayDate];
-}
+//         setPaused(pause);
+//         if (!pause) {
+//             setLastPlayDate(new Date());
+//         }
+//     }
+//     return [pausedNow, setPause, lastPlayDate, setLastPlayDate];
+// }
 
-function useEvolveEngine(
-    centrifugalMagnitude: number,
-    coriolisMagnitude: number,
-    timeStep: number,
-    autoplay: boolean
-): [Atmosphere, boolean, (val: boolean) => void, number] {
-    const [pausedNow, setPaused, lastPlayDate, setLastPlayDate] = usePause(
-        true
-    );
-    const [fps, setFps] = useState(0);
-    const [fpsAcc, setFpsAcc] = useState(0);
-    const [fpsCounter, setFpsCounter] = useState(0);
+// function useEvolveEngine(
+//     centrifugalMagnitude: number,
+//     coriolisMagnitude: number,
+//     timeStep: number,
+//     autoplay: boolean
+// ): [Atmosphere, boolean, (val: boolean) => void, number] {
+//     const [pausedNow, setPaused, lastPlayDate, setLastPlayDate] = usePause(
+//         true
+//     );
+//     const [fps, setFps] = useState(0);
+//     const [fpsAcc, setFpsAcc] = useState(0);
+//     const [fpsCounter, setFpsCounter] = useState(0);
 
-    useEffect(
-        () => {
-            if (pausedNow) {
-                return;
-            }
-            const timeoutId = setTimeout(() => {
-                const now = new Date();
-                const timePass =
-                    (now.getTime() - lastPlayDate.getTime()) / 1000;
-                if (fpsAcc + timePass >= 1) {
-                    setFpsAcc(fpsAcc + timePass - 1);
-                    setFps(fpsCounter);
-                    setFpsCounter(0);
-                } else {
-                    setFpsAcc(last => last + timePass);
-                    setFpsCounter(counter => counter + 1);
-                }
-                atmoDriver.evolve(timePass * timeStep);
-                if (!autoplay) {
-                    setPaused(true);
-                }
-                setLastPlayDate(now);
-            }, stepTimeout);
-            return () => clearTimeout(timeoutId);
-        },
-        [lastPlayDate]
-    );
+//     useEffect(
+//         () => {
+//             if (pausedNow) {
+//                 return;
+//             }
+//             const timeoutId = setTimeout(() => {
+//                 const now = new Date();
+//                 const timePass =
+//                     (now.getTime() - lastPlayDate.getTime()) / 1000;
+//                 if (fpsAcc + timePass >= 1) {
+//                     setFpsAcc(fpsAcc + timePass - 1);
+//                     setFps(fpsCounter);
+//                     setFpsCounter(0);
+//                 } else {
+//                     setFpsAcc(last => last + timePass);
+//                     setFpsCounter(counter => counter + 1);
+//                 }
+//                 atmoDriver.evolve(timePass * timeStep);
+//                 if (!autoplay) {
+//                     setPaused(true);
+//                 }
+//                 setLastPlayDate(now);
+//             }, stepTimeout);
+//             return () => clearTimeout(timeoutId);
+//         },
+//         [lastPlayDate]
+//     );
 
-    return [atmosphereSample, pausedNow, setPaused, fps];
-}
+//     return [atmosphereSample, pausedNow, setPaused, fps];
+// }
 
 export default App;
