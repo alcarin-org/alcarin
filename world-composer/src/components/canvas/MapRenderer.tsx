@@ -45,7 +45,7 @@ export function MapRenderer({
     const [renderCounter, setRenderCount] = useState(0);
 
     useEffect(() => {
-        const requestAnimFrameId = requestAnimationFrame(renderAtmosphere);
+        let requestAnimFrameId = requestAnimationFrame(renderAtmosphere);
 
         function renderAtmosphere(timestamp: DOMHighResTimeStamp) {
             if (lastRenderRef.current !== null) {
@@ -55,12 +55,13 @@ export function MapRenderer({
                 }
             }
             // this force rerender
-            setRenderCount(renderCounter + 1);
+            setRenderCount(prev => prev + 1);
             lastRenderRef.current = timestamp;
+            requestAnimFrameId = requestAnimationFrame(renderAtmosphere);
         }
 
         return () => cancelAnimationFrame(requestAnimFrameId);
-    });
+    }, []);
 
     return (
         <div
