@@ -1,7 +1,7 @@
 import React, {
-    useRef,
     useEffect,
     // useState,
+    useRef,
     // MouseEventHandler,
     // RefObject,
 } from 'react';
@@ -23,43 +23,54 @@ import { VelocityDrivenAtmo } from '../../data/VelocityDrivenAtmo';
 // } from '../../utils/Math';
 
 interface Props {
-    atmosphere: Atmosphere;
-    atmoDriver: VelocityDrivenAtmo;
+    atmo: Atmosphere;
+    driver: VelocityDrivenAtmo;
     fieldSizePx?: number;
     mapType: MapType;
+    onRender?: (deltaTime: DOMHighResTimeStamp) => void;
 }
 
-export default function MapRenderer({
-    atmosphere,
-    atmoDriver,
+export function MapRenderer({
+    atmo,
+    driver,
     fieldSizePx = 30,
     mapType = MapType.Pressure,
+    onRender,
 }: Props) {
-    const atmo = atmosphere;
-    const displayCanvasRef = useRef<HTMLCanvasElement>(null);
     const canvasSizePx = fieldSizePx * atmo.size;
 
-    // const [screenCanvasRef, screenCtxRef] = useCanvas(
-    //     canvasSizePx,
-    //     canvasSizePx,
-    //     displayCanvasRef
-    // );
+    const lastRenderRef = useRef<DOMHighResTimeStamp | null>(null);
 
-    useEffect(() => {
-        function renderAtmosphere() {
-            // const screenCtx = screenCtxRef.current!;
-        }
+    useEffect(
+        () => {
+            console.log('here');
+            let requestAnimFrameId = requestAnimationFrame(renderAtmosphere);
 
-        const requestId = requestAnimationFrame(renderAtmosphere);
+            function renderAtmosphere(timestamp: DOMHighResTimeStamp) {
+                if (lastRenderRef.current !== null) {
+                    const deltaTime = timestamp - lastRenderRef.current;
+                    if (onRender) {
+                        onRender(deltaTime);
+                    }
+                }
+                // this force rerender
+                lastRenderRef.current = timestamp;
+                requestAnimFrameId = requestAnimationFrame(renderAtmosphere);
+            }
 
-        return () => cancelAnimationFrame(requestId);
-    });
+            return () => cancelAnimationFrame(requestAnimFrameId);
+        },
+        [atmo, driver]
+    );
 
     return (
-        <div className="map-renderer">
+        <div
+            className="map-renderer"
+            style={{ width: canvasSizePx, height: canvasSizePx }}
+        >
             <BackgroundRenderer
                 atmo={atmo}
-                driver={atmoDriver}
+                driver={driver}
                 width={canvasSizePx}
                 height={canvasSizePx}
                 mapType={mapType}
@@ -73,12 +84,7 @@ export default function MapRenderer({
             />
             <VelocityFieldRenderer
                 atmo={atmo}
-                driver={atmoDriver}
-                width={canvasSizePx}
-                height={canvasSizePx}
-            />
-            <canvas
-                ref={displayCanvasRef}
+                driver={driver}
                 width={canvasSizePx}
                 height={canvasSizePx}
             />

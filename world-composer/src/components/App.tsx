@@ -1,19 +1,18 @@
 import React, { useEffect, useState, FormEvent } from 'react';
 
 import './App.scss';
-import MapRenderer from './canvas/MapRenderer';
+import { InteractiveMap, MapSettings } from './map/InteractiveMap';
 import { MapType } from './canvas/utils/CanvasUtils';
 import { Atmosphere } from '../data/Atmosphere';
+import { VelocityDrivenAtmo } from '../data/VelocityDrivenAtmo';
 // import { Point } from '../utils/Math';
 // import { interpolateVelocityAt, evolve, divergence } from '../data/AtmoMotion';
-import { VelocityDrivenAtmo } from '../data/VelocityDrivenAtmo';
 import { ipcRenderer } from '../electron-bridge';
 import Stats from './Stats';
 
 const stepTimeout = 0;
 
 const WorldRadius = 14;
-const DrawFieldSize = 30;
 
 const atmosphereSample = new Atmosphere(WorldRadius);
 const atmoDriver = new VelocityDrivenAtmo(atmosphereSample);
@@ -24,11 +23,14 @@ function App() {
     const [coriolisMagnitude, setCoriolisMagnitude] = useState(0.05);
     const [centrifugalMagnitude, setCentrifugalMagnitude] = useState(0.05);
     // const [clickedNodePos, setClickedNodePos] = useState([0, 0] as Point);
-    const [mapType, setMapType] = useState(MapType.Neutral);
     const [timeStep, setTimeStep] = useState(1);
     // const [drawRealInterpolation, setDrawRealInterpolation] = useState(false);
     // const [drawGrid, setDrawGrid] = useState(false);
     const [autoplay, setAutoplay] = useState(true);
+    const [mapSettings, setMapSettings] = useState<MapSettings>({
+        drawFieldSize: 30,
+        mapType: MapType.Neutral,
+    });
 
     const [_, forceRedraw] = useState(true);
 
@@ -40,7 +42,8 @@ function App() {
     );
 
     function onMapTypeChange(ev: FormEvent<HTMLInputElement>) {
-        setMapType(parseInt(ev.currentTarget.value, 10));
+        const mapType = parseInt(ev.currentTarget.value, 10);
+        setMapSettings({ ...mapSettings, mapType });
     }
 
     // function onAtmoClick(p: Point) {
@@ -68,11 +71,10 @@ function App() {
 
     return (
         <div className="app">
-            <MapRenderer
-                atmosphere={atmo}
-                atmoDriver={atmoDriver}
-                fieldSizePx={DrawFieldSize}
-                mapType={mapType}
+            <InteractiveMap
+                atmo={atmo}
+                driver={atmoDriver}
+                settings={mapSettings}
             />
             <Stats
                 atmoDriver={atmoDriver}
@@ -102,7 +104,7 @@ function App() {
                             type="radio"
                             name="mapType[]"
                             value={MapType.Pressure}
-                            checked={mapType === MapType.Pressure}
+                            checked={mapSettings.mapType === MapType.Pressure}
                             onChange={onMapTypeChange}
                         />{' '}
                         Pressure
@@ -112,7 +114,7 @@ function App() {
                             type="radio"
                             name="mapType[]"
                             value={MapType.Neutral}
-                            checked={mapType === MapType.Neutral}
+                            checked={mapSettings.mapType === MapType.Neutral}
                             onChange={onMapTypeChange}
                         />{' '}
                         Neutral
@@ -122,7 +124,7 @@ function App() {
                             type="radio"
                             name="mapType[]"
                             value={MapType.Velocity}
-                            checked={mapType === MapType.Velocity}
+                            checked={mapSettings.mapType === MapType.Velocity}
                             onChange={onMapTypeChange}
                         />{' '}
                         Velocity
@@ -132,7 +134,7 @@ function App() {
                             type="radio"
                             name="mapType[]"
                             value={MapType.Divergence}
-                            checked={mapType === MapType.Divergence}
+                            checked={mapSettings.mapType === MapType.Divergence}
                             onChange={onMapTypeChange}
                         />{' '}
                         Divergence

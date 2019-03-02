@@ -19,9 +19,6 @@ interface Props {
 export function VelocityFieldRenderer({ atmo, driver, width, height }: Props) {
     const domCanvasRef = useRef<HTMLCanvasElement>(null);
     const [, displayCtxRef] = useCanvas(width, height, domCanvasRef);
-    // const [velocityFieldContainer, setVelocityFieldContainer] = useState<
-    //     DataContainer<VectorField>
-    // >();
 
     useEffect(
         () => {
