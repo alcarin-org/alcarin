@@ -1,3 +1,4 @@
+// tslint:disable no-bitwise
 import React, { useEffect, useRef } from 'react';
 
 import { useCanvas } from './utils/CanvasUtils';
@@ -57,44 +58,30 @@ function renderConfetti(
     width: number,
     height: number
 ) {
-    function pxFromCoords(x: number, y: number) {
-        return [
-            Math.floor((x + 0.5) * fieldSizePx),
-            Math.floor((y + 0.5) * fieldSizePx),
-        ];
-    }
     function offsetFromPx(x: number, y: number) {
-        return (y * width + x) * 4;
+        return y * width + x;
     }
 
     const pixelData = ctx.getImageData(0, 0, width, height);
-
-    function condHalfColor(pX: number, pY: number, color: Uint8ClampedArray) {
-        const offset = offsetFromPx(pX, pY);
-        if (pixelData.data[offset + 3] === 0) {
-            color[3] = 128;
-            pixelData.data.set(color, offset);
-        }
-    }
+    const data = new Uint32Array(pixelData.data.buffer);
 
     for (let i = 0; i < particles.positions.length / 2; i++) {
         const i2 = 2 * i;
-        const i4 = 4 * i;
         const pos = particles.positions.slice(i2, i2 + 2);
-        const pxPos = pxFromCoords(pos[0], pos[1]);
-        const color = particles.colors.slice(i4, i4 + 4);
+        const pxPos = [
+            Math.floor((pos[0] + 0.5) * fieldSizePx),
+            Math.floor((pos[1] + 0.5) * fieldSizePx),
+        ];
+        const color = particles.colors[i];
+        // set alpha for color
+        const blendColor = (color & 0x00ffffff) | (160 << 24);
 
         const offset = offsetFromPx(pxPos[0], pxPos[1]);
-        pixelData.data.set(color, offset);
-        condHalfColor(pxPos[0], pxPos[1] - 1, color);
-        condHalfColor(pxPos[0], pxPos[1] + 1, color);
-        condHalfColor(pxPos[0] - 1, pxPos[1], color);
-        condHalfColor(pxPos[0] + 1, pxPos[1], color);
-        condHalfColor(pxPos[0] - 1, pxPos[1] - 1, color);
-        condHalfColor(pxPos[0] + 1, pxPos[1] - 1, color);
-        condHalfColor(pxPos[0] - 1, pxPos[1] + 1, color);
-        condHalfColor(pxPos[0] + 1, pxPos[1] + 1, color);
-        // ctx.drawImage(cellCanvas, offset[0] - 4, offset[1] - 4);
+        data[offset] = color;
+        data[offset - 1] = blendColor;
+        data[offset + 1] = blendColor;
+        data[offset - width] = blendColor;
+        data[offset + width] = blendColor;
     }
     ctx.putImageData(pixelData, 0, 0);
 }

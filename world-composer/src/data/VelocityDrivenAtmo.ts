@@ -8,7 +8,6 @@ import {
     resolveLinearByJacobi,
     normalize,
 } from '../utils/Math';
-import { Color } from '../utils/Draw';
 import {
     createRandomParticles,
     concatParticles,

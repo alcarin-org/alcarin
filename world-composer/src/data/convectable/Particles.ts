@@ -1,13 +1,14 @@
 import { Atmosphere } from '../Atmosphere';
 import { Point, round } from '../../utils/Math';
 import { ConvectValue } from './ConvectableValues';
-import { Color } from '../../utils/Draw';
+import { Color, colorToNumber } from '../../utils/Draw';
 
 export interface Particles {
     // bundled Points as Float64Array.
     // code format: [x1, y1, x2, y2, x3, y3, ...]
-    positions: Float64Array;
-    colors: Uint8ClampedArray;
+    positions: Float32Array;
+    // colors encoded at float64 numbers (every 8-bit from 32-bits represent in order r,g,b,a values)
+    colors: Uint32Array;
 }
 
 export const convectParticle: ConvectValue<Point, Particles> = (
@@ -18,29 +19,27 @@ export const convectParticle: ConvectValue<Point, Particles> = (
 };
 
 const ParticleColors: Color[] = [
-    [168, 100, 253, 255],
-    [41, 205, 255, 255],
+    // [168, 100, 253, 255],
+    // [41, 205, 255, 255],
     [120, 255, 68, 255],
-    [255, 113, 141, 255],
-    [253, 255, 106, 255],
+    // [255, 113, 141, 255],
+    // [253, 255, 106, 255],
 ];
 
 export function concatParticles(part1: Particles, part2: Particles): Particles {
-    const concatedPositions = new Float64Array(
+    const positions = new Float32Array(
         part1.positions.length + part2.positions.length
     );
-    concatedPositions.set(part1.positions, 0);
-    concatedPositions.set(part2.positions, part1.positions.length);
+    positions.set(part1.positions, 0);
+    positions.set(part2.positions, part1.positions.length);
 
-    const concatedColors = new Uint8ClampedArray(
-        part1.colors.length + part2.colors.length
-    );
-    concatedColors.set(part1.colors, 0);
-    concatedColors.set(part2.colors, part1.colors.length);
+    const colors = new Uint32Array(part1.colors.length + part2.colors.length);
+    colors.set(part1.colors, 0);
+    colors.set(part2.colors, part1.colors.length);
 
     return {
-        positions: concatedPositions,
-        colors: concatedColors,
+        positions,
+        colors,
     };
 }
 
@@ -49,9 +48,10 @@ export function createRandomParticles(
     atmo: Atmosphere,
     colors = ParticleColors
 ): Particles {
+    const colorsAsNumbers = ParticleColors.map(colorToNumber);
     const particles: Particles = {
-        positions: new Float64Array(2 * count),
-        colors: new Uint8ClampedArray(4 * count),
+        positions: new Float32Array(2 * count),
+        colors: new Uint32Array(count),
     };
 
     for (let i = 0; i < count; i++) {
@@ -64,10 +64,8 @@ export function createRandomParticles(
         }
         particles.positions.set(p, 2 * i);
 
-        particles.colors.set(
-            colors[Math.floor(Math.random() * colors.length)],
-            4 * i
-        );
+        particles.colors[i] =
+            colorsAsNumbers[Math.floor(Math.random() * colorsAsNumbers.length)];
     }
     return particles;
 }

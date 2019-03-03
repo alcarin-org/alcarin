@@ -26,7 +26,7 @@ function App() {
     // const [drawGrid, setDrawGrid] = useState(false);
     const [autoplay, setAutoplay] = useState(true);
     const [mapSettings, setMapSettings] = useState<MapSettings>({
-        drawFieldSize: 30,
+        drawFieldSize: 25,
         mapType: MapType.Neutral,
     });
 
@@ -64,8 +64,7 @@ function App() {
     }
 
     function onMapRenderTick(deltaTime: DOMHighResTimeStamp) {
-        // atmoDriver.update(deltaTime / 1000);
-        setTimeout(() => atmoDriver.update(deltaTime / 1000), 0);
+        atmoDriver.update(deltaTime / 1000);
     }
 
     function onMapStatsUpdated(stats: MapStats) {
