@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import { ImageDataCanvas } from './ImageDataCanvas';
 import { create, ImageDataContainer } from '../utils/ImageDataUtils';
-import { Color } from '../utils/CanvasUtils';
+import { Color } from '../../../utils/Draw';
 
 interface Props {
     solids: Int8Array;

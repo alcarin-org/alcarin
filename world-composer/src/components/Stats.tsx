@@ -86,7 +86,7 @@ export default function Stats({
                 <dt>fps</dt>
                 <dd>{fps}</dd>
                 <dt>Particles</dt>
-                <dd>{atmoDriver.particles.length}</dd>
+                <dd>{atmoDriver.particles.positions.length / 2}</dd>
             </dl>
         </div>
     );

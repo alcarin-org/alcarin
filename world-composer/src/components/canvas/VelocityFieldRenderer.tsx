@@ -16,6 +16,8 @@ interface Props {
     height: number;
 }
 
+const VelocityDrawFactor = 1.3;
+
 export function VelocityFieldRenderer({ atmo, driver, width, height }: Props) {
     const domCanvasRef = useRef<HTMLCanvasElement>(null);
     const [, displayCtxRef] = useCanvas(width, height, domCanvasRef);
@@ -61,7 +63,7 @@ export function renderVelocities(
             }
             const vel = atmo.interpolateVelocity([i, j]);
             const offset = [(i + 0.5) * fieldSizePx, (j + 0.5) * fieldSizePx];
-            const vPower = clamp(0.1, 1, magnitude(vel));
+            const vPower = clamp(0.1, 1, magnitude(vel) * VelocityDrawFactor);
             const vNorm = normalize(vel);
             const v = multiply(vNorm, 0.85 * fieldSizePx * vPower);
             drawVectorFromTo(

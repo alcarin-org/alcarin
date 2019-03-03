@@ -1,7 +1,5 @@
 import { useEffect, useRef, RefObject } from 'react';
 
-export type Color = [number, number, number, number];
-
 export enum MapType {
     Neutral,
     Pressure,

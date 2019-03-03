@@ -10,6 +10,7 @@ import { BackgroundRenderer } from './background/BackgroundRenderer';
 import { SolidBackground } from './background/SolidBackground';
 import { VelocityFieldRenderer } from './VelocityFieldRenderer';
 import { ParticlesRenderer } from './ParticlesRenderer';
+import { ConfettiRenderer } from './ConfettiRenderer';
 import { MapType } from './utils/CanvasUtils';
 import { Atmosphere } from '../../data/Atmosphere';
 import { VelocityDrivenAtmo } from '../../data/VelocityDrivenAtmo';
@@ -91,7 +92,7 @@ export function MapRenderer({
                 />
             )}
             {mapType === MapType.Neutral && (
-                <ParticlesRenderer
+                <ConfettiRenderer
                     width={canvasSizePx}
                     height={canvasSizePx}
                     atmo={atmo}

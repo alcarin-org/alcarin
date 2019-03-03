@@ -8,6 +8,13 @@ import {
     resolveLinearByJacobi,
     normalize,
 } from '../utils/Math';
+import { Color } from '../utils/Draw';
+import {
+    createRandomParticles,
+    concatParticles,
+    Particles,
+    convectParticle,
+} from '../data/convectable/Particles';
 
 const relNeightbours: Vector[] = [[-1, 0], [1, 0], [0, -1], [0, 1]];
 type ValueFromPositionFn<T> = (p: Point) => T;
@@ -21,7 +28,7 @@ export class VelocityDrivenAtmo {
 
     public readonly neightboursMatrix: Int8Array;
 
-    public particles: Point[] = [];
+    public particles: Particles = createRandomParticles(0, this.atmo);
 
     public lastDivergenceVector: Float64Array;
 
@@ -45,19 +52,9 @@ export class VelocityDrivenAtmo {
     }
 
     public spawnPartcles(count: number) {
-        this.particles = this.particles.concat(
-            new Array(count)
-                .fill(null)
-                .map(
-                    () =>
-                        [
-                            1 + Math.random() * (this.atmo.size - 3),
-                            1 + Math.random() * (this.atmo.size - 3),
-                        ] as Point
-                )
-                .filter(
-                    p => this.atmo.solidsVector[this.atmo.index(round(p))] === 0
-                )
+        this.particles = concatParticles(
+            this.particles,
+            createRandomParticles(count, this.atmo)
         );
     }
 
@@ -185,41 +182,50 @@ export class VelocityDrivenAtmo {
     }
 
     private updateParticles(deltaTime: DOMHighResTimeStamp) {
-        this.particles = this.particles.map(p =>
-            this.convectValue(deltaTime, p, v => v)
-        );
+        const positions = this.particles.positions;
+        for (let i = 0; i < positions.length / 2; i++) {
+            const i2 = i * 2;
+
+            const pos = positions.slice(i2, i2 + 2);
+            const newPos = this.convectValue(
+                deltaTime,
+                [pos[0], pos[1]],
+                lastPos => convectParticle(lastPos, this.particles, this.atmo)
+            );
+            positions.set(newPos, i2);
+        }
+        this.particles = {
+            ...this.particles,
+        };
     }
 
     private generateFluid(deltaTime: DOMHighResTimeStamp) {
-        const p = this.fluidSourcePos;
-        if (!p) {
-            return;
-        }
-        const ind = this.atmo.index(p);
-
-        const FluidPower = 5;
-        const ParticlesPerSec = 220;
-        const SpeadRange = 0.5;
-
-        const fluidDir = normalize(
-            multiply(add(p, [-this.atmo.size / 2, -this.atmo.size / 2]), -1)
-        );
-        const flow = multiply(fluidDir, FluidPower);
-        this.atmo.velX[ind] += flow[0];
-        this.atmo.velY[ind] += flow[1];
-
-        const newParticles = new Array(Math.floor(deltaTime * ParticlesPerSec))
-            .fill(null)
-            .map(() =>
-                add(p, [
-                    SpeadRange - 2 * SpeadRange * Math.random(),
-                    SpeadRange - 2 * SpeadRange * Math.random(),
-                ])
-            )
-            .filter(
-                p => this.atmo.solidsVector[this.atmo.index(round(p))] === 0
-            );
-        this.particles = this.particles.concat(newParticles);
+        // const p = this.fluidSourcePos;
+        // if (!p) {
+        //     return;
+        // }
+        // const ind = this.atmo.index(p);
+        // const FluidPower = 5;
+        // const ParticlesPerSec = 220;
+        // const SpeadRange = 0.5;
+        // const fluidDir = normalize(
+        //     multiply(add(p, [-this.atmo.size / 2, -this.atmo.size / 2]), -1)
+        // );
+        // const flow = multiply(fluidDir, FluidPower);
+        // this.atmo.velX[ind] += flow[0];
+        // this.atmo.velY[ind] += flow[1];
+        // const newParticles = new Array(Math.floor(deltaTime * ParticlesPerSec))
+        //     .fill(null)
+        //     .map(() =>
+        //         add(p, [
+        //             SpeadRange - 2 * SpeadRange * Math.random(),
+        //             SpeadRange - 2 * SpeadRange * Math.random(),
+        //         ])
+        //     )
+        //     .filter(
+        //         p => this.atmo.solidsVector[this.atmo.index(round(p))] === 0
+        //     );
+        // this.particles = this.particles.concat(newParticles);
     }
 
     private convectVelocity(deltaTime: DOMHighResTimeStamp) {

@@ -64,7 +64,8 @@ function App() {
     }
 
     function onMapRenderTick(deltaTime: DOMHighResTimeStamp) {
-        atmoDriver.update(deltaTime / 1000);
+        // atmoDriver.update(deltaTime / 1000);
+        setTimeout(() => atmoDriver.update(deltaTime / 1000), 0);
     }
 
     function onMapStatsUpdated(stats: MapStats) {

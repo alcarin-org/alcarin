@@ -12,7 +12,7 @@ interface Props {
     height: number;
 }
 
-const HtmlParticleColor = '#0080b3';
+const HtmlParticleColors = ['#0074D9', '#FF4136'];
 
 export function ParticlesRenderer({ atmo, particles, width, height }: Props) {
     const domCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -20,7 +20,7 @@ export function ParticlesRenderer({ atmo, particles, width, height }: Props) {
     const [cellCanvasRef, cellCtxRef] = useCanvas(10, 10);
 
     useEffect(() => {
-        renderParticleTo(cellCtxRef.current!, HtmlParticleColor);
+        renderParticleTo(cellCtxRef.current!, HtmlParticleColors[0]);
     }, []);
 
     useEffect(
@@ -54,6 +54,7 @@ function renderParticles(
 ) {
     particles.forEach(([x, y]) => {
         const offset = [(x + 0.5) * fieldSizePx, (y + 0.5) * fieldSizePx];
+
         ctx.drawImage(cellCanvas, offset[0] - 4, offset[1] - 4);
     });
 }
