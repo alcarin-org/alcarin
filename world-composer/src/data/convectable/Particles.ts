@@ -59,8 +59,8 @@ export function createRandomParticles(
         let containInd: number | null = null;
         do {
             p = [
-                1 + Math.random() * (grid.size - 3),
-                1 + Math.random() * (grid.size - 3),
+                0.5 + Math.random() * (grid.size - 2),
+                0.5 + Math.random() * (grid.size - 2),
             ];
             containInd = MACGrid.index(grid, round(p));
         } while (p === null || grid.solids[containInd] === 1);
