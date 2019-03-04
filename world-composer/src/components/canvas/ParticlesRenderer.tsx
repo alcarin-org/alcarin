@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 
 import { useCanvas } from './utils/CanvasUtils';
-import { Point, multiply, clamp, magnitude, normalize } from '../../utils/Math';
+import { Point } from '../../utils/Math';
 import { MACGridData } from '../../data/atmosphere/MACGrid';
 
 interface Props {

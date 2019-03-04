@@ -11,7 +11,7 @@ import { DataContainer } from '../../../utils/Immutable';
 
 import { MapType } from '../utils/CanvasUtils';
 
-import { PressureBackground } from './PressureBackground';
+// import { PressureBackground } from './PressureBackground';
 import { DivergenceBackground } from './DivergenceBackground';
 import { VelocityBackground } from './VelocityBackground';
 

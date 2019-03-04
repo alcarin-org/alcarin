@@ -10,8 +10,6 @@ export function precalcNeighboursMatrix(grid: MACGrid.MACGridData): Int8Array {
     const vectorSize = grid.size ** 2;
     const matrix = new Int8Array(vectorSize ** 2);
 
-    // let iFluidCell = 0;
-
     for (let iCell = 0; iCell < vectorSize; iCell++) {
         if (grid.solids[iCell] === 1) {
             continue;

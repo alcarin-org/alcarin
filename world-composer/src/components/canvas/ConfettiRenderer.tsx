@@ -2,15 +2,6 @@
 import React, { useEffect, useRef } from 'react';
 
 import { useCanvas } from './utils/CanvasUtils';
-import { Color } from '../../utils/Draw';
-import {
-    Point,
-    multiply,
-    clamp,
-    magnitude,
-    normalize,
-    round,
-} from '../../utils/Math';
 import { Particles } from '../../data/convectable/Particles';
 import { MACGridData } from '../../data/atmosphere/MACGrid';
 
@@ -25,7 +16,6 @@ interface Props {
 export function ConfettiRenderer({ atmo, particles, width, height }: Props) {
     const domCanvasRef = useRef<HTMLCanvasElement>(null);
     const [, displayCtxRef] = useCanvas(width, height, domCanvasRef);
-    const [cellCanvasRef, cellCtxRef] = useCanvas(10, 10);
 
     useEffect(
         () => {

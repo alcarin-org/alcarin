@@ -3,15 +3,9 @@ import { precalcNeighboursMatrix, calculateFieldPressure } from './EngineUtils';
 
 import {
     Point,
-    Vector,
     multiply,
     add,
-    round,
-    resolveLinearByJacobi,
-    normalize,
 } from '../../utils/Math';
-
-type ValueFromPositionFn<T> = (p: Point) => T;
 
 const StepDelaySec = 0.05;
 export class AtmosphereEngine {

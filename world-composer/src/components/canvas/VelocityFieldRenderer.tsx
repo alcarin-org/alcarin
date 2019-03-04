@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
 import { useCanvas } from './utils/CanvasUtils';
-// import { DataContainer } from '../../utils/Immutable';
 import { Point, multiply, clamp, magnitude, normalize } from '../../utils/Math';
 import {
     MACGridData,
@@ -9,8 +8,6 @@ import {
     interpolateVelocity,
 } from '../../data/atmosphere/MACGrid';
 import { AtmosphereEngine } from '../../data/engine/AtmosphereEngine';
-
-// type VectorField = Vector[];
 
 interface Props {
     atmo: MACGridData;

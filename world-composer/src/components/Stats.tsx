@@ -46,7 +46,7 @@ export default function Stats({
         ? [0, 0]
         : MACGrid.interpolateVelocity(atmosphere, mouseOver);
     const clickedDivergence = divVector[selectedInd];
-    const ind = MACGrid.index(atmosphere, mouseOverCell);
+    // const ind = MACGrid.index(atmosphere, mouseOverCell);
 
     // const selectedNodePressure = atmosphere.pressureVector[ind];
     // const clickedInterpolatedPress = isSolid

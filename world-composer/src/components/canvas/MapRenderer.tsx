@@ -1,29 +1,14 @@
-import React, {
-    useEffect,
-    useState,
-    useRef,
-    // MouseEventHandler,
-    // RefObject,
-} from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 import { BackgroundRenderer } from './background/BackgroundRenderer';
 import { SolidBackground } from './background/SolidBackground';
 import { VelocityFieldRenderer } from './VelocityFieldRenderer';
-import { ParticlesRenderer } from './ParticlesRenderer';
+// import { ParticlesRenderer } from './ParticlesRenderer';
 import { ConfettiRenderer } from './ConfettiRenderer';
 import { MapType } from './utils/CanvasUtils';
 import { MACGridData } from '../../data/atmosphere/MACGrid';
 import { AtmosphereEngine } from '../../data/engine/AtmosphereEngine';
 import { ParticlesEngine } from '../../data/engine/ParticlesEngine';
-// import {
-//     Point,
-//     Vector,
-//     normalize,
-//     multiply,
-//     round,
-//     add,
-//     floor,
-// } from '../../utils/Math';
 
 interface Props {
     atmo: MACGridData;
@@ -46,7 +31,7 @@ export function MapRenderer({
 
     const lastRenderRef = useRef<DOMHighResTimeStamp | null>(null);
     // temporary solution, the atmo/driver system waiting for refactor
-    const [renderCounter, setRenderCount] = useState(0);
+    const [, setRenderCount] = useState(0);
 
     useEffect(() => {
         let requestAnimFrameId = requestAnimationFrame(renderAtmosphere);

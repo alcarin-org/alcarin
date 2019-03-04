@@ -1,5 +1,3 @@
-import { Point, Vector } from '../../utils/Math';
-
 export interface VelocityField {
     // fluid velocity field coded as MAC grid with cell size 1.
     // integer point ((px, py)) represent center of a cell

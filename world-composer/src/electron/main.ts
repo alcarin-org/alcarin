@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, Event } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import { join } from 'path';
 
 // TODO: add support for remembering window custum size and position: https://github.com/mawie81/electron-window-state
@@ -60,15 +60,4 @@ ipcMain.on('main-window-ready', function onMainWindowReady() {
         mainWindow.show();
         mainWindow.focus();
     }
-});
-
-ipcMain.on(
-    'test',
-    (ev: Event, arg: string) =>
-        mainWindow && dialog.showMessageBox(mainWindow, { message: arg })
-);
-
-process.on('uncaughtException', function t(error) {
-    console.log('wtf', error);
-    // Handle the error
 });

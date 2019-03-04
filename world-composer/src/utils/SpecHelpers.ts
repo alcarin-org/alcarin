@@ -20,7 +20,7 @@ export function atmoFromPressureArray(pressureArray: number[]) {
     const atmo = create(radius);
     for (let i = 1; i < atmo.size - 1; i++) {
         for (let j = 1; j < atmo.size - 1; j++) {
-            const sampleInd = (j - 1) * (atmo.size - 2) + i - 1;
+            // const sampleInd = (j - 1) * (atmo.size - 2) + i - 1;
             // atmo.pressureVector[index(atmo, [i, j])] = pressureArray[sampleInd];
         }
     }

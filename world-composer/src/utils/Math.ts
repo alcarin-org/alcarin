@@ -53,25 +53,24 @@ export function resolveLinearByJacobi(
     A: Int8Array, // coefficient matrix A
     B: Float64Array // constants matrix B
 ): Float64Array {
-    // if (A.length !== B.length ** 2 || (initX && initX.length !== B.length)) {
-    //     throw new Error(
-    //         'Coefficient matrix A has different size that constant matrix B! Can not continue.'
-    //     );
-    // }
+    if (process.env.REACT_APP_DEBUG === '1') {
+        if (A.length !== B.length ** 2) {
+            throw new Error(
+                'Coefficient matrix A has different size that constant matrix B! Can not continue.'
+            );
+        }
+    }
     let x = new Float64Array(B.length); // resultsMatrix
     const tmpX = new Float64Array(B.length);
 
     for (let step = 0; step < 10; step++) {
         for (let iUnknown = 0; iUnknown < B.length; iUnknown++) {
-            // const iUnknownCoefficientOffset = iUnknown * B.length;
             const unknownCoefficients = A.subarray(
                 iUnknown * B.length,
                 iUnknown * B.length + B.length
             );
-            // const unknownCoefficients = arr[iUnknown];
 
             let iGuess = B[iUnknown];
-            // iGuess = (eqA[i] * x[i] + ...) / eqA[iUnknown];
             for (
                 let iCoefficient = 0;
                 iCoefficient < B.length;
@@ -93,6 +92,5 @@ export function resolveLinearByJacobi(
         }
         x = tmpX;
     }
-    // console.profileEnd('Jacobi');
     return x;
 }
