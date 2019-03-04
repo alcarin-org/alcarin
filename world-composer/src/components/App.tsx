@@ -6,6 +6,7 @@ import { MapType } from './canvas/utils/CanvasUtils';
 import * as MACGrid from '../data/atmosphere/MACGrid';
 import * as RandomizeField from '../data/atmosphere/RandomizeField';
 import { AtmosphereEngine } from '../data/engine/AtmosphereEngine';
+import { ParticlesEngine } from '../data/engine/ParticlesEngine';
 // import { Point } from '../utils/Math';
 // import { interpolateVelocityAt, evolve, divergence } from '../data/AtmoMotion';
 import { ipcRenderer } from '../electron-bridge';
@@ -15,6 +16,7 @@ const WorldSize = 20;
 
 let atmo = MACGrid.create(WorldSize);
 let atmoDriver = new AtmosphereEngine(atmo);
+let particlesEngine = new ParticlesEngine(atmoDriver);
 
 function App() {
     useEffect(() => ipcRenderer.send('main-window-ready'), []);
@@ -69,16 +71,19 @@ function App() {
             randomMethods[Math.floor(Math.random() * randomMethods.length)];
         atmo = MACGrid.create(WorldSize, method);
         atmoDriver = new AtmosphereEngine(atmo);
+        particlesEngine = new ParticlesEngine(atmoDriver);
         // atmoDriver.calculatePressure(1);
         forceRedraw(!_);
     }
 
     function spawnParticles() {
-        atmoDriver.spawnParticles(5000);
+        particlesEngine.spawnParticles(5000);
     }
 
     function onMapRenderTick(deltaTime: DOMHighResTimeStamp) {
-        atmoDriver.update(deltaTime / 1000);
+        const deltaTimeSec = deltaTime / 1000;
+        atmoDriver.update(deltaTimeSec);
+        particlesEngine.update(deltaTimeSec);
     }
 
     function onMapStatsUpdated(stats: MapStats) {
@@ -90,11 +95,13 @@ function App() {
             <InteractiveMap
                 atmo={atmo}
                 driver={atmoDriver}
+                particlesEngine={particlesEngine}
                 settings={mapSettings}
                 onTick={onMapRenderTick}
                 onStatsUpdated={onMapStatsUpdated}
             />
             <Stats
+                particlesEngine={particlesEngine}
                 atmoDriver={atmoDriver}
                 atmosphere={atmo}
                 mouseOver={[0, 0]}

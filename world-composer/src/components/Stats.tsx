@@ -4,11 +4,13 @@ import React from 'react';
 
 import * as MACGrid from '../data/atmosphere/MACGrid';
 import { AtmosphereEngine } from '../data/engine/AtmosphereEngine';
+import { ParticlesEngine } from '../data/engine/ParticlesEngine';
 import { Vector, Point, magnitude, add, multiply, round } from '../utils/Math';
 
 interface Props {
     atmosphere: MACGrid.MACGridData;
     atmoDriver: AtmosphereEngine;
+    particlesEngine: ParticlesEngine;
     mouseOver: Point;
     fps: number;
 }
@@ -16,6 +18,7 @@ interface Props {
 export default function Stats({
     atmosphere,
     atmoDriver,
+    particlesEngine,
     mouseOver,
     fps,
 }: Props) {
@@ -82,7 +85,7 @@ export default function Stats({
                 <dt>fps</dt>
                 <dd>{fps}</dd>
                 <dt>Particles</dt>
-                <dd>{atmoDriver.particles.positions.length / 2}</dd>
+                <dd>{particlesEngine.particles.positions.length / 2}</dd>
             </dl>
         </div>
     );

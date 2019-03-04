@@ -3,6 +3,7 @@ import React, { useCallback, useRef, MutableRefObject } from 'react';
 import { MapRenderer } from '../canvas/MapRenderer';
 import { MACGridData } from '../../data/atmosphere/MACGrid';
 import { AtmosphereEngine } from '../../data/engine/AtmosphereEngine';
+import { ParticlesEngine } from '../../data/engine/ParticlesEngine';
 import { MapType } from '../canvas/utils/CanvasUtils';
 
 export interface MapSettings {
@@ -17,6 +18,7 @@ export interface MapStats {
 interface Props {
     atmo: MACGridData;
     driver: AtmosphereEngine;
+    particlesEngine: ParticlesEngine;
 
     settings: MapSettings;
     onTick?: (deltaTime: DOMHighResTimeStamp) => void;
@@ -35,6 +37,7 @@ export function InteractiveMap({
     settings,
     onTick,
     onStatsUpdated,
+    particlesEngine,
 }: Props) {
     const fpsRef = useRef<FpsCalc>({
         fps: 0,
@@ -55,6 +58,7 @@ export function InteractiveMap({
     return (
         <MapRenderer
             atmo={atmo}
+            particlesEngine={particlesEngine}
             driver={driver}
             fieldSizePx={settings.drawFieldSize}
             mapType={settings.mapType}

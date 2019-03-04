@@ -14,6 +14,7 @@ import { ConfettiRenderer } from './ConfettiRenderer';
 import { MapType } from './utils/CanvasUtils';
 import { MACGridData } from '../../data/atmosphere/MACGrid';
 import { AtmosphereEngine } from '../../data/engine/AtmosphereEngine';
+import { ParticlesEngine } from '../../data/engine/ParticlesEngine';
 // import {
 //     Point,
 //     Vector,
@@ -27,6 +28,7 @@ import { AtmosphereEngine } from '../../data/engine/AtmosphereEngine';
 interface Props {
     atmo: MACGridData;
     driver: AtmosphereEngine;
+    particlesEngine: ParticlesEngine;
     fieldSizePx?: number;
     mapType: MapType;
     onRender?: (deltaTime: DOMHighResTimeStamp) => void;
@@ -38,6 +40,7 @@ export function MapRenderer({
     fieldSizePx = 30,
     mapType = MapType.Pressure,
     onRender,
+    particlesEngine,
 }: Props) {
     const canvasSizePx = fieldSizePx * atmo.size;
 
@@ -96,7 +99,7 @@ export function MapRenderer({
                     width={canvasSizePx}
                     height={canvasSizePx}
                     atmo={atmo}
-                    particles={driver.particles}
+                    particles={particlesEngine.particles}
                 />
             )}
         </div>

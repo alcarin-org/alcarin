@@ -10,12 +10,6 @@ import {
     resolveLinearByJacobi,
     normalize,
 } from '../../utils/Math';
-import {
-    createRandomParticles,
-    concatParticles,
-    Particles,
-    convectParticle,
-} from '../../data/convectable/Particles';
 
 type ValueFromPositionFn<T> = (p: Point) => T;
 
@@ -31,8 +25,6 @@ export class AtmosphereEngine {
 
     public step: number = 0;
 
-    public particles: Particles = createRandomParticles(0, this.grid);
-
     private fluidSourcePos?: Point;
 
     private deltaTimeAcc: DOMHighResTimeStamp = 0;
@@ -43,13 +35,6 @@ export class AtmosphereEngine {
         this.lastDivergenceVector = new Float64Array(this.grid.size ** 2);
         this.lastPressureVector = new Float64Array(this.grid.size ** 2);
         // this.lastPressureVector = this.calculatePressure(1);
-    }
-
-    public spawnParticles(count: number) {
-        this.particles = concatParticles(
-            this.particles,
-            createRandomParticles(count, this.grid)
-        );
     }
 
     public convectValue<T>(
@@ -69,8 +54,6 @@ export class AtmosphereEngine {
             this.evolve(this.deltaTimeAcc);
             this.deltaTimeAcc = 0;
         }
-
-        this.updateParticles(deltaTimeSec);
     }
 
     public setFluidSource(p: Point) {
@@ -161,24 +144,6 @@ export class AtmosphereEngine {
         );
         this.adjustVelocityFromPressure(this.lastPressureVector, deltaTime);
         this.step++;
-    }
-
-    private updateParticles(deltaTime: DOMHighResTimeStamp) {
-        const positions = this.particles.positions;
-        for (let i = 0; i < positions.length / 2; i++) {
-            const i2 = i * 2;
-
-            const pos = positions.slice(i2, i2 + 2);
-            const newPos = this.convectValue(
-                deltaTime,
-                [pos[0], pos[1]],
-                lastPos => convectParticle(lastPos, this.particles, this.grid)
-            );
-            positions.set(newPos, i2);
-        }
-        this.particles = {
-            ...this.particles,
-        };
     }
 
     private generateFluid(deltaTime: DOMHighResTimeStamp) {
