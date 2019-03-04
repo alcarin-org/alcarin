@@ -2,13 +2,13 @@ import './Stats.scss';
 
 import React from 'react';
 
-import { Atmosphere } from '../data/Atmosphere';
-import { VelocityDrivenAtmo } from '../data/VelocityDrivenAtmo';
+import * as MACGrid from '../data/atmosphere/MACGrid';
+import { AtmosphereEngine } from '../data/engine/AtmosphereEngine';
 import { Vector, Point, magnitude, add, multiply, round } from '../utils/Math';
 
 interface Props {
-    atmosphere: Atmosphere;
-    atmoDriver: VelocityDrivenAtmo;
+    atmosphere: MACGrid.MACGridData;
+    atmoDriver: AtmosphereEngine;
     mouseOver: Point;
     fps: number;
 }
@@ -19,17 +19,17 @@ export default function Stats({
     mouseOver,
     fps,
 }: Props) {
-    const divVector = atmosphere.divergenceVector();
+    const divVector = MACGrid.divergenceVector(atmosphere);
     const length = atmosphere.size ** 2;
-    let pressure = 0;
+    const pressure = 0;
     let totalVelocity: Vector = [0, 0];
     let totalDivergence = 0;
-    for (let i = 0; i < atmosphere.vectorSize; i++) {
+    for (let i = 0; i < atmosphere.size ** 2; i++) {
         totalVelocity = add(totalVelocity, [
-            atmosphere.velX[i],
-            atmosphere.velY[i],
+            atmosphere.field.velX[i],
+            atmosphere.field.velY[i],
         ]);
-        pressure += atmosphere.pressureVector[i];
+        // pressure += atmosphere.pressureVector[i];
         totalDivergence += divVector[i];
     }
     const avPressure = pressure / length;
@@ -37,18 +37,18 @@ export default function Stats({
     const avVelocity = multiply(totalVelocity, 1 / length);
 
     const mouseOverCell = round(mouseOver);
-    const selectedInd = atmosphere.index(mouseOverCell);
-    const isSolid = atmosphere.solidsVector[selectedInd] === 1;
+    const selectedInd = MACGrid.index(atmosphere, mouseOverCell);
+    const isSolid = atmosphere.solids[selectedInd] === 1;
     const clickedInterpolatedVel = isSolid
         ? [0, 0]
-        : atmosphere.interpolateVelocity(mouseOver);
+        : MACGrid.interpolateVelocity(atmosphere, mouseOver);
     const clickedDivergence = divVector[selectedInd];
-    const ind = atmosphere.index(mouseOverCell);
+    const ind = MACGrid.index(atmosphere, mouseOverCell);
 
-    const selectedNodePressure = atmosphere.pressureVector[ind];
-    const clickedInterpolatedPress = isSolid
-        ? NaN
-        : atmosphere.interpolatePressure(mouseOver);
+    // const selectedNodePressure = atmosphere.pressureVector[ind];
+    // const clickedInterpolatedPress = isSolid
+    //     ? NaN
+    //     : MACGrid.interpolatePressure(atmosphere, mouseOver);
     return (
         <div className="stats">
             <dl>
@@ -68,14 +68,10 @@ export default function Stats({
                 </dd>
                 <dt>Selected velocity</dt>
                 <dd>
-                    ({atmosphere.velX[selectedInd].toFixed(3)},
-                    {atmosphere.velY[selectedInd].toFixed(3)})
+                    ({atmosphere.field.velX[selectedInd].toFixed(3)},
+                    {atmosphere.field.velY[selectedInd].toFixed(3)})
                 </dd>
-                <dt>Selected pressure:</dt>
-                <dd>{selectedNodePressure.toFixed(3)}</dd>
 
-                <dt>Clicked interp. pressure:</dt>
-                <dd>{clickedInterpolatedPress.toFixed(3)}</dd>
                 <dt>Clicked interp. velocity:</dt>
                 <dd>
                     ({clickedInterpolatedVel[0].toFixed(3)},
@@ -91,3 +87,9 @@ export default function Stats({
         </div>
     );
 }
+
+ // <dt>Selected pressure:</dt>
+ //                <dd>{selectedNodePressure.toFixed(3)}</dd>
+
+ //                <dt>Clicked interp. pressure:</dt>
+ //                <dd>{clickedInterpolatedPress.toFixed(3)}</dd>

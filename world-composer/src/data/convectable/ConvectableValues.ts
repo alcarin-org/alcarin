@@ -1,4 +1,4 @@
-import { Atmosphere } from '../Atmosphere';
+import { MACGridData } from '../atmosphere/MACGrid';
 import { Point } from '../../utils/Math';
 
 /**
@@ -11,5 +11,5 @@ import { Point } from '../../utils/Math';
 export type ConvectValue<T, U> = (
     lastPos: Point,
     valuesBundle: U,
-    atmo: Atmosphere
+    atmo: MACGridData
 ) => T;

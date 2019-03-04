@@ -12,11 +12,11 @@ import {
     round,
 } from '../../utils/Math';
 import { Particles } from '../../data/convectable/Particles';
-import { Atmosphere } from '../../data/Atmosphere';
+import { MACGridData } from '../../data/atmosphere/MACGrid';
 
 interface Props {
     particles: Particles;
-    atmo: Atmosphere;
+    atmo: MACGridData;
 
     width: number;
     height: number;

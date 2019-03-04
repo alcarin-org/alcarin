@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 
-import { Atmosphere } from '../../../data/Atmosphere';
-import { VelocityDrivenAtmo } from '../../../data/VelocityDrivenAtmo';
+import {
+    MACGridData,
+    coords,
+    interpolateVelocity,
+} from '../../../data/atmosphere/MACGrid';
+import { AtmosphereEngine } from '../../../data/engine/AtmosphereEngine';
 import { magnitude } from '../../../utils/Math';
 import { DataContainer } from '../../../utils/Immutable';
 
@@ -12,8 +16,8 @@ import { DivergenceBackground } from './DivergenceBackground';
 import { VelocityBackground } from './VelocityBackground';
 
 interface Props {
-    atmo: Atmosphere;
-    driver: VelocityDrivenAtmo;
+    atmo: MACGridData;
+    driver: AtmosphereEngine;
     mapType: MapType;
     width: number;
     height: number;
@@ -26,9 +30,9 @@ export function BackgroundRenderer({
     width,
     height,
 }: Props) {
-    const [pressureContainer, setPressureContainer] = useState({
-        value: atmo.pressureVector,
-    });
+    // const [pressureContainer, setPressureContainer] = useState({
+    //     value: atmo.pressureVector,
+    // });
     const [divergenceContainer, setDivergenceContainer] = useState({
         value: driver.lastDivergenceVector,
     });
@@ -39,10 +43,10 @@ export function BackgroundRenderer({
     useEffect(
         () => {
             switch (mapType) {
-                case MapType.Pressure:
-                    setPressureContainer({
-                        value: atmo.pressureVector,
-                    });
+                // case MapType.Pressure:
+                //     setPressureContainer({
+                //         value: atmo.pressureVector,
+                //     });
                 case MapType.Divergence:
                     setDivergenceContainer({
                         value: driver.lastDivergenceVector,
@@ -58,15 +62,17 @@ export function BackgroundRenderer({
 
     switch (mapType) {
         case MapType.Pressure:
-            return (
-                <PressureBackground
-                    pressure={pressureContainer}
-                    canvasWidth={width}
-                    canvasHeight={height}
-                    bgWidth={atmo.size}
-                    bgHeight={atmo.size}
-                />
-            );
+            console.warn('todo: handle temp pressure');
+            return null;
+        // (
+        //     <PressureBackground
+        //         pressure={pressureContainer}
+        //         canvasWidth={width}
+        //         canvasHeight={height}
+        //         bgWidth={atmo.size}
+        //         bgHeight={atmo.size}
+        //     />
+        // );
         case MapType.Velocity:
             return (
                 <VelocityBackground
@@ -92,10 +98,10 @@ export function BackgroundRenderer({
     }
 }
 
-function getAtmoVelocityMagnitudeVector(atmo: Atmosphere) {
-    return atmo.pressureVector.map((_, ind) =>
-        atmo.solidsVector[ind] === 1
+function getAtmoVelocityMagnitudeVector(grid: MACGridData) {
+    return new Float64Array(grid.size ** 2).map((_, ind) =>
+        grid.solids[ind] === 1
             ? 0
-            : magnitude(atmo.interpolateVelocity(atmo.coords(ind)))
+            : magnitude(interpolateVelocity(grid, coords(grid, ind)))
     );
 }

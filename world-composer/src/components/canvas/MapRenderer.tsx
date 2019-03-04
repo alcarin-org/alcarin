@@ -12,8 +12,8 @@ import { VelocityFieldRenderer } from './VelocityFieldRenderer';
 import { ParticlesRenderer } from './ParticlesRenderer';
 import { ConfettiRenderer } from './ConfettiRenderer';
 import { MapType } from './utils/CanvasUtils';
-import { Atmosphere } from '../../data/Atmosphere';
-import { VelocityDrivenAtmo } from '../../data/VelocityDrivenAtmo';
+import { MACGridData } from '../../data/atmosphere/MACGrid';
+import { AtmosphereEngine } from '../../data/engine/AtmosphereEngine';
 // import {
 //     Point,
 //     Vector,
@@ -25,8 +25,8 @@ import { VelocityDrivenAtmo } from '../../data/VelocityDrivenAtmo';
 // } from '../../utils/Math';
 
 interface Props {
-    atmo: Atmosphere;
-    driver: VelocityDrivenAtmo;
+    atmo: MACGridData;
+    driver: AtmosphereEngine;
     fieldSizePx?: number;
     mapType: MapType;
     onRender?: (deltaTime: DOMHighResTimeStamp) => void;
@@ -77,7 +77,7 @@ export function MapRenderer({
                 mapType={mapType}
             />
             <SolidBackground
-                solids={atmo.solidsVector}
+                solids={atmo.solids}
                 canvasWidth={canvasSizePx}
                 canvasHeight={canvasSizePx}
                 bgWidth={atmo.size}

@@ -1,4 +1,4 @@
-import { Atmosphere } from '../Atmosphere';
+import * as MACGrid from '../atmosphere/MACGrid';
 import { Point, round } from '../../utils/Math';
 import { ConvectValue } from './ConvectableValues';
 import { Color, colorToNumber } from '../../utils/Draw';
@@ -45,7 +45,7 @@ export function concatParticles(part1: Particles, part2: Particles): Particles {
 
 export function createRandomParticles(
     count: number,
-    atmo: Atmosphere,
+    grid: MACGrid.MACGridData,
     colors = ParticleColors
 ): Particles {
     const colorsAsNumbers = ParticleColors.map(colorToNumber);
@@ -56,12 +56,15 @@ export function createRandomParticles(
 
     for (let i = 0; i < count; i++) {
         let p: Point | null = null;
-        while (p === null || atmo.solidsVector[atmo.index(round(p))] === 1) {
+        let containInd: number | null = null;
+        do {
             p = [
-                1 + Math.random() * (atmo.size - 3),
-                1 + Math.random() * (atmo.size - 3),
+                1 + Math.random() * (grid.size - 3),
+                1 + Math.random() * (grid.size - 3),
             ];
-        }
+            containInd = MACGrid.index(grid, round(p));
+        } while (p === null || grid.solids[containInd] === 1);
+
         particles.positions.set(p, 2 * i);
 
         particles.colors[i] =

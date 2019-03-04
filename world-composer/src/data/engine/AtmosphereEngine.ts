@@ -1,4 +1,6 @@
-import { Atmosphere } from './Atmosphere';
+import * as MACGrid from '../atmosphere/MACGrid';
+import { precalcNeighboursMatrix, calculateFieldPressure } from './EngineUtils';
+
 import {
     Point,
     Vector,
@@ -7,53 +9,46 @@ import {
     round,
     resolveLinearByJacobi,
     normalize,
-} from '../utils/Math';
+} from '../../utils/Math';
 import {
     createRandomParticles,
     concatParticles,
     Particles,
     convectParticle,
-} from '../data/convectable/Particles';
+} from '../../data/convectable/Particles';
 
-const relNeightbours: Vector[] = [[-1, 0], [1, 0], [0, -1], [0, 1]];
 type ValueFromPositionFn<T> = (p: Point) => T;
-type ConvectHook = <T>(
-    convectValue: <T>(p: Point, getValue: ValueFromPositionFn<T>) => T
-) => void;
 
 const StepDelaySec = 0.05;
-export class VelocityDrivenAtmo {
-    public readonly atmo: Atmosphere;
+export class AtmosphereEngine {
+    public readonly grid: MACGrid.MACGridData;
 
     public readonly neightboursMatrix: Int8Array;
 
-    public particles: Particles = createRandomParticles(0, this.atmo);
-
     public lastDivergenceVector: Float64Array;
+
+    public lastPressureVector: Float64Array;
 
     public step: number = 0;
 
-    private onConvectHooks: ConvectHook[] = [];
+    public particles: Particles = createRandomParticles(0, this.grid);
 
     private fluidSourcePos?: Point;
 
     private deltaTimeAcc: DOMHighResTimeStamp = 0;
 
-    public constructor(atmo: Atmosphere) {
-        this.atmo = atmo;
-        this.neightboursMatrix = this.precalcNeightboursMatrix();
-        this.lastDivergenceVector = new Float64Array(this.atmo.size ** 2);
-        this.atmo.pressureVector = this.calculatePressure(1);
+    public constructor(grid: MACGrid.MACGridData) {
+        this.grid = grid;
+        this.neightboursMatrix = precalcNeighboursMatrix(grid);
+        this.lastDivergenceVector = new Float64Array(this.grid.size ** 2);
+        this.lastPressureVector = new Float64Array(this.grid.size ** 2);
+        // this.lastPressureVector = this.calculatePressure(1);
     }
 
-    public registerConvectHook(hook: ConvectHook) {
-        this.onConvectHooks.push(hook);
-    }
-
-    public spawnPartcles(count: number) {
+    public spawnParticles(count: number) {
         this.particles = concatParticles(
             this.particles,
-            createRandomParticles(count, this.atmo)
+            createRandomParticles(count, this.grid)
         );
     }
 
@@ -78,24 +73,14 @@ export class VelocityDrivenAtmo {
         this.updateParticles(deltaTimeSec);
     }
 
-    private evolve(deltaTime: DOMHighResTimeStamp) {
-        this.generateFluid(deltaTime);
-
-        this.convectVelocity(deltaTime);
-        this.applyExternalForces(deltaTime);
-        this.atmo.pressureVector = this.calculatePressure(deltaTime);
-        this.adjustVelocityFromPressure(this.atmo.pressureVector, deltaTime);
-        this.step++;
-    }
-
     public setFluidSource(p: Point) {
-        const ind = this.atmo.index(p);
+        const ind = MACGrid.index(this.grid, p);
         const itsSamePoint =
             this.fluidSourcePos &&
             p[0] === this.fluidSourcePos[0] &&
             p[1] === this.fluidSourcePos[1];
         this.fluidSourcePos =
-            itsSamePoint || this.atmo.solidsVector[ind] === 1 ? undefined : p;
+            itsSamePoint || this.grid.solids[ind] === 1 ? undefined : p;
     }
 
     public applyExternalForces(deltaTime: DOMHighResTimeStamp) {
@@ -120,64 +105,62 @@ export class VelocityDrivenAtmo {
     }
 
     public divergenceVector(deltaTime: DOMHighResTimeStamp) {
-        const divVector = this.atmo.divergenceVector(1 / deltaTime);
+        const divVector = MACGrid.divergenceVector(this.grid, 1 / deltaTime);
         this.lastDivergenceVector = divVector;
 
-        return divVector.filter((_, ind) => this.atmo.solidsVector[ind] === 0);
-    }
-
-    public calculatePressure(deltaTime: DOMHighResTimeStamp) {
-        const neighboursMatrixA = this.neightboursMatrix;
-        const divergenceVectorB = this.divergenceVector(deltaTime);
-        const fluidPressureSolveVector = resolveLinearByJacobi(
-            neighboursMatrixA,
-            divergenceVectorB
-        );
-
-        let iFluidCellInd = 0;
-        return this.atmo.pressureVector.map((isSolid, ind) =>
-            this.atmo.solidsVector[ind] === 1
-                ? 0
-                : fluidPressureSolveVector[iFluidCellInd++]
-        );
+        return divVector.filter((_, ind) => this.grid.solids[ind] === 0);
     }
 
     public adjustVelocityFromPressure(
         gridPressureVector: Float64Array,
         deltaTime: DOMHighResTimeStamp
     ) {
-        this.atmo.velX = this.atmo.velX.map((vel, ind) => {
-            if (this.atmo.solidsVector[ind] === 1) {
+        this.grid.field.velX = this.grid.field.velX.map((vel, ind) => {
+            if (this.grid.solids[ind] === 1) {
                 return 0;
             }
-            const pos = this.atmo.coords(ind);
-            this.atmo.assert(pos);
-            this.atmo.assert([pos[0] - 1, pos[1]]);
+            const pos = MACGrid.coords(this.grid, ind);
+            MACGrid.assert(this.grid, pos);
+            MACGrid.assert(this.grid, [pos[0] - 1, pos[1]]);
 
             const posPressure = gridPressureVector[ind];
-            const onLeftBorder = this.atmo.solidsVector[ind - 1] === 1;
+            const onLeftBorder = this.grid.solids[ind - 1] === 1;
             const pressureGradientX = onLeftBorder
                 ? 0
                 : posPressure - gridPressureVector[ind - 1];
             return vel - deltaTime * pressureGradientX;
         });
 
-        this.atmo.velY = this.atmo.velY.map((vel, ind) => {
-            if (this.atmo.solidsVector[ind] === 1) {
+        this.grid.field.velY = this.grid.field.velY.map((vel, ind) => {
+            if (this.grid.solids[ind] === 1) {
                 return 0;
             }
-            const pos = this.atmo.coords(ind);
-            this.atmo.assert(pos);
-            this.atmo.assert([pos[0], pos[1] - 1]);
+            const pos = MACGrid.coords(this.grid, ind);
+
+            MACGrid.assert(this.grid, pos);
+            MACGrid.assert(this.grid, [pos[0], pos[1] - 1]);
 
             const posPressure = gridPressureVector[ind];
-            const onTopBorder =
-                this.atmo.solidsVector[ind - this.atmo.size] === 1;
+            const onTopBorder = this.grid.solids[ind - this.grid.size] === 1;
             const pressureGradientY = onTopBorder
                 ? 0
-                : posPressure - gridPressureVector[ind - this.atmo.size];
+                : posPressure - gridPressureVector[ind - this.grid.size];
             return vel - deltaTime * pressureGradientY;
         });
+    }
+
+    private evolve(deltaTime: DOMHighResTimeStamp) {
+        this.generateFluid(deltaTime);
+
+        this.convectVelocity(deltaTime);
+        this.applyExternalForces(deltaTime);
+        this.lastPressureVector = calculateFieldPressure(
+            this.grid,
+            this.neightboursMatrix,
+            deltaTime
+        );
+        this.adjustVelocityFromPressure(this.lastPressureVector, deltaTime);
+        this.step++;
     }
 
     private updateParticles(deltaTime: DOMHighResTimeStamp) {
@@ -189,7 +172,7 @@ export class VelocityDrivenAtmo {
             const newPos = this.convectValue(
                 deltaTime,
                 [pos[0], pos[1]],
-                lastPos => convectParticle(lastPos, this.particles, this.atmo)
+                lastPos => convectParticle(lastPos, this.particles, this.grid)
             );
             positions.set(newPos, i2);
         }
@@ -228,78 +211,42 @@ export class VelocityDrivenAtmo {
     }
 
     private convectVelocity(deltaTime: DOMHighResTimeStamp) {
-        const newVelX = this.atmo.velX.map((_, ind) => {
-            const p = this.atmo.coords(ind);
+        const newVelX = this.grid.field.velX.map((_, ind) => {
+            const p = MACGrid.coords(this.grid, ind);
 
             // we expecting that a walls are on entire left border of the map
-            return this.atmo.solidsVector[ind] === 1 ||
-                this.atmo.solidsVector[ind - 1] === 1
+            return this.grid.solids[ind] === 1 ||
+                this.grid.solids[ind - 1] === 1
                 ? 0
                 : this.traceBackParticleVelocity(
                       [p[0] - 0.5, p[1]],
                       deltaTime
                   )[0];
         });
-        const newVelY = this.atmo.velX.map((_, ind) => {
-            const p = this.atmo.coords(ind);
+        const newVelY = this.grid.field.velX.map((_, ind) => {
+            const p = MACGrid.coords(this.grid, ind);
             // we expecting that a walls are on entire top border of the map
-            return this.atmo.solidsVector[ind] === 1 ||
-                this.atmo.solidsVector[ind - this.atmo.size] === 1
+            return this.grid.solids[ind] === 1 ||
+                this.grid.solids[ind - this.grid.size] === 1
                 ? 0
                 : this.traceBackParticleVelocity(
                       [p[0], p[1] - 0.5],
                       deltaTime
                   )[1];
         });
-        this.atmo.velX = newVelX;
-        this.atmo.velY = newVelY;
-    }
-
-    private precalcNeightboursMatrix() {
-        // neightbours matrix for every cell show negative number of non-solid neighbours
-        // for given cell and "1" for the cell neighbours. other cells are marked as "0".
-        // it only include fluid cells
-        const matrix = new Int8Array(this.atmo.vectorSize ** 2);
-
-        // let iFluidCell = 0;
-
-        for (let iCell = 0; iCell < this.atmo.vectorSize; iCell++) {
-            if (this.atmo.solidsVector[iCell] === 1) {
-                continue;
-            }
-
-            const rowOffset = iCell * this.atmo.vectorSize;
-            const p = this.atmo.coords(iCell);
-
-            let neighboursCount = 0;
-            for (const relPos of relNeightbours) {
-                const nPos = add(p, relPos);
-                const nIndex = this.atmo.index(nPos);
-                if (this.atmo.solidsVector[nIndex] === 0) {
-                    matrix[rowOffset + nIndex] = 1;
-                    neighboursCount++;
-                }
-            }
-            matrix[rowOffset + iCell] = -neighboursCount;
-        }
-        return matrix.filter(
-            (_, ind) =>
-                this.atmo.solidsVector[
-                    Math.floor(ind / this.atmo.vectorSize)
-                ] === 0 &&
-                this.atmo.solidsVector[ind % this.atmo.vectorSize] === 0
-        );
+        this.grid.field.velX = newVelX;
+        this.grid.field.velY = newVelY;
     }
 
     private traceBackParticleVelocity(
         p: Point,
         deltaTime: DOMHighResTimeStamp
     ): Point {
-        const v = this.atmo.interpolateVelocity(p);
+        const v = MACGrid.interpolateVelocity(this.grid, p);
         const lastKnownP: Point = add(p, multiply(v, -0.5 * deltaTime));
-        const avVelocity = this.atmo.interpolateVelocity(lastKnownP);
+        const avVelocity = MACGrid.interpolateVelocity(this.grid, lastKnownP);
 
         const particlePos = add(p, multiply(avVelocity, -deltaTime));
-        return this.atmo.interpolateVelocity(particlePos);
+        return MACGrid.interpolateVelocity(this.grid, particlePos);
     }
 }

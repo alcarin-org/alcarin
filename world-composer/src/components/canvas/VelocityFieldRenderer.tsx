@@ -3,14 +3,18 @@ import React, { useEffect, useRef } from 'react';
 import { useCanvas } from './utils/CanvasUtils';
 // import { DataContainer } from '../../utils/Immutable';
 import { Point, multiply, clamp, magnitude, normalize } from '../../utils/Math';
-import { Atmosphere } from '../../data/Atmosphere';
-import { VelocityDrivenAtmo } from '../../data/VelocityDrivenAtmo';
+import {
+    MACGridData,
+    index,
+    interpolateVelocity,
+} from '../../data/atmosphere/MACGrid';
+import { AtmosphereEngine } from '../../data/engine/AtmosphereEngine';
 
 // type VectorField = Vector[];
 
 interface Props {
-    atmo: Atmosphere;
-    driver: VelocityDrivenAtmo;
+    atmo: MACGridData;
+    driver: AtmosphereEngine;
 
     width: number;
     height: number;
@@ -41,7 +45,7 @@ export function VelocityFieldRenderer({ atmo, driver, width, height }: Props) {
 
 export function renderVelocities(
     ctx: CanvasRenderingContext2D,
-    atmo: Atmosphere,
+    atmo: MACGridData,
     fieldSizePx: number
 ) {
     function drawVectorFromTo(from: Point, to: Point) {
@@ -57,11 +61,11 @@ export function renderVelocities(
     ctx.strokeStyle = 'black';
     for (let i = 0; i < atmo.size; i++) {
         for (let j = 0; j < atmo.size; j++) {
-            const ind = atmo.index([i, j]);
-            if (atmo.solidsVector[ind] === 1) {
+            const ind = index(atmo, [i, j]);
+            if (atmo.solids[ind] === 1) {
                 continue;
             }
-            const vel = atmo.interpolateVelocity([i, j]);
+            const vel = interpolateVelocity(atmo, [i, j]);
             const offset = [(i + 0.5) * fieldSizePx, (j + 0.5) * fieldSizePx];
             const vPower = clamp(0.1, 1, magnitude(vel) * VelocityDrawFactor);
             const vNorm = normalize(vel);

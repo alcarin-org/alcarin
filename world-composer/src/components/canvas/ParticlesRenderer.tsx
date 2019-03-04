@@ -2,11 +2,11 @@ import React, { useEffect, useRef } from 'react';
 
 import { useCanvas } from './utils/CanvasUtils';
 import { Point, multiply, clamp, magnitude, normalize } from '../../utils/Math';
-import { Atmosphere } from '../../data/Atmosphere';
+import { MACGridData } from '../../data/atmosphere/MACGrid';
 
 interface Props {
     particles: Point[];
-    atmo: Atmosphere;
+    atmo: MACGridData;
 
     width: number;
     height: number;

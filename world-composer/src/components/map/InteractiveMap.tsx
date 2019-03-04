@@ -1,8 +1,8 @@
 import React, { useCallback, useRef, MutableRefObject } from 'react';
 
 import { MapRenderer } from '../canvas/MapRenderer';
-import { Atmosphere } from '../../data/Atmosphere';
-import { VelocityDrivenAtmo } from '../../data/VelocityDrivenAtmo';
+import { MACGridData } from '../../data/atmosphere/MACGrid';
+import { AtmosphereEngine } from '../../data/engine/AtmosphereEngine';
 import { MapType } from '../canvas/utils/CanvasUtils';
 
 export interface MapSettings {
@@ -15,8 +15,8 @@ export interface MapStats {
 }
 
 interface Props {
-    atmo: Atmosphere;
-    driver: VelocityDrivenAtmo;
+    atmo: MACGridData;
+    driver: AtmosphereEngine;
 
     settings: MapSettings;
     onTick?: (deltaTime: DOMHighResTimeStamp) => void;

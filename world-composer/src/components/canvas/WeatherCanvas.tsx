@@ -21,7 +21,7 @@
 // import { Color } from './utils/DrawUtils';
 // import { useCanvas } from './utils/CanvasUtils';
 // import { Atmosphere } from '../../data/Atmosphere';
-// import { VelocityDrivenAtmo } from '../../data/VelocityDrivenAtmo';
+// import { VelocityDrivenAtmo } from '../../data/engine/AtmosphereEngine';
 // import {
 //     Point,
 //     Vector,

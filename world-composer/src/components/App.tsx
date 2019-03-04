@@ -3,17 +3,18 @@ import React, { useEffect, useState, FormEvent } from 'react';
 import './App.scss';
 import { InteractiveMap, MapSettings, MapStats } from './map/InteractiveMap';
 import { MapType } from './canvas/utils/CanvasUtils';
-import { Atmosphere } from '../data/Atmosphere';
-import { VelocityDrivenAtmo } from '../data/VelocityDrivenAtmo';
+import * as MACGrid from '../data/atmosphere/MACGrid';
+import * as RandomizeField from '../data/atmosphere/RandomizeField';
+import { AtmosphereEngine } from '../data/engine/AtmosphereEngine';
 // import { Point } from '../utils/Math';
 // import { interpolateVelocityAt, evolve, divergence } from '../data/AtmoMotion';
 import { ipcRenderer } from '../electron-bridge';
 import Stats from './Stats';
 
-const WorldRadius = 14;
+const WorldSize = 20;
 
-const atmo = new Atmosphere(WorldRadius);
-const atmoDriver = new VelocityDrivenAtmo(atmo);
+let atmo = MACGrid.create(WorldSize);
+let atmoDriver = new AtmosphereEngine(atmo);
 
 function App() {
     useEffect(() => ipcRenderer.send('main-window-ready'), []);
@@ -58,9 +59,22 @@ function App() {
     }
 
     function randomizeMap() {
-        atmo.randomizeField();
-        atmoDriver.calculatePressure(1);
+        const randomMethods = [
+            RandomizeField.Chaotic,
+            RandomizeField.GlobalCurl,
+            RandomizeField.LeftWave,
+            RandomizeField.RightWave,
+        ];
+        const method =
+            randomMethods[Math.floor(Math.random() * randomMethods.length)];
+        atmo = MACGrid.create(WorldSize, method);
+        atmoDriver = new AtmosphereEngine(atmo);
+        // atmoDriver.calculatePressure(1);
         forceRedraw(!_);
+    }
+
+    function spawnParticles() {
+        atmoDriver.spawnParticles(5000);
     }
 
     function onMapRenderTick(deltaTime: DOMHighResTimeStamp) {
@@ -88,9 +102,7 @@ function App() {
             />
             <button onClick={randomizeMap}> Random</button>
             <button onClick={() => setPause(!pause)}>Run</button>
-            <button onClick={() => atmoDriver.spawnPartcles(5000)}>
-                Spawn 5k particles
-            </button>
+            <button onClick={spawnParticles}>Spawn 5k particles</button>
 
             <label>
                 <input

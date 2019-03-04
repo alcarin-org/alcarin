@@ -1,5 +1,5 @@
 // import { Atmosphere } from './Atmosphere';
-import { VelocityDrivenAtmo } from './VelocityDrivenAtmo';
+import { AtmosphereEngine } from './engine/AtmosphereEngine';
 
 import { Vector } from '../utils/Math';
 import { atmoFromVelocityArray } from '../utils/SpecHelpers';
@@ -65,7 +65,7 @@ const smallAtmo = () => atmoFromVelocityArray([
 // });
 
 test.only('Should properly prepare neigbours matrix', () => {
-    const driver = new VelocityDrivenAtmo(smallAtmo());
+    const driver = new AtmosphereEngine(smallAtmo());
     // prettier-ignore
     console.log(driver.neightboursMatrix.length);
     expect(Array.from(driver.neightboursMatrix)).toEqual([
