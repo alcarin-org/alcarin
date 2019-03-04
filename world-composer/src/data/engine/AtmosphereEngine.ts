@@ -103,8 +103,11 @@ export class AtmosphereEngine {
                 return 0;
             }
             const pos = MACGrid.coords(this.grid, ind);
-            MACGrid.assert(this.grid, pos);
-            MACGrid.assert(this.grid, [pos[0] - 1, pos[1]]);
+
+            if (process.env.REACT_APP_DEBUG === '1') {
+                MACGrid.assert(this.grid, pos);
+                MACGrid.assert(this.grid, [pos[0] - 1, pos[1]]);
+            }
 
             const posPressure = gridPressureVector[ind];
             const onLeftBorder = this.grid.solids[ind - 1] === 1;
@@ -120,8 +123,10 @@ export class AtmosphereEngine {
             }
             const pos = MACGrid.coords(this.grid, ind);
 
-            MACGrid.assert(this.grid, pos);
-            MACGrid.assert(this.grid, [pos[0], pos[1] - 1]);
+            if (process.env.REACT_APP_DEBUG === '1') {
+                MACGrid.assert(this.grid, pos);
+                MACGrid.assert(this.grid, [pos[0], pos[1] - 1]);
+            }
 
             const posPressure = gridPressureVector[ind];
             const onTopBorder = this.grid.solids[ind - this.grid.size] === 1;

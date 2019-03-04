@@ -117,19 +117,21 @@ export function coords(grid: MACGridData, index: number): Point {
 }
 
 export function assert(grid: MACGridData, p: Point) {
-    // uncomment it to debug problems with simulation numbers
-    // if (
-    //     p[0] < -0.5 ||
-    //     p[0] > grid.size - 0.5 ||
-    //     p[1] < -0.5 ||
-    //     p[1] > grid.size - 0.5
-    // ) {
-    //     throw new Error(
-    //         `Point (${p[0]}, ${
-    //             p[1]
-    //         }) is outside legal map coords. There must be an error in the code.`
-    //     );
-    // }
+    if (process.env.REACT_APP_DEBUG !== '1') {
+        console.warn('Asserting when not in debug mode.');
+    }
+    if (
+        p[0] < -0.5 ||
+        p[0] > grid.size - 0.5 ||
+        p[1] < -0.5 ||
+        p[1] > grid.size - 0.5
+    ) {
+        throw new Error(
+            `Point (${p[0]}, ${
+                p[1]
+            }) is outside legal map coords. There must be an error in the code.`
+        );
+    }
 }
 
 export function interpolateVelocity(grid: MACGridData, p: Point): Vector {
@@ -161,7 +163,9 @@ function interpolateVelocityAt(
                 minCellP[1] + offsetY,
             ];
 
-            assert(grid, neighPos);
+            if (process.env.REACT_APP_DEBUG === '1') {
+                assert(grid, neighPos);
+            }
 
             const neighInd = index(grid, neighPos);
 
@@ -195,7 +199,10 @@ export function interpolatePressure(
                 minCellP[0] + offsetX,
                 minCellP[1] + offsetY,
             ];
-            assert(grid, neighPos);
+
+            if (process.env.REACT_APP_DEBUG === '1') {
+                assert(grid, neighPos);
+            }
 
             const ind = index(grid, neighPos);
             if (grid.solids[ind] === 1) {
