@@ -83,8 +83,12 @@ function App() {
                 mouseOver={[0, 0]}
                 fps={renderFps}
             />
-            <button onClick={randomizeMap}> Random</button>
-            <button onClick={spawnParticles}>Spawn 5k particles</button>
+            <button className="pure-button" onClick={randomizeMap}>
+                <i className="fa fa-cog"></i> Random
+            </button>
+            <button className="pure-button" onClick={spawnParticles}>
+                Spawn 5k particles
+            </button>
 
             <div className="app__control-panel">
                 Map Type:
@@ -96,6 +100,7 @@ function App() {
                             value={MapType.Pressure}
                             checked={mapSettings.mapType === MapType.Pressure}
                             onChange={onMapTypeChange}
+                            disabled={true}
                         />{' '}
                         Pressure
                     </label>
