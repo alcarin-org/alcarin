@@ -1,0 +1,26 @@
+
+@import 'variables';
+
+.toolbar {
+    display: inline-flex;
+    align-items: stretch;
+    justify-content: center;
+
+    border: 1px solid $panel-border;
+    background-color: $panel-bg;
+    padding: 2px 0;
+    width: 100%;
+
+    &__button {
+        margin: 0 2px;
+    }
+
+    &__separator {
+        display: inline-block;
+        margin: 1px 7px;
+        border-right: 1px solid $panel-border;
+
+        width: 1px;
+        height: auto;
+    }
+}

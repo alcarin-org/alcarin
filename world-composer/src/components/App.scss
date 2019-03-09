@@ -1,50 +1,29 @@
+@import 'variables';
+
 .app {
-    padding: 1rem;
+    display: flex;
+    flex-flow: column;
+    height: 100%;
     text-align: center;
 
-    &__logo {
-        animation: App-logo-spin infinite 20s linear;
-        height: 40vmin;
-    }
-
-    &__header {
+    &__toolbar {
         display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        background-color: #282c34;
-        min-height: 100vh;
-        color: #fff;
-        font-size: calc(10px + 2vmin);
     }
 
-    &__link {
-        color: #61dafb;
+    &__stats-panel {
+        border: 1px solid $panel-border;
+        background-color: $panel-bg;
+        width: 500px;
     }
 
-    &__control-panel {
+    &__content {
         display: flex;
-        flex-flow: column;
-
-        & > * {
-            margin: 10px 0;
-        }
+        flex: 1;
     }
 
-    &__checkboxes {
-        & > * {
-            padding: 0 10px;
-        }
-    }
-}
-
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-
-    to {
-        transform: rotate(360deg);
+    &__map {
+        flex: 1;
+        align-self: center;
     }
 }
 

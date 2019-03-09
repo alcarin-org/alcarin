@@ -1,19 +1,15 @@
 .stats {
     dl {
-        dt {
-            text-align: right;
-        }
-
-        dd {
-            text-align: left;
-        }
+        display: flex;
+        flex-wrap: wrap;
+        padding: 0 20px;
 
         dt,
         dd {
-            display: inline-block;
-            margin: 0;
-            padding: 0 10px;
-            width: 20%;
+            flex-basis: 45%;
+            margin: 5px 0;
+            padding: 0;
+            text-align: left;
         }
     }
 }

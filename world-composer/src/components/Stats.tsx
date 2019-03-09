@@ -63,7 +63,7 @@ export default function Stats({
                 <dt>Av. Pressure</dt>
                 <dd>{avPressure.toFixed(3)}</dd>
                 <dt>Av. Divergence</dt>
-                <dd>({avDivergence.toFixed(3)})</dd>
+                <dd>{avDivergence.toFixed(3)}</dd>
                 <dt>Selected</dt>
                 <dd>
                     ({mouseOver[0].toFixed(3)}, {mouseOver[1].toFixed(3)}) ~(
@@ -75,14 +75,14 @@ export default function Stats({
                     {atmosphere.field.velY[selectedInd].toFixed(3)})
                 </dd>
 
-                <dt>Clicked interp. velocity:</dt>
+                <dt>Clicked interp. velocity</dt>
                 <dd>
                     ({clickedInterpolatedVel[0].toFixed(3)},
                     {clickedInterpolatedVel[1].toFixed(3)})
                 </dd>
-                <dt>Clicked divergence:</dt>
+                <dt>Clicked divergence</dt>
                 <dd>{clickedDivergence.toFixed(3)}</dd>
-                <dt>fps</dt>
+                <dt>Render FPS</dt>
                 <dd>{fps}</dd>
                 <dt>Particles</dt>
                 <dd>{particlesEngine.particles.positions.length / 2}</dd>
@@ -91,8 +91,8 @@ export default function Stats({
     );
 }
 
- // <dt>Selected pressure:</dt>
- //                <dd>{selectedNodePressure.toFixed(3)}</dd>
+// <dt>Selected pressure</dt>
+//                <dd>{selectedNodePressure.toFixed(3)}</dd>
 
- //                <dt>Clicked interp. pressure:</dt>
- //                <dd>{clickedInterpolatedPress.toFixed(3)}</dd>
+//                <dt>Clicked interp. pressure:</dt>
+//                <dd>{clickedInterpolatedPress.toFixed(3)}</dd>

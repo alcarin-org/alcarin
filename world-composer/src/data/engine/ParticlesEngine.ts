@@ -11,9 +11,12 @@ export class ParticlesEngine {
 
     private engine: AtmosphereEngine;
 
-    public constructor(engine: AtmosphereEngine) {
+    public constructor(
+        engine: AtmosphereEngine,
+        particles = createRandomParticles(0, engine.grid)
+    ) {
         this.engine = engine;
-        this.particles = createRandomParticles(0, engine.grid);
+        this.particles = particles;
     }
 
     public spawnParticles(count: number) {

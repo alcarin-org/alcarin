@@ -1,4 +1,4 @@
-import React, { useEffect, useState, FormEvent } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import './App.scss';
 import { InteractiveMap, MapSettings, MapStats } from './map/InteractiveMap';
@@ -10,6 +10,8 @@ import { ParticlesEngine } from '../data/engine/ParticlesEngine';
 import { ipcRenderer } from '../electron-bridge';
 import Stats from './Stats';
 
+import { Toolbar, ToolbarButton, ToolbarSeparator } from './common/Toolbar';
+
 const WorldSize = 20;
 
 let atmo = MACGrid.create(WorldSize);
@@ -19,8 +21,8 @@ let particlesEngine = new ParticlesEngine(atmoDriver);
 function App() {
     useEffect(() => ipcRenderer.send('main-window-ready'), []);
 
-    // todo
-    const [timeStep, setTimeStep] = useState(1);
+    const [isStatsVisible, setIsStatsVisible] = useState(false);
+
     const [mapSettings, setMapSettings] = useState<MapSettings>({
         drawFieldSize: 25,
         mapType: MapType.Neutral,
@@ -28,14 +30,8 @@ function App() {
 
     const [renderFps, setRenderFps] = useState(0);
 
-    function onMapTypeChange(ev: FormEvent<HTMLInputElement>) {
-        const mapType = parseInt(ev.currentTarget.value, 10);
+    function onMapTypeChange(mapType: MapType) {
         setMapSettings({ ...mapSettings, mapType });
-    }
-
-    function onDrawGrid(ev: FormEvent<HTMLInputElement>) {
-        // todo
-        // setDrawGrid(ev.currentTarget.checked);
     }
 
     function randomizeMap() {
@@ -49,7 +45,10 @@ function App() {
             randomMethods[Math.floor(Math.random() * randomMethods.length)];
         atmo = MACGrid.create(WorldSize, method);
         atmoDriver = new AtmosphereEngine(atmo);
-        particlesEngine = new ParticlesEngine(atmoDriver);
+        particlesEngine = new ParticlesEngine(
+            atmoDriver,
+            particlesEngine.particles
+        );
     }
 
     function spawnParticles() {
@@ -68,93 +67,80 @@ function App() {
 
     return (
         <div className="app">
-            <InteractiveMap
-                atmo={atmo}
-                driver={atmoDriver}
-                particlesEngine={particlesEngine}
-                settings={mapSettings}
-                onTick={onMapRenderTick}
-                onStatsUpdated={onMapStatsUpdated}
-            />
-            <Stats
-                particlesEngine={particlesEngine}
-                atmoDriver={atmoDriver}
-                atmosphere={atmo}
-                mouseOver={[0, 0]}
-                fps={renderFps}
-            />
-            <button className="pure-button" onClick={randomizeMap}>
-                <i className="fa fa-cog"></i> Random
-            </button>
-            <button className="pure-button" onClick={spawnParticles}>
-                Spawn 5k particles
-            </button>
+            <div className="app__toolbar">
+                <Toolbar>
+                    <ToolbarButton
+                        onClick={randomizeMap}
+                        title="Randomize velocity field"
+                    >
+                        <i className="fa fa-random" />
+                    </ToolbarButton>
+                    <ToolbarButton
+                        onClick={spawnParticles}
+                        title="Spawn 5k particles"
+                    >
+                        <i className="fa fa-ravelry" />
+                    </ToolbarButton>
 
-            <div className="app__control-panel">
-                Map Type:
-                <div className="app__input-group">
-                    <label>
-                        <input
-                            type="radio"
-                            name="mapType[]"
-                            value={MapType.Pressure}
-                            checked={mapSettings.mapType === MapType.Pressure}
-                            onChange={onMapTypeChange}
-                            disabled={true}
-                        />{' '}
+                    <ToolbarSeparator />
+
+                    <ToolbarButton
+                        active={mapSettings.mapType === MapType.Pressure}
+                        onClick={() => onMapTypeChange(MapType.Pressure)}
+                        disabled={true}
+                    >
                         Pressure
-                    </label>
-                    <label>
-                        <input
-                            type="radio"
-                            name="mapType[]"
-                            value={MapType.Neutral}
-                            checked={mapSettings.mapType === MapType.Neutral}
-                            onChange={onMapTypeChange}
-                        />{' '}
+                    </ToolbarButton>
+                    <ToolbarButton
+                        active={mapSettings.mapType === MapType.Neutral}
+                        onClick={() => onMapTypeChange(MapType.Neutral)}
+                    >
                         Neutral
-                    </label>
-                    <label>
-                        <input
-                            type="radio"
-                            name="mapType[]"
-                            value={MapType.Velocity}
-                            checked={mapSettings.mapType === MapType.Velocity}
-                            onChange={onMapTypeChange}
-                        />{' '}
+                    </ToolbarButton>
+                    <ToolbarButton
+                        active={mapSettings.mapType === MapType.Velocity}
+                        onClick={() => onMapTypeChange(MapType.Velocity)}
+                    >
                         Velocity
-                    </label>
-                    <label>
-                        <input
-                            type="radio"
-                            name="mapType[]"
-                            value={MapType.Divergence}
-                            checked={mapSettings.mapType === MapType.Divergence}
-                            onChange={onMapTypeChange}
-                        />{' '}
+                    </ToolbarButton>
+                    <ToolbarButton
+                        active={mapSettings.mapType === MapType.Divergence}
+                        onClick={() => onMapTypeChange(MapType.Divergence)}
+                    >
                         Divergence
-                    </label>
-                </div>
-                <label>
-                    Time step
-                    <input
-                        type="range"
-                        min={1}
-                        max={50}
-                        step={5}
-                        value={timeStep * 10}
-                        onChange={ev =>
-                            setTimeStep(
-                                parseInt(ev.currentTarget.value, 10) / 10
-                            )
-                        }
+                    </ToolbarButton>
+
+                    <ToolbarSeparator />
+
+                    <ToolbarButton
+                        onClick={() => setIsStatsVisible(!isStatsVisible)}
+                        title="Show statistics"
+                    >
+                        <i className="fa fa-bar-chart" />
+                    </ToolbarButton>
+                </Toolbar>
+            </div>
+            <div className="app__content">
+                {isStatsVisible && (
+                    <div className="app__stats-panel">
+                        <Stats
+                            particlesEngine={particlesEngine}
+                            atmoDriver={atmoDriver}
+                            atmosphere={atmo}
+                            mouseOver={[0, 0]}
+                            fps={renderFps}
+                        />
+                    </div>
+                )}
+                <div className="app__map">
+                    <InteractiveMap
+                        atmo={atmo}
+                        driver={atmoDriver}
+                        particlesEngine={particlesEngine}
+                        settings={mapSettings}
+                        onTick={onMapRenderTick}
+                        onStatsUpdated={onMapStatsUpdated}
                     />
-                </label>
-                <div className="app__checkboxes">
-                    <label>
-                        <input type="checkbox" onChange={onDrawGrid} />
-                        Draw grid
-                    </label>
                 </div>
             </div>
         </div>
