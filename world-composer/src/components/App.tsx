@@ -9,8 +9,7 @@ import { AtmosphereEngine } from '../data/engine/AtmosphereEngine';
 import { ParticlesEngine } from '../data/engine/ParticlesEngine';
 import { ipcRenderer } from '../electron-bridge';
 import Stats from './Stats';
-
-import { Toolbar, ToolbarButton, ToolbarSeparator } from './common/Toolbar';
+import { MainToolbar } from './MainToolbar';
 
 const WorldSize = 20;
 
@@ -68,57 +67,14 @@ function App() {
     return (
         <div className="app">
             <div className="app__toolbar">
-                <Toolbar>
-                    <ToolbarButton
-                        onClick={randomizeMap}
-                        title="Randomize velocity field"
-                    >
-                        <i className="fa fa-random" />
-                    </ToolbarButton>
-                    <ToolbarButton
-                        onClick={spawnParticles}
-                        title="Spawn 5k particles"
-                    >
-                        <i className="fa fa-ravelry" />
-                    </ToolbarButton>
-
-                    <ToolbarSeparator />
-
-                    <ToolbarButton
-                        active={mapSettings.mapType === MapType.Pressure}
-                        onClick={() => onMapTypeChange(MapType.Pressure)}
-                        disabled={true}
-                    >
-                        Pressure
-                    </ToolbarButton>
-                    <ToolbarButton
-                        active={mapSettings.mapType === MapType.Neutral}
-                        onClick={() => onMapTypeChange(MapType.Neutral)}
-                    >
-                        Neutral
-                    </ToolbarButton>
-                    <ToolbarButton
-                        active={mapSettings.mapType === MapType.Velocity}
-                        onClick={() => onMapTypeChange(MapType.Velocity)}
-                    >
-                        Velocity
-                    </ToolbarButton>
-                    <ToolbarButton
-                        active={mapSettings.mapType === MapType.Divergence}
-                        onClick={() => onMapTypeChange(MapType.Divergence)}
-                    >
-                        Divergence
-                    </ToolbarButton>
-
-                    <ToolbarSeparator />
-
-                    <ToolbarButton
-                        onClick={() => setIsStatsVisible(!isStatsVisible)}
-                        title="Show statistics"
-                    >
-                        <i className="fa fa-bar-chart" />
-                    </ToolbarButton>
-                </Toolbar>
+                <MainToolbar
+                    mapSettings={mapSettings}
+                    onRandomizeVelocity={randomizeMap}
+                    statsVisible={isStatsVisible}
+                    onToggleStats={newState => setIsStatsVisible(newState)}
+                    onMapTypeChange={onMapTypeChange}
+                    onSpawnParticles={spawnParticles}
+                />
             </div>
             <div className="app__content">
                 {isStatsVisible && (
