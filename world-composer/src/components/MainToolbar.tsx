@@ -9,6 +9,7 @@ interface Props {
     onMapTypeChange: (mapType: MapType) => void;
     onSpawnParticles: () => void;
     onRandomizeVelocity: () => void;
+    onMapReset: () => void;
 
     statsVisible: boolean;
     mapSettings: MapSettings;
@@ -21,9 +22,16 @@ export function MainToolbar({
     onSpawnParticles,
     mapSettings,
     onRandomizeVelocity,
+    onMapReset,
 }: Props) {
     return (
         <Toolbar>
+            <ToolbarButton
+                onClick={onMapReset}
+                title="Reset map"
+            >
+                <i className="fa fa-undo" />
+            </ToolbarButton>
             <ToolbarButton
                 onClick={onRandomizeVelocity}
                 title="Randomize velocity field"

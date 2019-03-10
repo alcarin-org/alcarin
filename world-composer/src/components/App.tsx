@@ -50,12 +50,22 @@ function App() {
         ];
         const method =
             randomMethods[Math.floor(Math.random() * randomMethods.length)];
+        onMapReset(method, true);
+    }
 
-        const newGrid = MACGrid.create(WorldSize, debugFieldIsWall, method);
+    function onMapReset(
+        randomMethod?: RandomizeField.RandomMethod,
+        preserveParticles?: boolean
+    ) {
+        const newGrid = MACGrid.create(
+            WorldSize,
+            debugFieldIsWall,
+            randomMethod
+        );
         const newEngine = new AtmosphereEngine(newGrid);
         const newParticlesEngine = new ParticlesEngine(
             newEngine,
-            particlesEngine.particles
+            preserveParticles ? particlesEngine.particles : undefined
         );
 
         setAtmoGrid(newGrid);
@@ -98,6 +108,7 @@ function App() {
                         onToggleStats={newState => setIsStatsVisible(newState)}
                         onMapTypeChange={onMapTypeChange}
                         onSpawnParticles={spawnParticles}
+                        onMapReset={() => onMapReset()}
                     />
                 </div>
                 <div className="app__content">
