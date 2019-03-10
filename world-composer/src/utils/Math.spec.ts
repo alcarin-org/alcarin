@@ -1,8 +1,8 @@
 import { resolveLinearByJacobi } from './Math';
 
-test.only('System of linear equations should be properly approximated by Jacobi method', () => {
+test('System of linear equations should be properly approximated by Jacobi method', () => {
     // prettier-ignore
-    const A = Float64Array.from([
+    const A = Int8Array.from([
         10, -1, 2, 0,
         -1, 11, -1, 3,
         2, -1, 10, -1,
