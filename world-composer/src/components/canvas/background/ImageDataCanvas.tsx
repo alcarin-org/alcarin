@@ -36,6 +36,7 @@ export function ImageDataCanvas({
 
     useEffect(
         () => {
+            displayCtx.current!.clearRect(0, 0, width, height);
             pixelCtx.current!.putImageData(pixels.value, 0, 0);
             displayCtx.current!.drawImage(
                 pixelCanvas.current!,

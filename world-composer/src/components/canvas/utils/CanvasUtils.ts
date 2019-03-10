@@ -5,7 +5,9 @@ export enum MapType {
     Pressure,
     Velocity,
     Divergence,
+    Wall,
 }
+
 export function useCanvas(
     width: number,
     height: number,

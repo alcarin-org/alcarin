@@ -7,8 +7,6 @@ const StepDelaySec = 0.05;
 export class AtmosphereEngine {
     public readonly grid: MACGrid.MACGridData;
 
-    public readonly neightboursMatrix: Int8Array;
-
     public lastDivergenceVector: Float32Array;
 
     public lastPressureVector: Float32Array;
@@ -19,12 +17,25 @@ export class AtmosphereEngine {
 
     private deltaTimeAcc: DOMHighResTimeStamp = 0;
 
+    private neightboursMatrix: Int8Array;
+
     public constructor(grid: MACGrid.MACGridData) {
         this.grid = grid;
         this.neightboursMatrix = precalcNeighboursMatrix(grid);
         this.lastDivergenceVector = new Float32Array(this.grid.size ** 2);
         this.lastPressureVector = new Float32Array(this.grid.size ** 2);
         // this.lastPressureVector = this.calculatePressure(1);
+    }
+
+    public toggleSolid(pos: Point, value?: boolean) {
+        const ind = MACGrid.index(this.grid, pos);
+        const newSolids = this.grid.solids.slice(0);
+
+        const newValue =
+            value !== undefined ? value : this.grid.solids[ind] === 0;
+        newSolids[ind] = newValue ? 1 : 0;
+        this.grid.solids = newSolids;
+        this.neightboursMatrix = precalcNeighboursMatrix(this.grid);
     }
 
     public convectValue<T>(

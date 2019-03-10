@@ -20,7 +20,7 @@ export interface MACGridData {
     field: VelocityField;
 
     // solids is coded as 1/0 values vector
-    readonly solids: Int8Array;
+    solids: Int8Array;
 
     // the assumption is that the field is a square, so we need only one
     // size factor
@@ -29,26 +29,22 @@ export interface MACGridData {
 
 export function create(
     mapSize: number,
-    fieldIsWall?: (x: number, y: number, mapSize: number) => boolean,
+    solidsVector?: Int8Array,
     fieldInitMethod?: RandomMethod
 ): MACGridData {
     // we create additionall buffer of solids around our map
     const size = mapSize + 2;
     const vectorSize = size ** 2;
 
-    const solids = new Int8Array(vectorSize).map((_, ind) => {
-        // prefedined solids for now, should be dynamic later.
+    const solids =
+        solidsVector ||
+        new Int8Array(vectorSize).map((_, ind) => {
+            // prefedined solids for now, should be dynamic later.
 
-        const x = ind % size;
-        const y = Math.floor(ind / size);
-        return y === 0 ||
-            y === size - 1 ||
-            x === 0 ||
-            x === size - 1 ||
-            (fieldIsWall && fieldIsWall(x, y, size))
-            ? 1
-            : 0;
-    });
+            const x = ind % size;
+            const y = Math.floor(ind / size);
+            return isBufferWall(size, [x, y]) ? 1 : 0;
+        });
 
     const grid: MACGridData = {
         field: {
@@ -74,6 +70,10 @@ export function create(
     }
 
     return grid;
+}
+
+export function isBufferWall(gridSize: number, [x, y]: Point) {
+    return y === 0 || y === gridSize - 1 || x === 0 || x === gridSize - 1;
 }
 
 export function divergenceVector(

@@ -30,8 +30,8 @@ function bootstrapAppWindow() {
     mainWindow.loadURL('http://localhost:3000');
 
     // Open the DevTools.
-    mainWindow.webContents.openDevTools({ mode: 'right' });
-    // mainWindow.webContents.openDevTools({ mode: 'undocked' });
+    // mainWindow.webContents.openDevTools({ mode: 'right' });
+    mainWindow.webContents.openDevTools({ mode: 'undocked' });
 
     // Emitted when the window is closed.
     mainWindow.on('closed', () => (mainWindow = null));

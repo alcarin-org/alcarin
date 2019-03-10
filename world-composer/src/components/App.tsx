@@ -9,18 +9,17 @@ import * as MACGrid from '../data/atmosphere/MACGrid';
 import * as RandomizeField from '../data/atmosphere/RandomizeField';
 import { AtmosphereEngine } from '../data/engine/AtmosphereEngine';
 import { ParticlesEngine } from '../data/engine/ParticlesEngine';
+import { round, Point } from '../utils/Math';
 import { ipcRenderer } from '../electron-bridge';
 import Stats from './Stats';
 import { MainToolbar } from './MainToolbar';
 
 const WorldSize = 20;
 
-function App() {
+export function App() {
     useEffect(() => ipcRenderer.send('main-window-ready'), []);
 
-    const [atmoGrid, setAtmoGrid] = useState(() =>
-        MACGrid.create(WorldSize, debugFieldIsWall)
-    );
+    const [atmoGrid, setAtmoGrid] = useState(() => MACGrid.create(WorldSize));
     const [atmoEngine, setAtmoEngine] = useState(
         () => new AtmosphereEngine(atmoGrid)
     );
@@ -50,16 +49,17 @@ function App() {
         ];
         const method =
             randomMethods[Math.floor(Math.random() * randomMethods.length)];
-        onMapReset(method, true);
+        onMapReset(method, true, true);
     }
 
     function onMapReset(
         randomMethod?: RandomizeField.RandomMethod,
-        preserveParticles?: boolean
+        preserveParticles?: boolean,
+        preserveSolids?: boolean
     ) {
         const newGrid = MACGrid.create(
             WorldSize,
-            debugFieldIsWall,
+            preserveSolids ? atmoGrid.solids : undefined,
             randomMethod
         );
         const newEngine = new AtmosphereEngine(newGrid);
@@ -87,16 +87,27 @@ function App() {
 
     const onRenderTick = useCallback(
         (deltaTime: DOMHighResTimeStamp) => {
+            if (mapSettings.mapType === MapType.Wall) {
+                return;
+            }
             const deltaTimeSec = deltaTime / 1000;
             particlesEngine.update(deltaTimeSec);
             atmoEngine.update(deltaTimeSec);
         },
-        [atmoEngine, particlesEngine]
+        [atmoEngine, particlesEngine, mapSettings]
     );
 
     function onMapStatsUpdated(stats: MapStats) {
         setRenderFps(stats.renderFps);
     }
+
+    function onWallToggle(mapPos: Point, value: boolean) {
+        if (mapSettings.mapType === MapType.Wall) {
+            const gridPos = round(mapPos);
+            atmoEngine.toggleSolid(gridPos, value);
+        }
+    }
+
     return (
         <Context.Provider value={simulationContext}>
             <div className="app">
@@ -127,6 +138,7 @@ function App() {
                             settings={mapSettings}
                             onTick={onRenderTick}
                             onStatsUpdated={onMapStatsUpdated}
+                            onWallToggle={onWallToggle}
                         />
                     </div>
                 </div>
@@ -134,16 +146,3 @@ function App() {
         </Context.Provider>
     );
 }
-
-function debugFieldIsWall(x: number, y: number, mapSize: number) {
-    const centerPos = Math.floor(mapSize / 2);
-
-    return (
-        (x === 12 && y < 12) ||
-        (x === mapSize - 12 && y < mapSize - 4 && y > 16) ||
-        (x > 2 && x < 15 && y === mapSize - 10) ||
-        (x === centerPos && y === centerPos)
-    );
-}
-
-export default App;
