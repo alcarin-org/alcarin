@@ -1,47 +1,96 @@
-export interface Vector {
-    x: number;
-    y: number;
+export type Vector = [number, number];
+export enum VectorComponent {
+    x = 0,
+    y = 1,
 }
 
 export type Point = Vector;
 
+export function normalize(v: Vector): Vector {
+    if (v[0] === 0 && v[1] === 0) {
+        return v;
+    }
+
+    return multiply(v, 1 / magnitude(v));
+}
+
 export function magnitude(v: Vector) {
-    return Math.sqrt(v.x ** 2 + v.y ** 2);
+    return Math.sqrt(v[0] ** 2 + v[1] ** 2);
 }
 
-export function distance(from: Point, to: Point) {
-    return Math.sqrt((to.x - from.x) ** 2 + (to.y - from.y) ** 2);
+export function clamp(from: number, to: number, val: number) {
+    return Math.min(Math.max(from, val), to);
 }
 
-export function normalize(v: Vector) {
-    const m = magnitude(v);
-    return { x: v.x / m, y: v.y / m };
+export function perpendicular(v: Vector): Vector {
+    return [v[1], -v[0]];
 }
 
-export function angle(v: Vector, v2: Vector = { x: 1, y: 0 }) {
-    const normalizedV = normalize(v);
-    const normalizedV2 = normalize(v2);
-
-    return Math.atan2(v.y, v.x) - Math.atan2(v2.y, v2.x);
+export function interpolate(v1: Vector, v2: Vector, perc: number): Vector {
+    return [v1[0] + (v2[0] - v1[0]) * perc, v1[1] + (v2[1] - v1[1]) * perc];
 }
 
-export function constraints(from: number, to: number, val: number) {
-    const [rFrom, rTo] = [from, to].sort();
-    return Math.min(Math.max(rFrom, val), rTo);
+export function multiply(v: Vector, scalar: number): Vector {
+    return [v[0] * scalar, v[1] * scalar];
 }
 
-export function scale(scalar: number, v: Vector) {
-    return { x: v.x * scalar, y: v.y * scalar };
+export function add(v1: Vector, v2: Vector): Vector {
+    return [v1[0] + v2[0], v1[1] + v2[1]];
 }
 
-export function perpendicular(v: Vector) {
-    return { x: v.y, y: -v.x };
+export function floor(p: Point): Point {
+    return [Math.floor(p[0]), Math.floor(p[1])];
 }
 
-export function sum(v: Vector, v2: Vector) {
-    return { x: v.x + v2.x, y: v.y + v2.y };
+export function round(p: Point): Point {
+    return [Math.round(p[0]), Math.round(p[1])];
 }
 
-export function equals(p: Point, p2: Point) {
-    return p.x === p2.x && p.y === p2.y;
+// coefficientA main diagonal CAN NOT HAVE zeros. in our system
+// main diagonal represent neightbours of given cell. as we do not have
+// fully separated cell, there will be no 0s on main diagonal
+export function resolveLinearByJacobi(
+    A: Int8Array, // coefficient matrix A
+    B: Float64Array // constants matrix B
+): Float64Array {
+    if (process.env.REACT_APP_DEBUG === '1') {
+        if (A.length !== B.length ** 2) {
+            throw new Error(
+                'Coefficient matrix A has different size that constant matrix B! Can not continue.'
+            );
+        }
+    }
+    let x = new Float64Array(B.length); // resultsMatrix
+    const tmpX = new Float64Array(B.length);
+
+    for (let step = 0; step < 10; step++) {
+        for (let iUnknown = 0; iUnknown < B.length; iUnknown++) {
+            const unknownCoefficients = A.subarray(
+                iUnknown * B.length,
+                iUnknown * B.length + B.length
+            );
+
+            let iGuess = B[iUnknown];
+            for (
+                let iCoefficient = 0;
+                iCoefficient < B.length;
+                iCoefficient++
+            ) {
+                if (iCoefficient === iUnknown) {
+                    continue;
+                }
+                //  checking for 0 instead of multiplying give better performance ;/
+                //  unknownCoefficients[iCoefficient] === 0
+                const coefficient = unknownCoefficients[iCoefficient];
+                if (coefficient === 0) {
+                    continue;
+                }
+                iGuess -= coefficient * x[iCoefficient];
+            }
+            iGuess /= unknownCoefficients[iUnknown];
+            tmpX[iUnknown] = iGuess;
+        }
+        x = tmpX;
+    }
+    return x;
 }

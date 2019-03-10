@@ -1,0 +1,15 @@
+.stats {
+    dl {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 0 20px;
+
+        dt,
+        dd {
+            flex-basis: 45%;
+            margin: 5px 0;
+            padding: 0;
+            text-align: left;
+        }
+    }
+}

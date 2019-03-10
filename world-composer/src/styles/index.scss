@@ -1,7 +1,14 @@
-body {
+@import 'purecss';
+
+html, body {
     margin: 0;
     padding: 0;
+    height: 100%;
     font: caption;
+}
+
+body {
+    min-height: 100%;
 }
 
 code {

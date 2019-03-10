@@ -86,3 +86,10 @@ Check the file comment for explanation why we do this.
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+## Debug Mode
+
+You can enable debug mode that will validate simulation calculation steps and can provide some useful info.
+But it make entire simulation much slow and is disabled by default.
+To enable it, run the compiler with `REACT_APP_DEBUG=1` environment variable. E.g.
+docker-compose run --rm -e REACT_APP_DEBUG=1 web yarn start

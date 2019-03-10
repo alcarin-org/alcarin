@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, Event, IpcMain } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import { join } from 'path';
 
 // TODO: add support for remembering window custum size and position: https://github.com/mawie81/electron-window-state
@@ -30,7 +30,7 @@ function bootstrapAppWindow() {
     mainWindow.loadURL('http://localhost:3000');
 
     // Open the DevTools.
-    // mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools({ mode: 'right' });
 
     // Emitted when the window is closed.
     mainWindow.on('closed', () => (mainWindow = null));
@@ -61,9 +61,3 @@ ipcMain.on('main-window-ready', function onMainWindowReady() {
         mainWindow.focus();
     }
 });
-
-ipcMain.on(
-    'test',
-    (ev: Event, arg: string) =>
-        mainWindow && dialog.showMessageBox(mainWindow, { message: arg })
-);

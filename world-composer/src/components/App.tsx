@@ -1,97 +1,137 @@
-import React, { useEffect, useState, MouseEvent } from 'react';
 import './App.scss';
-import WeatherCanvas from './canvas/WeatherCanvas';
-import * as Atmo from '../data/AtmosphereData';
-import { ipcRenderer } from '../electron-bridge';
 
-const WorldRadius = 20;
-const atmosphereSample = Atmo.randomizeField(Atmo.create(WorldRadius));
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
+
+import Context, { SimulationContext } from './SimulationContext';
+import { InteractiveMap, MapSettings, MapStats } from './map/InteractiveMap';
+import { MapType } from './canvas/utils/CanvasUtils';
+import * as MACGrid from '../data/atmosphere/MACGrid';
+import * as RandomizeField from '../data/atmosphere/RandomizeField';
+import { AtmosphereEngine } from '../data/engine/AtmosphereEngine';
+import { ParticlesEngine } from '../data/engine/ParticlesEngine';
+import { ipcRenderer } from '../electron-bridge';
+import Stats from './Stats';
+import { MainToolbar } from './MainToolbar';
+
+const WorldSize = 20;
 
 function App() {
     useEffect(() => ipcRenderer.send('main-window-ready'), []);
-    const [coriolisMagnitude, setCoriolisMagnitude] = useState(0.1);
-    const [centrifugalMagnitude, setCentrifugalMagnitude] = useState(0);
-    const [atmo, setAtmo] = useState(atmosphereSample);
-    const [play, setPlay] = useState(true);
 
-    function evolveAtmo() {
-        const newAtmo = Atmo.evolve(
-            atmo,
-            centrifugalMagnitude,
-            coriolisMagnitude
-        );
-        setAtmo(newAtmo);
-    }
-    useEffect(() => {
-        if (play) {
-            const id = setTimeout(evolveAtmo, 100);
-            return () => clearTimeout(id);
-        }
+    const [atmoGrid, setAtmoGrid] = useState(() =>
+        MACGrid.create(WorldSize, debugFieldIsWall)
+    );
+    const [atmoEngine, setAtmoEngine] = useState(
+        () => new AtmosphereEngine(atmoGrid)
+    );
+    const [particlesEngine, setParticlesEngine] = useState(
+        () => new ParticlesEngine(atmoEngine)
+    );
+
+    const [isStatsVisible, setIsStatsVisible] = useState(false);
+
+    const [mapSettings, setMapSettings] = useState<MapSettings>({
+        drawFieldSize: 25,
+        mapType: MapType.Neutral,
     });
 
-    function onAtmoClick(ev: MouseEvent) {
-        const x = Math.floor(ev.nativeEvent.offsetX / 30) - atmo.radius + 1;
-        const y = Math.floor(ev.nativeEvent.offsetY / 30) - atmo.radius + 1;
-        const newAtmo = Atmo.set(
-            atmo,
-            { x, y },
-            {
-                pressure: 0,
-                velocity: {
-                    x: 1 - 2 * Math.random(),
-                    y: 1 - 2 * Math.random(),
-                },
-            }
-        );
-        setAtmo(newAtmo);
+    const [renderFps, setRenderFps] = useState(0);
+
+    function onMapTypeChange(mapType: MapType) {
+        setMapSettings({ ...mapSettings, mapType });
     }
 
+    function randomizeMap() {
+        const randomMethods = [
+            RandomizeField.Chaotic,
+            RandomizeField.GlobalCurl,
+            RandomizeField.LeftWave,
+            RandomizeField.RightWave,
+        ];
+        const method =
+            randomMethods[Math.floor(Math.random() * randomMethods.length)];
+
+        const newGrid = MACGrid.create(WorldSize, debugFieldIsWall, method);
+        const newEngine = new AtmosphereEngine(newGrid);
+        const newParticlesEngine = new ParticlesEngine(
+            newEngine,
+            particlesEngine.particles
+        );
+
+        setAtmoGrid(newGrid);
+        setAtmoEngine(newEngine);
+        setParticlesEngine(newParticlesEngine);
+    }
+
+    const simulationContext = useMemo<SimulationContext>(
+        () => ({
+            grid: atmoGrid,
+            engine: atmoEngine,
+        }),
+        [atmoGrid, atmoEngine]
+    );
+
+    function spawnParticles() {
+        particlesEngine.spawnParticles(5000);
+    }
+
+    const onMapRenderTick = useCallback(
+        (deltaTime: DOMHighResTimeStamp) => {
+            const deltaTimeSec = deltaTime / 1000;
+            particlesEngine.update(deltaTimeSec);
+            atmoEngine.update(deltaTimeSec);
+        },
+        [atmoEngine, particlesEngine]
+    );
+
+    function onMapStatsUpdated(stats: MapStats) {
+        setRenderFps(stats.renderFps);
+    }
     return (
-        <div className="app">
-            <button
-                onClick={() => setAtmo(Atmo.randomizeField(atmosphereSample))}
-            >
-                Randomize
-            </button>
-            <button onClick={evolveAtmo}>Next step</button>
-            <button onClick={() => setPlay(!play)}>Play/Pause</button>
-            <label>
-                Centrifugal Force
-                <input
-                    type="range"
-                    min={0}
-                    max={50}
-                    step={0}
-                    value={centrifugalMagnitude * 100}
-                    onChange={ev =>
-                        setCentrifugalMagnitude(
-                            parseInt(ev.currentTarget.value, 10) / 100
-                        )
-                    }
-                />
-            </label>
-            <label>
-                Coriolis Force
-                <input
-                    type="range"
-                    min={0}
-                    max={50}
-                    step={1}
-                    value={coriolisMagnitude * 100}
-                    onChange={ev =>
-                        setCoriolisMagnitude(
-                            parseInt(ev.currentTarget.value, 10) / 100
-                        )
-                    }
-                />
-            </label>
-            <WeatherCanvas
-                atmosphere={atmo}
-                onClick={onAtmoClick}
-                centrifugalMagnitudeMod={centrifugalMagnitude}
-                coriolisMagnitudeMod={coriolisMagnitude}
-            />
-        </div>
+        <Context.Provider value={simulationContext}>
+            <div className="app">
+                <div className="app__toolbar">
+                    <MainToolbar
+                        mapSettings={mapSettings}
+                        onRandomizeVelocity={randomizeMap}
+                        statsVisible={isStatsVisible}
+                        onToggleStats={newState => setIsStatsVisible(newState)}
+                        onMapTypeChange={onMapTypeChange}
+                        onSpawnParticles={spawnParticles}
+                    />
+                </div>
+                <div className="app__content">
+                    {isStatsVisible && (
+                        <div className="app__stats-panel">
+                            <Stats
+                                particlesEngine={particlesEngine}
+                                mouseOver={[0, 0]}
+                                fps={renderFps}
+                            />
+                        </div>
+                    )}
+                    <div className="app__map">
+                        <InteractiveMap
+                            particlesEngine={particlesEngine}
+                            settings={mapSettings}
+                            onTick={onMapRenderTick}
+                            onStatsUpdated={onMapStatsUpdated}
+                        />
+                    </div>
+                </div>
+            </div>
+        </Context.Provider>
+    );
+}
+
+function debugFieldIsWall(x: number, y: number, mapSize: number) {
+    const centerPos = Math.floor(mapSize / 2);
+
+    return (
+        (x === 12 && y < 12) ||
+        (x === mapSize - 12 && y < mapSize - 4 && y > 16) ||
+        (x > 2 && x < 15 && y === mapSize - 10) ||
+        (x === centerPos && y === centerPos)
     );
 }
 
