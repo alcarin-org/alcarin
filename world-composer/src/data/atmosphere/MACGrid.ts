@@ -2,11 +2,6 @@ import { Point, Vector } from '../../utils/Math';
 import { VelocityField } from './VelocityField';
 import { RandomMethod } from './RandomizeField';
 
-enum VectorComponent {
-    x = 0,
-    y = 1,
-}
-
 // "Marker and Cell grid", google it for more details
 export interface MACGridData {
     // fluid simulation field coded as MAC grid with cell size 1.
@@ -57,8 +52,8 @@ export function create(
 
     const grid: MACGridData = {
         field: {
-            velX: new Float64Array(vectorSize),
-            velY: new Float64Array(vectorSize),
+            velX: new Float32Array(vectorSize),
+            velY: new Float32Array(vectorSize),
         },
         solids,
         size,
@@ -84,8 +79,8 @@ export function create(
 export function divergenceVector(
     grid: MACGridData,
     multiplier: number = 1
-): Float64Array {
-    const divVector = new Float64Array(grid.solids.length);
+): Float32Array {
+    const divVector = new Float32Array(grid.solids.length);
     // we calculate divergence of given cell by sum of derivative
     // of x and y velocity components around given cell center.
     // we treat velocity as 0 when it's between solid/fluid cells,
@@ -134,28 +129,25 @@ export function assert(grid: MACGridData, p: Point) {
 
 export function interpolateVelocity(grid: MACGridData, p: Point): Vector {
     return [
-        interpolateVelocityAt(grid, [p[0] + 0.5, p[1]], VectorComponent.x),
-        interpolateVelocityAt(grid, [p[0], p[1] + 0.5], VectorComponent.y),
+        interpolateVelocityAt(grid, [p[0] + 0.5, p[1]], grid.field.velX),
+        interpolateVelocityAt(grid, [p[0], p[1] + 0.5], grid.field.velY),
     ];
 }
 
 function interpolateVelocityAt(
     grid: MACGridData,
     p: Point,
-    cmp: VectorComponent
+    velVector: Float32Array
 ): number {
-    const velVector =
-        cmp === VectorComponent.x ? grid.field.velX : grid.field.velY;
-
-    const minCellP = [Math.floor(p[0]), Math.floor(p[1])];
+    // tslint:disable no-bitwise
+    const minCellP = [~~p[0], ~~p[1]];
     const relToCell = [p[0] - minCellP[0], p[1] - minCellP[1]];
 
-    const range = [0, 1];
     let weightSum = 0;
     let resultVel = 0;
 
-    for (const offsetX of range) {
-        for (const offsetY of range) {
+    for (let offsetX = 0; offsetX < 2; offsetX++) {
+        for (let offsetY = 0; offsetY < 2; offsetY++) {
             const neighPos: Point = [
                 minCellP[0] + offsetX,
                 minCellP[1] + offsetY,
@@ -181,7 +173,7 @@ function interpolateVelocityAt(
 
 export function interpolatePressure(
     grid: MACGridData,
-    pressureVector: Float64Array,
+    pressureVector: Float32Array,
     p: Point
 ) {
     const minCellP = [Math.floor(p[0]), Math.floor(p[1])];

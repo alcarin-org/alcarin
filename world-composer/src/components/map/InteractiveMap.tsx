@@ -33,7 +33,6 @@ interface FpsCalc {
     fpsAcc: number;
 }
 
-// let test: any = null;
 export function InteractiveMap({
     settings,
     onTick,

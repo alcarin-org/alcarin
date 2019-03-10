@@ -1,11 +1,7 @@
 import * as MACGrid from '../atmosphere/MACGrid';
 import { precalcNeighboursMatrix, calculateFieldPressure } from './EngineUtils';
 
-import {
-    Point,
-    multiply,
-    add,
-} from '../../utils/Math';
+import { Point, multiply, add } from '../../utils/Math';
 
 const StepDelaySec = 0.05;
 export class AtmosphereEngine {
@@ -13,9 +9,9 @@ export class AtmosphereEngine {
 
     public readonly neightboursMatrix: Int8Array;
 
-    public lastDivergenceVector: Float64Array;
+    public lastDivergenceVector: Float32Array;
 
-    public lastPressureVector: Float64Array;
+    public lastPressureVector: Float32Array;
 
     public step: number = 0;
 
@@ -26,8 +22,8 @@ export class AtmosphereEngine {
     public constructor(grid: MACGrid.MACGridData) {
         this.grid = grid;
         this.neightboursMatrix = precalcNeighboursMatrix(grid);
-        this.lastDivergenceVector = new Float64Array(this.grid.size ** 2);
-        this.lastPressureVector = new Float64Array(this.grid.size ** 2);
+        this.lastDivergenceVector = new Float32Array(this.grid.size ** 2);
+        this.lastPressureVector = new Float32Array(this.grid.size ** 2);
         // this.lastPressureVector = this.calculatePressure(1);
     }
 
@@ -89,7 +85,7 @@ export class AtmosphereEngine {
     }
 
     public adjustVelocityFromPressure(
-        gridPressureVector: Float64Array,
+        gridPressureVector: Float32Array,
         deltaTime: DOMHighResTimeStamp
     ) {
         this.grid.field.velX = this.grid.field.velX.map((vel, ind) => {

@@ -31,10 +31,9 @@ export class ParticlesEngine {
         for (let i = 0; i < positions.length / 2; i++) {
             const i2 = i * 2;
 
-            const pos = positions.slice(i2, i2 + 2);
             const newPos = this.engine.convectValue(
                 deltaTime,
-                [pos[0], pos[1]],
+                [positions[i2], positions[i2 + 1]],
                 lastPos =>
                     convectParticle(lastPos, this.particles, this.engine.grid)
             );
