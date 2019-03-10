@@ -1,14 +1,19 @@
+import './InteractiveMap.scss';
+
 import React, {
     useCallback,
     useRef,
-    // useContext,
+    useContext,
+    useState,
     MutableRefObject,
 } from 'react';
 
+import { round, Point } from '../../utils/Math';
+import { isBufferWall } from '../../data/atmosphere/MACGrid';
 import { MapRenderer } from '../canvas/MapRenderer';
 import { ParticlesEngine } from '../../data/engine/ParticlesEngine';
 import { MapType } from '../canvas/utils/CanvasUtils';
-// import Context from '../SimulationContext';
+import Context from '../SimulationContext';
 
 export interface MapSettings {
     drawFieldSize: number;
@@ -25,6 +30,7 @@ interface Props {
     settings: MapSettings;
     onTick?: (deltaTime: DOMHighResTimeStamp) => void;
     onStatsUpdated?: (stats: MapStats) => void;
+    onWallToggle?: (mapPos: Point, value: boolean) => void;
 }
 
 interface FpsCalc {
@@ -38,12 +44,16 @@ export function InteractiveMap({
     onTick,
     onStatsUpdated,
     particlesEngine,
+    onWallToggle,
 }: Props) {
     const fpsRef = useRef<FpsCalc>({
         fps: 0,
         timeAcc: 0,
         fpsAcc: 0,
     });
+
+    const { grid } = useContext(Context)!;
+    const [isCursorOnBuffer, setIsCursorOnBuffer] = useState(false)!;
 
     const onRender = useCallback(
         (deltaTime: DOMHighResTimeStamp) => {
@@ -55,13 +65,48 @@ export function InteractiveMap({
         [onTick]
     );
 
+    function eventToMapPosition(ev: React.MouseEvent<HTMLDivElement>) {
+        return [
+            ev.nativeEvent.offsetX / settings.drawFieldSize - 0.5,
+            ev.nativeEvent.offsetY / settings.drawFieldSize - 0.5,
+        ] as Point;
+    }
+
+    function onMouseMove(ev: React.MouseEvent<HTMLDivElement>) {
+        onMapContainerDown(ev);
+    }
+
+    function onMapContainerDown(ev: React.MouseEvent<HTMLDivElement>) {
+        if (settings.mapType !== MapType.Wall || ev.buttons === 0) {
+            return;
+        }
+        const mapPos = eventToMapPosition(ev);
+        const bufferWall = isBufferWall(grid.size, round(mapPos));
+        if (bufferWall !== isCursorOnBuffer) {
+            setIsCursorOnBuffer(bufferWall);
+        }
+        if (!bufferWall && onWallToggle) {
+            onWallToggle(eventToMapPosition(ev), ev.buttons === 1);
+        }
+    }
+
+    const pointerMode = !isCursorOnBuffer && settings.mapType === MapType.Wall;
     return (
-        <MapRenderer
-            particlesEngine={particlesEngine}
-            fieldSizePx={settings.drawFieldSize}
-            mapType={settings.mapType}
-            onRender={onRender}
-        />
+        <div
+            className={
+                'interactive-map' +
+                (pointerMode ? ' interactive-map--active' : '')
+            }
+            onMouseDown={onMapContainerDown}
+            onMouseMove={onMouseMove}
+        >
+            <MapRenderer
+                particlesEngine={particlesEngine}
+                fieldSizePx={settings.drawFieldSize}
+                mapType={settings.mapType}
+                onRender={onRender}
+            />
+        </div>
     );
 }
 

@@ -66,14 +66,7 @@ export function MapRenderer({
                 height={canvasSizePx}
                 mapType={mapType}
             />
-            <SolidBackground
-                solids={grid.solids}
-                canvasWidth={canvasSizePx}
-                canvasHeight={canvasSizePx}
-                bgWidth={grid.size}
-                bgHeight={grid.size}
-            />
-            {mapType !== MapType.Neutral && (
+            {mapType === MapType.Velocity && (
                 <VelocityFieldRenderer
                     atmo={grid}
                     driver={engine}
@@ -81,7 +74,7 @@ export function MapRenderer({
                     height={canvasSizePx}
                 />
             )}
-            {mapType === MapType.Neutral && (
+            {(mapType === MapType.Neutral || mapType === MapType.Wall) && (
                 <ConfettiRenderer
                     width={canvasSizePx}
                     height={canvasSizePx}
@@ -89,6 +82,13 @@ export function MapRenderer({
                     particles={particlesEngine.particles}
                 />
             )}
+            <SolidBackground
+                solids={grid.solids}
+                canvasWidth={canvasSizePx}
+                canvasHeight={canvasSizePx}
+                bgWidth={grid.size}
+                bgHeight={grid.size}
+            />
         </div>
     );
 }
