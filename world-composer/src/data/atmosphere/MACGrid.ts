@@ -34,25 +34,23 @@ export interface MACGridData {
 
 export function create(
     mapSize: number,
+    fieldIsWall?: (x: number, y: number, mapSize: number) => boolean,
     fieldInitMethod?: RandomMethod
 ): MACGridData {
     // we create additionall buffer of solids around our map
     const size = mapSize + 2;
     const vectorSize = size ** 2;
 
-    const centerPos = Math.floor(size / 2);
     const solids = new Int8Array(vectorSize).map((_, ind) => {
         // prefedined solids for now, should be dynamic later.
+
         const x = ind % size;
         const y = Math.floor(ind / size);
         return y === 0 ||
             y === size - 1 ||
             x === 0 ||
             x === size - 1 ||
-            (x === 12 && y < 12) ||
-            (x === size - 12 && y < size - 4 && y > 16) ||
-            (x > 2 && x < 15 && y === size - 10) ||
-            (x === centerPos && y === centerPos)
+            (fieldIsWall && fieldIsWall(x, y, size))
             ? 1
             : 0;
     });

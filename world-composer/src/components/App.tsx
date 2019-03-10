@@ -18,7 +18,9 @@ const WorldSize = 20;
 function App() {
     useEffect(() => ipcRenderer.send('main-window-ready'), []);
 
-    const [atmoGrid, setAtmoGrid] = useState(() => MACGrid.create(WorldSize));
+    const [atmoGrid, setAtmoGrid] = useState(() =>
+        MACGrid.create(WorldSize, debugFieldIsWall)
+    );
     const [atmoEngine, setAtmoEngine] = useState(
         () => new AtmosphereEngine(atmoGrid)
     );
@@ -49,7 +51,7 @@ function App() {
         const method =
             randomMethods[Math.floor(Math.random() * randomMethods.length)];
 
-        const newGrid = MACGrid.create(WorldSize, method);
+        const newGrid = MACGrid.create(WorldSize, debugFieldIsWall, method);
         const newEngine = new AtmosphereEngine(newGrid);
         const newParticlesEngine = new ParticlesEngine(
             newEngine,
@@ -119,6 +121,17 @@ function App() {
                 </div>
             </div>
         </Context.Provider>
+    );
+}
+
+function debugFieldIsWall(x: number, y: number, mapSize: number) {
+    const centerPos = Math.floor(mapSize / 2);
+
+    return (
+        (x === 12 && y < 12) ||
+        (x === mapSize - 12 && y < mapSize - 4 && y > 16) ||
+        (x > 2 && x < 15 && y === mapSize - 10) ||
+        (x === centerPos && y === centerPos)
     );
 }
 
