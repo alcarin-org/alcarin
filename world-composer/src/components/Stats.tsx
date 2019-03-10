@@ -1,38 +1,33 @@
 import './Stats.scss';
 
-import React from 'react';
+import React, { useContext } from 'react';
 
 import * as MACGrid from '../data/atmosphere/MACGrid';
-import { AtmosphereEngine } from '../data/engine/AtmosphereEngine';
 import { ParticlesEngine } from '../data/engine/ParticlesEngine';
 import { Vector, Point, magnitude, add, multiply, round } from '../utils/Math';
+import Context from './SimulationContext';
 
 interface Props {
-    atmosphere: MACGrid.MACGridData;
-    atmoDriver: AtmosphereEngine;
     particlesEngine: ParticlesEngine;
     mouseOver: Point;
     fps: number;
 }
 
-export default function Stats({
-    atmosphere,
-    atmoDriver,
-    particlesEngine,
-    mouseOver,
-    fps,
-}: Props) {
-    const divVector = MACGrid.divergenceVector(atmosphere);
-    const length = atmosphere.size ** 2;
+// This component waiting for refactor
+export default function Stats({ particlesEngine, mouseOver, fps }: Props) {
+    const { grid } = useContext(Context)!;
+
+    const divVector = MACGrid.divergenceVector(grid);
+    const length = grid.size ** 2;
     const pressure = 0;
     let totalVelocity: Vector = [0, 0];
     let totalDivergence = 0;
-    for (let i = 0; i < atmosphere.size ** 2; i++) {
+    for (let i = 0; i < grid.size ** 2; i++) {
         totalVelocity = add(totalVelocity, [
-            atmosphere.field.velX[i],
-            atmosphere.field.velY[i],
+            grid.field.velX[i],
+            grid.field.velY[i],
         ]);
-        // pressure += atmosphere.pressureVector[i];
+        // pressure += grid.pressureVector[i];
         totalDivergence += divVector[i];
     }
     const avPressure = pressure / length;
@@ -40,18 +35,18 @@ export default function Stats({
     const avVelocity = multiply(totalVelocity, 1 / length);
 
     const mouseOverCell = round(mouseOver);
-    const selectedInd = MACGrid.index(atmosphere, mouseOverCell);
-    const isSolid = atmosphere.solids[selectedInd] === 1;
+    const selectedInd = MACGrid.index(grid, mouseOverCell);
+    const isSolid = grid.solids[selectedInd] === 1;
     const clickedInterpolatedVel = isSolid
         ? [0, 0]
-        : MACGrid.interpolateVelocity(atmosphere, mouseOver);
+        : MACGrid.interpolateVelocity(grid, mouseOver);
     const clickedDivergence = divVector[selectedInd];
-    // const ind = MACGrid.index(atmosphere, mouseOverCell);
+    // const ind = MACGrid.index(grid, mouseOverCell);
 
-    // const selectedNodePressure = atmosphere.pressureVector[ind];
+    // const selectedNodePressure = grid.pressureVector[ind];
     // const clickedInterpolatedPress = isSolid
     //     ? NaN
-    //     : MACGrid.interpolatePressure(atmosphere, mouseOver);
+    //     : MACGrid.interpolatePressure(grid, mouseOver);
     return (
         <div className="stats">
             <dl>
@@ -71,8 +66,8 @@ export default function Stats({
                 </dd>
                 <dt>Selected velocity</dt>
                 <dd>
-                    ({atmosphere.field.velX[selectedInd].toFixed(3)},
-                    {atmosphere.field.velY[selectedInd].toFixed(3)})
+                    ({grid.field.velX[selectedInd].toFixed(3)},
+                    {grid.field.velY[selectedInd].toFixed(3)})
                 </dd>
 
                 <dt>Clicked interp. velocity</dt>

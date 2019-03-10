@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
 
 import { BackgroundRenderer } from './background/BackgroundRenderer';
 import { SolidBackground } from './background/SolidBackground';
@@ -6,13 +6,10 @@ import { VelocityFieldRenderer } from './VelocityFieldRenderer';
 // import { ParticlesRenderer } from './ParticlesRenderer';
 import { ConfettiRenderer } from './ConfettiRenderer';
 import { MapType } from './utils/CanvasUtils';
-import { MACGridData } from '../../data/atmosphere/MACGrid';
-import { AtmosphereEngine } from '../../data/engine/AtmosphereEngine';
 import { ParticlesEngine } from '../../data/engine/ParticlesEngine';
+import Context from '../SimulationContext';
 
 interface Props {
-    atmo: MACGridData;
-    driver: AtmosphereEngine;
     particlesEngine: ParticlesEngine;
     fieldSizePx?: number;
     mapType: MapType;
@@ -20,37 +17,40 @@ interface Props {
 }
 
 export function MapRenderer({
-    atmo,
-    driver,
     fieldSizePx = 30,
     mapType = MapType.Pressure,
     onRender,
     particlesEngine,
 }: Props) {
-    const canvasSizePx = fieldSizePx * atmo.size;
+    const { grid, engine } = useContext(Context)!;
+
+    const canvasSizePx = fieldSizePx * grid.size;
 
     const lastRenderRef = useRef<DOMHighResTimeStamp | null>(null);
-    // temporary solution, the atmo/driver system waiting for refactor
+    // temporary solution, entire rendering mechanism will be refactored soon
     const [, setRenderCount] = useState(0);
 
-    useEffect(() => {
-        let requestAnimFrameId = requestAnimationFrame(renderAtmosphere);
+    useEffect(
+        () => {
+            let requestAnimFrameId = requestAnimationFrame(renderAtmosphere);
 
-        function renderAtmosphere(timestamp: DOMHighResTimeStamp) {
-            if (lastRenderRef.current !== null) {
-                const deltaTime = timestamp - lastRenderRef.current;
-                if (onRender) {
-                    onRender(deltaTime);
+            function renderAtmosphere(timestamp: DOMHighResTimeStamp) {
+                if (lastRenderRef.current !== null) {
+                    const deltaTime = timestamp - lastRenderRef.current;
+                    if (onRender) {
+                        onRender(deltaTime);
+                    }
                 }
+                // this force rerender
+                setRenderCount(prev => prev + 1);
+                lastRenderRef.current = timestamp;
+                requestAnimFrameId = requestAnimationFrame(renderAtmosphere);
             }
-            // this force rerender
-            setRenderCount(prev => prev + 1);
-            lastRenderRef.current = timestamp;
-            requestAnimFrameId = requestAnimationFrame(renderAtmosphere);
-        }
 
-        return () => cancelAnimationFrame(requestAnimFrameId);
-    }, []);
+            return () => cancelAnimationFrame(requestAnimFrameId);
+        },
+        [onRender]
+    );
 
     return (
         <div
@@ -58,23 +58,23 @@ export function MapRenderer({
             style={{ width: canvasSizePx, height: canvasSizePx }}
         >
             <BackgroundRenderer
-                atmo={atmo}
-                driver={driver}
+                atmo={grid}
+                driver={engine}
                 width={canvasSizePx}
                 height={canvasSizePx}
                 mapType={mapType}
             />
             <SolidBackground
-                solids={atmo.solids}
+                solids={grid.solids}
                 canvasWidth={canvasSizePx}
                 canvasHeight={canvasSizePx}
-                bgWidth={atmo.size}
-                bgHeight={atmo.size}
+                bgWidth={grid.size}
+                bgHeight={grid.size}
             />
             {mapType !== MapType.Neutral && (
                 <VelocityFieldRenderer
-                    atmo={atmo}
-                    driver={driver}
+                    atmo={grid}
+                    driver={engine}
                     width={canvasSizePx}
                     height={canvasSizePx}
                 />
@@ -83,7 +83,7 @@ export function MapRenderer({
                 <ConfettiRenderer
                     width={canvasSizePx}
                     height={canvasSizePx}
-                    atmo={atmo}
+                    atmo={grid}
                     particles={particlesEngine.particles}
                 />
             )}

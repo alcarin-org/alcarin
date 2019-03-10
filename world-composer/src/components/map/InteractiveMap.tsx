@@ -1,10 +1,14 @@
-import React, { useCallback, useRef, MutableRefObject } from 'react';
+import React, {
+    useCallback,
+    useRef,
+    // useContext,
+    MutableRefObject,
+} from 'react';
 
 import { MapRenderer } from '../canvas/MapRenderer';
-import { MACGridData } from '../../data/atmosphere/MACGrid';
-import { AtmosphereEngine } from '../../data/engine/AtmosphereEngine';
 import { ParticlesEngine } from '../../data/engine/ParticlesEngine';
 import { MapType } from '../canvas/utils/CanvasUtils';
+// import Context from '../SimulationContext';
 
 export interface MapSettings {
     drawFieldSize: number;
@@ -16,8 +20,6 @@ export interface MapStats {
 }
 
 interface Props {
-    atmo: MACGridData;
-    driver: AtmosphereEngine;
     particlesEngine: ParticlesEngine;
 
     settings: MapSettings;
@@ -31,9 +33,8 @@ interface FpsCalc {
     fpsAcc: number;
 }
 
+// let test: any = null;
 export function InteractiveMap({
-    atmo,
-    driver,
     settings,
     onTick,
     onStatsUpdated,
@@ -52,14 +53,12 @@ export function InteractiveMap({
             }
             calculateFps(fpsRef, deltaTime, onStatsUpdated);
         },
-        [atmo, driver, onTick]
+        [onTick]
     );
 
     return (
         <MapRenderer
-            atmo={atmo}
             particlesEngine={particlesEngine}
-            driver={driver}
             fieldSizePx={settings.drawFieldSize}
             mapType={settings.mapType}
             onRender={onRender}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 
 import {
     MACGridData,
@@ -8,9 +8,8 @@ import {
 import { AtmosphereEngine } from '../../../data/engine/AtmosphereEngine';
 import { magnitude } from '../../../utils/Math';
 import { DataContainer } from '../../../utils/Immutable';
-
+import Context from '../../SimulationContext';
 import { MapType } from '../utils/CanvasUtils';
-
 // import { PressureBackground } from './PressureBackground';
 import { DivergenceBackground } from './DivergenceBackground';
 import { VelocityBackground } from './VelocityBackground';
@@ -23,41 +22,40 @@ interface Props {
     height: number;
 }
 
-export function BackgroundRenderer({
-    atmo,
-    driver,
-    mapType,
-    width,
-    height,
-}: Props) {
+export function BackgroundRenderer({ mapType, width, height }: Props) {
+    const { grid, engine } = useContext(Context)!;
+
     // const [pressureContainer, setPressureContainer] = useState({
     //     value: atmo.pressureVector,
     // });
     const [divergenceContainer, setDivergenceContainer] = useState({
-        value: driver.lastDivergenceVector,
+        value: engine.lastDivergenceVector,
     });
     const [velocityMagnitudeField, setVelocityMagnitudeField] = useState<
         DataContainer<Float64Array>
-    >({ value: getAtmoVelocityMagnitudeVector(atmo) });
+    >({ value: getAtmoVelocityMagnitudeVector(grid) });
 
     useEffect(
         () => {
             switch (mapType) {
                 // case MapType.Pressure:
                 //     setPressureContainer({
-                //         value: atmo.pressureVector,
+                //         value: grid.pressureVector,
                 //     });
                 case MapType.Divergence:
                     setDivergenceContainer({
-                        value: driver.lastDivergenceVector,
+                        value: engine.lastDivergenceVector,
                     });
+                    break;
                 case MapType.Velocity:
+                    console.log('here');
                     setVelocityMagnitudeField({
-                        value: getAtmoVelocityMagnitudeVector(atmo),
+                        value: getAtmoVelocityMagnitudeVector(grid),
                     });
+                    break;
             }
         },
-        [driver.step]
+        [engine.step]
     );
 
     switch (mapType) {
@@ -79,8 +77,8 @@ export function BackgroundRenderer({
                     velocityMagnitudeField={velocityMagnitudeField}
                     canvasWidth={width}
                     canvasHeight={height}
-                    bgWidth={atmo.size}
-                    bgHeight={atmo.size}
+                    bgWidth={grid.size}
+                    bgHeight={grid.size}
                 />
             );
         case MapType.Divergence:
@@ -89,8 +87,8 @@ export function BackgroundRenderer({
                     divergence={divergenceContainer}
                     canvasWidth={width}
                     canvasHeight={height}
-                    bgWidth={atmo.size}
-                    bgHeight={atmo.size}
+                    bgWidth={grid.size}
+                    bgHeight={grid.size}
                 />
             );
         default:
