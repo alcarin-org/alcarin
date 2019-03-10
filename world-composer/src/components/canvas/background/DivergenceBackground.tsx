@@ -6,7 +6,7 @@ import { DataContainer } from '../../../utils/Immutable';
 import { Color } from '../../../utils/Draw';
 
 interface Props {
-    divergence: DataContainer<Float64Array>;
+    divergence: DataContainer<Float32Array>;
     bgWidth: number;
     bgHeight: number;
 

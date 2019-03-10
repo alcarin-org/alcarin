@@ -31,6 +31,7 @@ function bootstrapAppWindow() {
 
     // Open the DevTools.
     mainWindow.webContents.openDevTools({ mode: 'right' });
+    // mainWindow.webContents.openDevTools({ mode: 'undocked' });
 
     // Emitted when the window is closed.
     mainWindow.on('closed', () => (mainWindow = null));

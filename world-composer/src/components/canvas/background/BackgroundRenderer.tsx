@@ -32,7 +32,7 @@ export function BackgroundRenderer({ mapType, width, height }: Props) {
         value: engine.lastDivergenceVector,
     });
     const [velocityMagnitudeField, setVelocityMagnitudeField] = useState<
-        DataContainer<Float64Array>
+        DataContainer<Float32Array>
     >({ value: getAtmoVelocityMagnitudeVector(grid) });
 
     useEffect(
@@ -48,7 +48,6 @@ export function BackgroundRenderer({ mapType, width, height }: Props) {
                     });
                     break;
                 case MapType.Velocity:
-                    console.log('here');
                     setVelocityMagnitudeField({
                         value: getAtmoVelocityMagnitudeVector(grid),
                     });
@@ -97,7 +96,7 @@ export function BackgroundRenderer({ mapType, width, height }: Props) {
 }
 
 function getAtmoVelocityMagnitudeVector(grid: MACGridData) {
-    return new Float64Array(grid.size ** 2).map((_, ind) =>
+    return new Float32Array(grid.size ** 2).map((_, ind) =>
         grid.solids[ind] === 1
             ? 0
             : magnitude(interpolateVelocity(grid, coords(grid, ind)))

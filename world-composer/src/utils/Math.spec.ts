@@ -9,7 +9,7 @@ test('System of linear equations should be properly approximated by Jacobi metho
         0, 3, -1, 8,
     ]);
 
-    const B = Float64Array.from([6, 25, -11, 15]);
+    const B = Float32Array.from([6, 25, -11, 15]);
     const x = resolveLinearByJacobi(A, B);
     expect(Math.abs(x[0] - 1)).toBeLessThan(0.001);
     expect(Math.abs(x[1] - 2)).toBeLessThan(0.001);
@@ -23,7 +23,7 @@ test('Basic system of linear equations should be properly approximated by Jacobi
         2, 1,
         5, 7
     ]);
-    const B = Float64Array.from([11, 13]);
+    const B = Float32Array.from([11, 13]);
     const x = resolveLinearByJacobi(A, B);
     expect(Math.trunc(x[0] * 100) / 100).toEqual(7.11);
     expect(Math.trunc(x[1] * 100) / 100).toEqual(-3.22);

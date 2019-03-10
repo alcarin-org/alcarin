@@ -6,7 +6,7 @@ import { DataContainer } from '../../../utils/Immutable';
 import { Color } from '../../../utils/Draw';
 
 interface Props {
-    velocityMagnitudeField: DataContainer<Float64Array>;
+    velocityMagnitudeField: DataContainer<Float32Array>;
     bgWidth: number;
     bgHeight: number;
 

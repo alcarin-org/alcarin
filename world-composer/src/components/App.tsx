@@ -28,7 +28,7 @@ function App() {
         () => new ParticlesEngine(atmoEngine)
     );
 
-    const [isStatsVisible, setIsStatsVisible] = useState(false);
+    const [isStatsVisible, setIsStatsVisible] = useState(true);
 
     const [mapSettings, setMapSettings] = useState<MapSettings>({
         drawFieldSize: 25,
@@ -75,7 +75,7 @@ function App() {
         particlesEngine.spawnParticles(5000);
     }
 
-    const onMapRenderTick = useCallback(
+    const onRenderTick = useCallback(
         (deltaTime: DOMHighResTimeStamp) => {
             const deltaTimeSec = deltaTime / 1000;
             particlesEngine.update(deltaTimeSec);
@@ -114,7 +114,7 @@ function App() {
                         <InteractiveMap
                             particlesEngine={particlesEngine}
                             settings={mapSettings}
-                            onTick={onMapRenderTick}
+                            onTick={onRenderTick}
                             onStatsUpdated={onMapStatsUpdated}
                         />
                     </div>

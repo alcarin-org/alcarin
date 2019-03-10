@@ -4,7 +4,7 @@ import { ConvectValue } from './ConvectableValues';
 import { Color, colorToNumber } from '../../utils/Draw';
 
 export interface Particles {
-    // bundled Points as Float64Array.
+    // bundled Points as Float32Array.
     // code format: [x1, y1, x2, y2, x3, y3, ...]
     positions: Float32Array;
     // colors encoded at float64 numbers (every 8-bit from 32-bits represent in order r,g,b,a values)

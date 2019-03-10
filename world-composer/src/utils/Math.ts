@@ -51,8 +51,8 @@ export function round(p: Point): Point {
 // fully separated cell, there will be no 0s on main diagonal
 export function resolveLinearByJacobi(
     A: Int8Array, // coefficient matrix A
-    B: Float64Array // constants matrix B
-): Float64Array {
+    B: Float32Array // constants matrix B
+): Float32Array {
     if (process.env.REACT_APP_DEBUG === '1') {
         if (A.length !== B.length ** 2) {
             throw new Error(
@@ -60,8 +60,8 @@ export function resolveLinearByJacobi(
             );
         }
     }
-    let x = new Float64Array(B.length); // resultsMatrix
-    const tmpX = new Float64Array(B.length);
+    let x = new Float32Array(B.length); // resultsMatrix
+    const tmpX = new Float32Array(B.length);
 
     for (let step = 0; step < 10; step++) {
         for (let iUnknown = 0; iUnknown < B.length; iUnknown++) {

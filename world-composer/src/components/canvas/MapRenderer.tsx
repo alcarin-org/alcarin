@@ -42,12 +42,14 @@ export function MapRenderer({
                     }
                 }
                 // this force rerender
-                setRenderCount(prev => prev + 1);
                 lastRenderRef.current = timestamp;
                 requestAnimFrameId = requestAnimationFrame(renderAtmosphere);
+                setRenderCount(prev => prev + 1);
             }
 
-            return () => cancelAnimationFrame(requestAnimFrameId);
+            return () => {
+                cancelAnimationFrame(requestAnimFrameId);
+            };
         },
         [onRender]
     );

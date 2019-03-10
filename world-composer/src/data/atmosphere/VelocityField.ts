@@ -7,6 +7,6 @@ export interface VelocityField {
     // e.g. velX: (-0.5, 0), velY: (0, -0.5)
     // the map is surronded by 1 cell solids buffer
 
-    velX: Float64Array;
-    velY: Float64Array;
+    velX: Float32Array;
+    velY: Float32Array;
 }
