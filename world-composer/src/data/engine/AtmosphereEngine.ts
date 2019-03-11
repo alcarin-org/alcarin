@@ -4,6 +4,9 @@ import { precalcNeighboursMatrix, calculateFieldPressure } from './EngineUtils';
 import { Point, multiply, add } from '../../utils/Math';
 
 const StepDelaySec = 0.05;
+
+type SimulationClickHandler = (deltaTime: DOMHighResTimeStamp) => void;
+
 export class AtmosphereEngine {
     public readonly grid: MACGrid.MACGridData;
 
@@ -18,6 +21,8 @@ export class AtmosphereEngine {
     private deltaTimeAcc: DOMHighResTimeStamp = 0;
 
     private neightboursMatrix: Int8Array;
+
+    private onTickHandlers: SimulationClickHandler[] = [];
 
     public constructor(grid: MACGrid.MACGridData) {
         this.grid = grid;
@@ -53,8 +58,13 @@ export class AtmosphereEngine {
         this.deltaTimeAcc += deltaTimeSec;
         if (this.deltaTimeAcc >= StepDelaySec) {
             this.evolve(this.deltaTimeAcc);
+            this.onTickHandlers.forEach(handler => handler(this.deltaTimeAcc));
             this.deltaTimeAcc = 0;
         }
+    }
+
+    public onSimulationTick(handler: SimulationClickHandler) {
+        this.onTickHandlers.push(handler);
     }
 
     public setFluidSource(p: Point) {

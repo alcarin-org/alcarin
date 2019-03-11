@@ -20,11 +20,44 @@ export const convectParticle: ConvectValue<Point, Particles> = (
 
 const ParticleColors: Color[] = [
     // [168, 100, 253, 255],
-    // [41, 205, 255, 255],
-    [120, 255, 68, 255],
+    [41, 205, 255, 255],
+    // [120, 255, 68, 255],
     // [255, 113, 141, 255],
     // [253, 255, 106, 255],
 ];
+
+export interface HashTable {
+    [key: string]: null;
+}
+
+export function removeParticlesOnIndexes(
+    particles: Particles,
+    indexesHash: HashTable
+): Particles {
+    const size = Object.keys(indexesHash).length;
+    const newPositions = new Float32Array(
+        particles.positions.length - size * 2
+    );
+    const newColors = new Uint32Array(particles.colors.length - size);
+
+    let newInd = 0;
+
+    particles.colors.forEach((_, ind) => {
+        if (ind in indexesHash) {
+            return;
+        }
+        newColors[newInd] = particles.colors[ind];
+        newPositions[2 * newInd] = particles.positions[2 * ind];
+        newPositions[2 * newInd + 1] = particles.positions[2 * ind + 1];
+
+        newInd++;
+    });
+
+    return {
+        positions: newPositions,
+        colors: newColors,
+    };
+}
 
 export function concatParticles(part1: Particles, part2: Particles): Particles {
     const positions = new Float32Array(

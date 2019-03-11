@@ -9,6 +9,10 @@ import * as MACGrid from '../data/atmosphere/MACGrid';
 import * as RandomizeField from '../data/atmosphere/RandomizeField';
 import { AtmosphereEngine } from '../data/engine/AtmosphereEngine';
 import { ParticlesEngine } from '../data/engine/ParticlesEngine';
+import {
+    FluidSourcesEngine,
+    FluidSourceType,
+} from '../data/engine/FluidSourcesEngine';
 import { round, Point } from '../utils/Math';
 import { ipcRenderer } from '../electron-bridge';
 import Stats from './Stats';
@@ -19,13 +23,18 @@ const WorldSize = 20;
 export function App() {
     useEffect(() => ipcRenderer.send('main-window-ready'), []);
 
-    const [atmoGrid, setAtmoGrid] = useState(() => MACGrid.create(WorldSize));
-    const [atmoEngine, setAtmoEngine] = useState(
-        () => new AtmosphereEngine(atmoGrid)
-    );
-    const [particlesEngine, setParticlesEngine] = useState(
-        () => new ParticlesEngine(atmoEngine)
-    );
+    const [atmoGrid, setAtmoGrid] = useState<MACGrid.MACGridData | null>(null);
+    const [atmoEngine, setAtmoEngine] = useState<AtmosphereEngine | null>(null);
+    const [
+        particlesEngine,
+        setParticlesEngine,
+    ] = useState<ParticlesEngine | null>(null);
+    const [
+        sourcesEngine,
+        setSourcesEngine,
+    ] = useState<FluidSourcesEngine | null>(null);
+
+    useEffect(onMapReset, []);
 
     const [isStatsVisible, setIsStatsVisible] = useState(true);
 
@@ -51,7 +60,6 @@ export function App() {
             randomMethods[Math.floor(Math.random() * randomMethods.length)];
         onMapReset(method, true, true);
     }
-
     function onMapReset(
         randomMethod?: RandomizeField.RandomMethod,
         preserveParticles?: boolean,
@@ -59,30 +67,69 @@ export function App() {
     ) {
         const newGrid = MACGrid.create(
             WorldSize,
-            preserveSolids ? atmoGrid.solids : undefined,
+            preserveSolids && atmoGrid ? atmoGrid.solids : undefined,
             randomMethod
         );
         const newEngine = new AtmosphereEngine(newGrid);
         const newParticlesEngine = new ParticlesEngine(
             newEngine,
-            preserveParticles ? particlesEngine.particles : undefined
+            preserveParticles && particlesEngine
+                ? particlesEngine.particles
+                : undefined
         );
+        const newSourcesEngine = new FluidSourcesEngine(
+            newEngine,
+            newParticlesEngine
+            // sourcesEngine
+        );
+        newEngine.onSimulationTick(deltaTimeSec =>
+            newSourcesEngine.update(deltaTimeSec)
+        );
+
+        // debug
+        newSourcesEngine.registerSource({
+            gridPosition: [
+                1 + Math.trunc(Math.random() * (newGrid.size - 2)),
+                1 + Math.trunc(Math.random() * (newGrid.size - 2)),
+            ],
+            type: FluidSourceType.Omni,
+            power: 15,
+            particlesColor: [30, 255, 30, 128],
+            particlesPerSecond: 105,
+        });
+
+        newSourcesEngine.registerSource({
+            gridPosition: [
+                1 + Math.trunc(Math.random() * (newGrid.size - 2)),
+                1 + Math.trunc(Math.random() * (newGrid.size - 2)),
+            ],
+            type: FluidSourceType.Sink,
+            power: -20,
+            particlesColor: [30, 255, 30, 128],
+            particlesPerSecond: 0,
+        });
 
         setAtmoGrid(newGrid);
         setAtmoEngine(newEngine);
         setParticlesEngine(newParticlesEngine);
+        setParticlesEngine(newParticlesEngine);
+        setSourcesEngine(newSourcesEngine);
     }
 
-    const simulationContext = useMemo<SimulationContext>(
-        () => ({
-            grid: atmoGrid,
-            engine: atmoEngine,
-        }),
-        [atmoGrid, atmoEngine]
+    const simulationContext = useMemo<SimulationContext | null>(
+        () =>
+            atmoEngine
+                ? {
+                      grid: atmoGrid!,
+                      engine: atmoEngine!,
+                      sources: sourcesEngine!,
+                  }
+                : null,
+        [atmoGrid, atmoEngine, sourcesEngine]
     );
 
     function spawnParticles() {
-        particlesEngine.spawnParticles(5000);
+        particlesEngine!.spawnParticles(5000);
     }
 
     const onRenderTick = useCallback(
@@ -91,8 +138,8 @@ export function App() {
                 return;
             }
             const deltaTimeSec = deltaTime / 1000;
-            particlesEngine.update(deltaTimeSec);
-            atmoEngine.update(deltaTimeSec);
+            particlesEngine!.update(deltaTimeSec);
+            atmoEngine!.update(deltaTimeSec);
         },
         [atmoEngine, particlesEngine, mapSettings]
     );
@@ -104,11 +151,11 @@ export function App() {
     function onWallToggle(mapPos: Point, value: boolean) {
         if (mapSettings.mapType === MapType.Wall) {
             const gridPos = round(mapPos);
-            atmoEngine.toggleSolid(gridPos, value);
+            atmoEngine!.toggleSolid(gridPos, value);
         }
     }
 
-    return (
+    return atmoEngine ? (
         <Context.Provider value={simulationContext}>
             <div className="app">
                 <div className="app__toolbar">
@@ -126,7 +173,7 @@ export function App() {
                     {isStatsVisible && (
                         <div className="app__stats-panel">
                             <Stats
-                                particlesEngine={particlesEngine}
+                                particlesEngine={particlesEngine!}
                                 mouseOver={[0, 0]}
                                 fps={renderFps}
                             />
@@ -134,7 +181,7 @@ export function App() {
                     )}
                     <div className="app__map">
                         <InteractiveMap
-                            particlesEngine={particlesEngine}
+                            particlesEngine={particlesEngine!}
                             settings={mapSettings}
                             onTick={onRenderTick}
                             onStatsUpdated={onMapStatsUpdated}
@@ -144,5 +191,5 @@ export function App() {
                 </div>
             </div>
         </Context.Provider>
-    );
+    ) : null;
 }

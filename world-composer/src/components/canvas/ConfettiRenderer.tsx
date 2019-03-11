@@ -64,14 +64,25 @@ function renderConfetti(
         ];
         const color = particles.colors[i];
         // set alpha for color
-        const blendColor = (color & 0x00ffffff) | (160 << 24);
+        const blendColor = (color & 0x00ffffff) | (120 << 24);
 
         const offset = offsetFromPx(pxPos[0], pxPos[1]);
         data[offset] = color;
+
         data[offset - 1] = blendColor;
+        data[offset - 2] = blendColor;
         data[offset + 1] = blendColor;
+        data[offset + 2] = blendColor;
+
         data[offset - width] = blendColor;
+        data[offset - 2 * width] = blendColor;
+        data[offset - width - 1] = blendColor;
+        data[offset - width + 1] = blendColor;
+
         data[offset + width] = blendColor;
+        data[offset + 2 * width] = blendColor;
+        data[offset + width - 1] = blendColor;
+        data[offset + width + 1] = blendColor;
     }
     ctx.putImageData(pixelData, 0, 0);
 }
