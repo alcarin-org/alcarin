@@ -28,6 +28,19 @@ export function FluidSourcePanel({ onSourceChanged }: Props) {
         onSourceChanged(newSource);
     };
 
+    function setColor(color: Color) {
+        updateFluidSource({
+            ...source,
+            particlesColor: color,
+        });
+    }
+
+    function randomizeColor() {
+        const rand = () => Math.trunc(Math.random() * 256);
+        console.log([rand(), rand(), rand(), 255]);
+        setColor([rand(), rand(), rand(), 255]);
+    }
+
     const onPowerChange = (ev: ChangeEvent<HTMLInputElement>) => {
         updateFluidSource({
             ...source,
@@ -43,10 +56,7 @@ export function FluidSourcePanel({ onSourceChanged }: Props) {
     };
 
     const onColorChange = (ev: ChangeEvent<HTMLInputElement>) => {
-        updateFluidSource({
-            ...source,
-            particlesColor: hexToColor(ev.currentTarget.value),
-        });
+        setColor(hexToColor(ev.currentTarget.value));
     };
 
     return (
@@ -88,6 +98,13 @@ export function FluidSourcePanel({ onSourceChanged }: Props) {
                             value={colorToHex(source.particlesColor)}
                             onChange={onColorChange}
                         />
+                        <button
+                            className="pure-button"
+                            type="button"
+                            onClick={randomizeColor}
+                        >
+                            <i className="fa fa-random" />
+                        </button>
                     </div>
                 </fieldset>
             </form>
