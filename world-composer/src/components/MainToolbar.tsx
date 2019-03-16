@@ -82,12 +82,6 @@ export function MainToolbar({
             >
                 Divergence
             </ToolbarButton>
-            <ToolbarButton
-                active={mapType === MapType.Wall}
-                onClick={() => dispachNewMapType(MapType.Wall)}
-            >
-                Wall
-            </ToolbarButton>
 
             <ToolbarSeparator />
 

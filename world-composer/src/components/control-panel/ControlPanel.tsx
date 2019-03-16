@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import Stats from './Stats';
+import { useInteractionContext } from '../../context/InteractionContext';
+import { MapMode } from '../../context/interaction/state';
+import { ActionType } from '../../context/interaction/reducer';
 
 export enum ControlPanelMode {
     Stats,
@@ -7,27 +10,43 @@ export enum ControlPanelMode {
 }
 
 const TabsDefinition = [
-    { mode: ControlPanelMode.Stats, label: 'Statistics' },
-    { mode: ControlPanelMode.Walls, label: 'Setup walls' },
+    {
+        mode: ControlPanelMode.Stats,
+        mapMode: MapMode.Neutral,
+        label: 'Statistics',
+    },
+    {
+        mode: ControlPanelMode.Walls,
+        mapMode: MapMode.WallEditor,
+        label: 'Setup walls',
+    },
 ];
 
-interface Props {
-    onModeChanged?: (mode: ControlPanelMode) => void;
+function setMapModeAction(mapMode: MapMode, data?: any) {
+    return {
+        type: ActionType.SetMapMode,
+        payload: {
+            mode: mapMode,
+            data,
+        },
+    };
 }
 
-export function ControlPanel({ onModeChanged }: Props) {
+export function ControlPanel() {
     const [mode, setMode] = useState(ControlPanelMode.Stats);
+    const { dispatch } = useInteractionContext();
+    const setMapMode = (mapMode: MapMode) =>
+        dispatch(setMapModeAction(mapMode));
 
     return (
         <div className="control-panel">
             <div className="pure-button-group">
                 {TabsDefinition.map(tab => (
                     <button
+                        key={tab.mode}
                         onClick={() => {
                             setMode(tab.mode);
-                            if (onModeChanged) {
-                                onModeChanged(tab.mode);
-                            }
+                            setMapMode(tab.mapMode);
                         }}
                         className={
                             'pure-button' +
@@ -51,6 +70,13 @@ function renderTab(mode: ControlPanelMode) {
         case ControlPanelMode.Stats:
             return <Stats mouseOver={[0, 0]} />;
         default:
-            return null;
+            return (
+                <p>
+                    In Walls Editor mode you can dynamically create/destroy
+                    walls on map. Use left mouse button to create a wall or
+                    right to destroy a wall. You can not destroy border walls,
+                    as their are essential for simulation.
+                </p>
+            );
     }
 }

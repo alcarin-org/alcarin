@@ -14,7 +14,7 @@ import { MapRenderer } from '../canvas/MapRenderer';
 import SimulationContext from '../../context/SimulationContext';
 import { useInteractionContext } from '../../context/InteractionContext';
 import { ActionType, Dispatch } from '../../context/interaction/reducer';
-import { MapType } from '../../context/interaction/state';
+import { MapMode } from '../../context/interaction/state';
 
 export interface MapStats {
     renderFps: number;
@@ -22,7 +22,6 @@ export interface MapStats {
 
 interface Props {
     onTick?: (deltaTime: DOMHighResTimeStamp) => void;
-    onWallToggle?: (mapPos: Point, value: boolean) => void;
 }
 
 interface FpsCalc {
@@ -38,8 +37,8 @@ function updateFpsAction(fps: number) {
     };
 }
 
-export function InteractiveMap({ onTick, onWallToggle }: Props) {
-    const { grid } = useContext(SimulationContext);
+export function InteractiveMap({ onTick }: Props) {
+    const { grid, engine } = useContext(SimulationContext);
     const {
         state: { settings },
         dispatch,
@@ -75,26 +74,28 @@ export function InteractiveMap({ onTick, onWallToggle }: Props) {
     }
 
     function onMapContainerDown(ev: React.MouseEvent<HTMLDivElement>) {
-        if (settings.mapType !== MapType.Wall || ev.buttons === 0) {
+        if (ev.buttons === 0) {
             return;
         }
         const mapPos = eventToMapPosition(ev);
-        const bufferWall = isBufferWall(grid.size, round(mapPos));
-        if (bufferWall !== isCursorOnBuffer) {
-            setIsCursorOnBuffer(bufferWall);
-        }
-        if (!bufferWall && onWallToggle) {
-            onWallToggle(eventToMapPosition(ev), ev.buttons === 1);
+        switch (settings.mapInteraction.mode) {
+            case MapMode.WallEditor:
+                const bufferWall = isBufferWall(grid.size, round(mapPos));
+                if (bufferWall !== isCursorOnBuffer) {
+                    setIsCursorOnBuffer(bufferWall);
+                }
+
+                if (!bufferWall) {
+                    const gridPos = round(mapPos);
+                    engine.toggleSolid(gridPos, ev.buttons === 1);
+                }
+                break;
         }
     }
 
-    const pointerMode = !isCursorOnBuffer && settings.mapType === MapType.Wall;
     return (
         <div
-            className={
-                'interactive-map' +
-                (pointerMode ? ' interactive-map--active' : '')
-            }
+            className="interactive-map"
             onMouseDown={onMapContainerDown}
             onMouseMove={onMouseMove}
         >

@@ -8,11 +8,9 @@ import SimulationContext, {
 } from '../context/SimulationContext';
 import { useInteractionContext } from '../context/InteractionContext';
 import * as RandomizeField from '../data/atmosphere/RandomizeField';
-import { MapType } from '../context/interaction/state';
 import { InteractiveMap } from './map/InteractiveMap';
 import { ControlPanel } from './control-panel/ControlPanel';
 import { MainToolbar } from './MainToolbar';
-import { round, Point } from '../utils/Math';
 
 interface Props {
     onContextRecreated: (context: SimulationContextType) => void;
@@ -29,22 +27,12 @@ export function Page({ onContextRecreated }: Props) {
 
     const onRenderTick = useCallback(
         (deltaTime: DOMHighResTimeStamp) => {
-            if (mapSettings.mapType === MapType.Wall) {
-                return;
-            }
             const deltaTimeSec = deltaTime / 1000;
             simulationContext.particles.update(deltaTimeSec);
             simulationContext.engine.update(deltaTimeSec);
         },
         [simulationContext, mapSettings]
     );
-
-    function onWallToggle(mapPos: Point, value: boolean) {
-        if (mapSettings.mapType === MapType.Wall) {
-            const gridPos = round(mapPos);
-            simulationContext.engine.toggleSolid(gridPos, value);
-        }
-    }
 
     function randomizeMap() {
         const randomMethods = [
@@ -85,15 +73,12 @@ export function Page({ onContextRecreated }: Props) {
             </div>
             <div className="page__content">
                 {showControlPanel && (
-                    <div className="page__stats-panel">
+                    <div className="page__control-panel">
                         <ControlPanel />
                     </div>
                 )}
                 <div className="page__map">
-                    <InteractiveMap
-                        onTick={onRenderTick}
-                        onWallToggle={onWallToggle}
-                    />
+                    <InteractiveMap onTick={onRenderTick} />
                 </div>
             </div>
         </div>

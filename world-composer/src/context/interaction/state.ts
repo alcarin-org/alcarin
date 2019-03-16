@@ -3,24 +3,25 @@ export enum MapType {
     Pressure,
     Velocity,
     Divergence,
-    Wall,
 }
 
-export interface MapSettings {
-    drawFieldSize: number;
-    mapType: MapType;
-}
-
-export interface InteractionContextState {
-    fps: number;
-    settings: MapSettings;
+export enum MapMode {
+    Neutral,
+    WallEditor,
 }
 
 const InteractionContextState = {
     fps: 0,
     settings: {
         drawFieldSize: 25,
+        // map type tell map render mode
         mapType: MapType.Neutral,
+        // map interaction mode, how clicks interact with map
+        mapInteraction: {
+            mode: MapMode.Neutral,
+            // specific map interaction mode could need some config data
+            payload: null as any,
+        },
     },
 };
 

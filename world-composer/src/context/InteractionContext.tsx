@@ -1,9 +1,9 @@
 import React, { createContext, useReducer, ReactNode, useContext } from 'react';
-import defaultState, { InteractionContextState } from './interaction/state';
+import defaultState from './interaction/state';
 import reducer, { Dispatch } from './interaction/reducer';
 
 interface InteractionContextType {
-    state: InteractionContextState;
+    state: typeof defaultState;
     dispatch: Dispatch;
 }
 
