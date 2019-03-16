@@ -91,7 +91,7 @@ export class FluidSourcesEngine {
     public removeSourcesAt(gridPos: Point) {
         this.sources = this.sources.filter(
             ({ source }) =>
-                source.gridPosition[0] !== gridPos[0] &&
+                source.gridPosition[0] !== gridPos[0] ||
                 source.gridPosition[1] !== gridPos[1]
         );
         this.reapplyPressureModifiers();
