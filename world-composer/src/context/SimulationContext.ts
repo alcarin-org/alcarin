@@ -3,10 +3,7 @@ import { createContext } from 'react';
 import * as MACGrid from '../data/atmosphere/MACGrid';
 import { AtmosphereEngine } from '../data/engine/AtmosphereEngine';
 import { ParticlesEngine } from '../data/engine/ParticlesEngine';
-import {
-    FluidSourcesEngine,
-    FluidSourceType,
-} from '../data/engine/FluidSourcesEngine';
+import { FluidSourcesEngine } from '../data/engine/FluidSourcesEngine';
 import * as RandomizeField from '../data/atmosphere/RandomizeField';
 
 const DefaultWorldSize = 20;
@@ -40,29 +37,6 @@ export function createSimulationContext(
     newEngine.onSimulationTick(deltaTimeSec =>
         newSourcesEngine.update(deltaTimeSec)
     );
-
-    // debug
-    // newSourcesEngine.registerSource({
-    //     gridPosition: [
-    //         1 + Math.trunc(Math.random() * (newGrid.size - 2)),
-    //         1 + Math.trunc(Math.random() * (newGrid.size - 2)),
-    //     ],
-    //     type: FluidSourceType.Omni,
-    //     power: 15,
-    //     particlesColor: [30, 255, 30, 128],
-    //     particlesPerSecond: 105,
-    // });
-
-    newSourcesEngine.registerSource({
-        gridPosition: [
-            1 + Math.trunc(Math.random() * (newGrid.size - 2)),
-            1 + Math.trunc(Math.random() * (newGrid.size - 2)),
-        ],
-        type: FluidSourceType.Sink,
-        power: -20,
-        particlesColor: [30, 255, 30, 128],
-        particlesPerSecond: 0,
-    });
 
     return {
         grid: newGrid,

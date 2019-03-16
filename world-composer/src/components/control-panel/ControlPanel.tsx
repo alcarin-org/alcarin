@@ -5,6 +5,7 @@ import { MapMode } from '../../context/interaction/state';
 import { ActionType } from '../../context/interaction/reducer';
 import { FluidSource } from '../../data/engine/FluidSourcesEngine';
 import { FluidSourcePanel, DefaultFluidSource } from './FluidSourcePanel';
+import { FluidSinkPanel, DefaultFluidSink } from './FluidSinkPanel';
 
 export enum ControlPanelMode {
     Stats,
@@ -44,8 +45,8 @@ const TabsDefinition: Tab[] = [
     {
         mode: ControlPanelMode.Sinks,
         mapMode: MapMode.SourcesAndSinks,
-        label: 'Fluid ssetMapModeinks',
-        defaultPayload: null,
+        label: 'Fluid sinks',
+        defaultPayload: DefaultFluidSink,
     },
 ];
 
@@ -124,6 +125,17 @@ function renderTab(
                         button to create a fluid source or right to destroy one.
                     </p>
                     <FluidSourcePanel onSourceChanged={onPayloadChanged} />
+                </>
+            );
+        case ControlPanelMode.Sinks:
+            return (
+                <>
+                    <p>
+                        In Sinks Editor mode you can dynamically create/destroy
+                        fluid sinks on the map. Use left mouse button to create
+                        a sink or right to destroy one.
+                    </p>
+                    <FluidSinkPanel onSinkChanged={onPayloadChanged} />
                 </>
             );
         case ControlPanelMode.Walls:

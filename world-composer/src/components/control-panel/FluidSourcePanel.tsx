@@ -10,13 +10,13 @@ interface Props {
     onSourceChanged: (source: FluidSource) => void;
 }
 
-const color: Color = [30, 255, 30, 128];
+const DefaultColor: Color = [30, 255, 30, 128];
 
 export const DefaultFluidSource: FluidSource = {
     type: FluidSourceType.Omni,
     gridPosition: [0, 0],
     power: 10,
-    particlesColor: color,
+    particlesColor: DefaultColor,
     particlesPerSecond: 50,
 };
 

@@ -12,9 +12,8 @@ import { Point, round, magnitude } from '../../utils/Math';
 
 export enum FluidSourceType {
     Directional,
+    // to create a sink, just create omni fluid source with negative power
     Omni,
-
-    Sink,
 }
 export interface FluidSource {
     type: FluidSourceType;
@@ -57,10 +56,7 @@ export class FluidSourcesEngine {
             assert(source.gridPosition);
         }
         this.sources.push({ source, particleAccumulator: 0 });
-        if (
-            source.type === FluidSourceType.Omni ||
-            source.type === FluidSourceType.Sink
-        ) {
+        if (source.type === FluidSourceType.Omni) {
             this.reapplyPressureModifiers();
         }
     }
@@ -98,16 +94,14 @@ export class FluidSourcesEngine {
                 source.gridPosition[0] !== gridPos[0] &&
                 source.gridPosition[1] !== gridPos[1]
         );
+        this.reapplyPressureModifiers();
     }
 
     private cleanupSinks() {
         const particles = this.particlesEngine.particles;
         const particlesIndToRemove: HashTable = {};
         this.sources
-            .filter(
-                sourceInstance =>
-                    sourceInstance.source.type === FluidSourceType.Sink
-            )
+            .filter(sourceInstance => sourceInstance.source.power < 0)
             .forEach(sourceInstance => {
                 for (let i = 0; i < particles.colors.length; i++) {
                     const x = particles.positions[2 * i];
@@ -135,8 +129,7 @@ export class FluidSourcesEngine {
         this.sources
             .filter(
                 sourceInstance =>
-                    sourceInstance.source.type === FluidSourceType.Omni ||
-                    sourceInstance.source.type === FluidSourceType.Sink
+                    sourceInstance.source.type === FluidSourceType.Omni
             )
             .forEach(sourceInstance => {
                 const gridIndex = MACGrid.index(
