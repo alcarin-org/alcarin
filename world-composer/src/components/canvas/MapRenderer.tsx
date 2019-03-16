@@ -70,7 +70,7 @@ export function MapRenderer({ fieldSizePx = 30, onRender }: Props) {
                     height={canvasSizePx}
                 />
             )}
-            {(mapType === MapType.Neutral || mapType === MapType.Wall) && (
+            {(mapType === MapType.Neutral) && (
                 <ConfettiRenderer
                     width={canvasSizePx}
                     height={canvasSizePx}
