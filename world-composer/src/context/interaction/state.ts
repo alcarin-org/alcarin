@@ -8,6 +8,7 @@ export enum MapType {
 export enum MapMode {
     Neutral,
     WallEditor,
+    SourcesAndSinks,
 }
 
 const InteractionContextState = {
@@ -20,7 +21,7 @@ const InteractionContextState = {
         mapInteraction: {
             mode: MapMode.Neutral,
             // specific map interaction mode could need some config data
-            payload: null as any,
+            data: null as any,
         },
     },
 };

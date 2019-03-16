@@ -1,3 +1,9 @@
 .interactive-map {
     display: flex;
+    justify-content: center;
+
+    &--active {
+        cursor: pointer;
+    }
+
 }

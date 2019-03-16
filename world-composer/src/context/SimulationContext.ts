@@ -42,16 +42,16 @@ export function createSimulationContext(
     );
 
     // debug
-    newSourcesEngine.registerSource({
-        gridPosition: [
-            1 + Math.trunc(Math.random() * (newGrid.size - 2)),
-            1 + Math.trunc(Math.random() * (newGrid.size - 2)),
-        ],
-        type: FluidSourceType.Omni,
-        power: 15,
-        particlesColor: [30, 255, 30, 128],
-        particlesPerSecond: 105,
-    });
+    // newSourcesEngine.registerSource({
+    //     gridPosition: [
+    //         1 + Math.trunc(Math.random() * (newGrid.size - 2)),
+    //         1 + Math.trunc(Math.random() * (newGrid.size - 2)),
+    //     ],
+    //     type: FluidSourceType.Omni,
+    //     power: 15,
+    //     particlesColor: [30, 255, 30, 128],
+    //     particlesPerSecond: 105,
+    // });
 
     newSourcesEngine.registerSource({
         gridPosition: [

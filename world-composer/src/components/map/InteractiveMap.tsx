@@ -4,12 +4,12 @@ import React, {
     useCallback,
     useRef,
     useContext,
-    useState,
     MutableRefObject,
 } from 'react';
 
 import { round, Point } from '../../utils/Math';
 import { isBufferWall } from '../../data/atmosphere/MACGrid';
+import { FluidSource } from '../../data/engine/FluidSourcesEngine';
 import { MapRenderer } from '../canvas/MapRenderer';
 import SimulationContext from '../../context/SimulationContext';
 import { useInteractionContext } from '../../context/InteractionContext';
@@ -38,7 +38,7 @@ function updateFpsAction(fps: number) {
 }
 
 export function InteractiveMap({ onTick }: Props) {
-    const { grid, engine } = useContext(SimulationContext);
+    const { grid, engine, sources } = useContext(SimulationContext);
     const {
         state: { settings },
         dispatch,
@@ -49,8 +49,6 @@ export function InteractiveMap({ onTick }: Props) {
         timeAcc: 0,
         fpsAcc: 0,
     });
-
-    const [isCursorOnBuffer, setIsCursorOnBuffer] = useState(false)!;
 
     const onRender = useCallback(
         (deltaTime: DOMHighResTimeStamp) => {
@@ -78,24 +76,37 @@ export function InteractiveMap({ onTick }: Props) {
             return;
         }
         const mapPos = eventToMapPosition(ev);
+        if (isBufferWall(grid.size, round(mapPos))) {
+            return;
+        }
+
+        const gridPos = round(mapPos);
+        const leftButton = ev.buttons === 1;
+
         switch (settings.mapInteraction.mode) {
             case MapMode.WallEditor:
-                const bufferWall = isBufferWall(grid.size, round(mapPos));
-                if (bufferWall !== isCursorOnBuffer) {
-                    setIsCursorOnBuffer(bufferWall);
-                }
-
-                if (!bufferWall) {
-                    const gridPos = round(mapPos);
-                    engine.toggleSolid(gridPos, ev.buttons === 1);
+                engine.toggleSolid(gridPos, leftButton);
+                break;
+            case MapMode.SourcesAndSinks:
+                sources.removeSourcesAt(gridPos);
+                if (leftButton) {
+                    const source: FluidSource = {
+                        ...(settings.mapInteraction.data as FluidSource),
+                        gridPosition: gridPos,
+                    };
+                    sources.registerSource(source);
                 }
                 break;
         }
     }
 
+    const showPointer = settings.mapInteraction.mode !== MapMode.Neutral;
     return (
         <div
-            className="interactive-map"
+            className={
+                'interactive-map' +
+                (showPointer ? ' interactive-map--active' : '')
+            }
             onMouseDown={onMapContainerDown}
             onMouseMove={onMouseMove}
         >

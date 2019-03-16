@@ -26,12 +26,17 @@ export interface FluidSource {
     particlesColor: Color;
 }
 
+interface SourceInstance {
+    source: FluidSource;
+    particleAccumulator: number;
+}
+
 export class FluidSourcesEngine {
-    private sources: FluidSource[] = [];
-    private sourcesParticleAcc: number[] = [];
+    private sources: SourceInstance[] = [];
 
     private engine: AtmosphereEngine;
     private particlesEngine: ParticlesEngine;
+
     private removeTimeAcc: number = 0;
 
     public constructor(
@@ -43,24 +48,15 @@ export class FluidSourcesEngine {
         this.particlesEngine = particlesEngine;
         if (base) {
             this.sources = base.sources;
-            this.sourcesParticleAcc = base.sourcesParticleAcc;
             this.reapplyPressureModifiers();
         }
     }
 
     public registerSource(source: FluidSource) {
         if (process.env.REACT_APP_DEBUG === '1') {
-            if (
-                source.gridPosition[0] !== Math.floor(source.gridPosition[0]) ||
-                source.gridPosition[1] !== Math.floor(source.gridPosition[0])
-            ) {
-                throw new Error(
-                    'Fluid source should be positioned only on center of grid cells.'
-                );
-            }
+            assert(source.gridPosition);
         }
-        this.sources.push(source);
-        this.sourcesParticleAcc.push(0);
+        this.sources.push({ source, particleAccumulator: 0 });
         if (
             source.type === FluidSourceType.Omni ||
             source.type === FluidSourceType.Sink
@@ -96,18 +92,29 @@ export class FluidSourcesEngine {
         // };
     }
 
+    public removeSourcesAt(gridPos: Point) {
+        this.sources = this.sources.filter(
+            ({ source }) =>
+                source.gridPosition[0] !== gridPos[0] &&
+                source.gridPosition[1] !== gridPos[1]
+        );
+    }
+
     private cleanupSinks() {
         const particles = this.particlesEngine.particles;
         const particlesIndToRemove: HashTable = {};
         this.sources
-            .filter(source => source.type === FluidSourceType.Sink)
-            .forEach(source => {
+            .filter(
+                sourceInstance =>
+                    sourceInstance.source.type === FluidSourceType.Sink
+            )
+            .forEach(sourceInstance => {
                 for (let i = 0; i < particles.colors.length; i++) {
                     const x = particles.positions[2 * i];
                     const y = particles.positions[2 * i + 1];
                     const distance = magnitude([
-                        source.gridPosition[0] - x,
-                        source.gridPosition[1] - y,
+                        sourceInstance.source.gridPosition[0] - x,
+                        sourceInstance.source.gridPosition[1] - y,
                     ]);
                     if (distance < 0.1) {
                         particlesIndToRemove[i] = null;
@@ -127,33 +134,34 @@ export class FluidSourcesEngine {
         );
         this.sources
             .filter(
-                source =>
-                    source.type === FluidSourceType.Omni ||
-                    source.type === FluidSourceType.Sink
+                sourceInstance =>
+                    sourceInstance.source.type === FluidSourceType.Omni ||
+                    sourceInstance.source.type === FluidSourceType.Sink
             )
-            .forEach(source => {
+            .forEach(sourceInstance => {
                 const gridIndex = MACGrid.index(
                     this.engine.grid,
-                    source.gridPosition
+                    sourceInstance.source.gridPosition
                 );
-                newPressureModifiers[gridIndex] = source.power;
+                newPressureModifiers[gridIndex] = sourceInstance.source.power;
             });
         this.engine.grid.pressureModifiers = newPressureModifiers;
     }
 
     private generateOmniParticles(
-        source: FluidSource,
+        sourceInstance: SourceInstance,
         index: number,
         deltaTime: DOMHighResTimeStamp
     ) {
-        const color = colorToNumber(source.particlesColor);
-        this.sourcesParticleAcc[index] += deltaTime * source.particlesPerSecond;
-        if (this.sourcesParticleAcc[index] < 1) {
+        sourceInstance.particleAccumulator +=
+            deltaTime * sourceInstance.source.particlesPerSecond;
+        if (sourceInstance.particleAccumulator < 1) {
             return;
         }
 
-        const count = Math.floor(this.sourcesParticleAcc[index]);
-        this.sourcesParticleAcc[index] -= count;
+        const color = colorToNumber(sourceInstance.source.particlesColor);
+        const count = Math.floor(sourceInstance.particleAccumulator);
+        sourceInstance.particleAccumulator -= count;
 
         const newParticles: Particles = {
             positions: new Float32Array(2 * count),
@@ -165,8 +173,10 @@ export class FluidSourcesEngine {
             let containInd: number | null = null;
             do {
                 p = [
-                    source.gridPosition[0] + 0.5 * (1 - 2 * Math.random()),
-                    source.gridPosition[1] + 0.5 * (1 - 2 * Math.random()),
+                    sourceInstance.source.gridPosition[0] +
+                        0.5 * (1 - 2 * Math.random()),
+                    sourceInstance.source.gridPosition[1] +
+                        0.5 * (1 - 2 * Math.random()),
                 ];
                 containInd = MACGrid.index(this.engine.grid, round(p));
             } while (p === null || this.engine.grid.solids[containInd] === 1);
@@ -180,7 +190,7 @@ export class FluidSourcesEngine {
     }
 
     private applySource(
-        source: FluidSource,
+        sourceInstance: SourceInstance,
         index: number,
         deltaTime: DOMHighResTimeStamp
     ) {
@@ -214,10 +224,20 @@ export class FluidSourcesEngine {
         // );
         // const flow = multiply(fluidDir, FluidPower);
         // this.particlesEngine.particles
-        switch (source.type) {
+        switch (sourceInstance.source.type) {
             case FluidSourceType.Omni:
-                this.generateOmniParticles(source, index, deltaTime);
+                this.generateOmniParticles(sourceInstance, index, deltaTime);
                 break;
+        }
+    }
+}
+
+function assert(pos: Point) {
+    if (process.env.REACT_APP_DEBUG === '1') {
+        if (pos[0] !== Math.floor(pos[0]) || pos[1] !== Math.floor(pos[0])) {
+            throw new Error(
+                'Fluid source should be positioned only on center of grid cells.'
+            );
         }
     }
 }
