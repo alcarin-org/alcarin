@@ -1,6 +1,6 @@
 import './Page.scss';
 
-import React, { useState, useContext, useCallback } from 'react';
+import React, { useState, useContext, useCallback, useEffect } from 'react';
 
 import SimulationContext, {
     SimulationContextType,
@@ -16,6 +16,8 @@ interface Props {
     onContextRecreated: (context: SimulationContextType) => void;
 }
 
+const KEY_SPACE = 32;
+
 export function Page({ onContextRecreated }: Props) {
     const simulationContext = useContext(SimulationContext)!;
 
@@ -24,15 +26,31 @@ export function Page({ onContextRecreated }: Props) {
     } = useInteractionContext();
 
     const [showControlPanel, setShowControlPanel] = useState(true);
+    const [play, setPlay] = useState(true);
+
+    const onTogglePlay = useCallback(() => setPlay(val => !val), []);
 
     const onRenderTick = useCallback(
         (deltaTime: DOMHighResTimeStamp) => {
+            if (!play) {
+                return;
+            }
             const deltaTimeSec = deltaTime / 1000;
             simulationContext.particles.update(deltaTimeSec);
             simulationContext.engine.update(deltaTimeSec);
         },
-        [simulationContext, mapSettings]
+        [simulationContext, mapSettings, play]
     );
+
+    useEffect(() => {
+        function onKeyPress(ev: KeyboardEvent) {
+            if (ev.keyCode === KEY_SPACE) {
+                onTogglePlay();
+            }
+        }
+        window.addEventListener('keyup', onKeyPress, true);
+        return window.removeEventListener('keyup', onKeyPress);
+    }, []);
 
     function randomizeMap() {
         const randomMethods = [
@@ -62,6 +80,8 @@ export function Page({ onContextRecreated }: Props) {
                 <MainToolbar
                     onRandomizeVelocity={randomizeMap}
                     controlPanelVisible={showControlPanel}
+                    onTogglePlay={onTogglePlay}
+                    isPlaying={play}
                     onToggleControlPanel={newState =>
                         setShowControlPanel(newState)
                     }

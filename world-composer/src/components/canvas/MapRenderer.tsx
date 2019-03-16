@@ -6,23 +6,21 @@ import { MapType } from '../../context/interaction/state';
 import { BackgroundRenderer } from './background/BackgroundRenderer';
 import { SolidBackground } from './background/SolidBackground';
 import { VelocityFieldRenderer } from './VelocityFieldRenderer';
-// import { ParticlesRenderer } from './ParticlesRenderer';
 import { ConfettiRenderer } from './ConfettiRenderer';
 
 interface Props {
-    fieldSizePx?: number;
     onRender?: (deltaTime: DOMHighResTimeStamp) => void;
 }
 
-export function MapRenderer({ fieldSizePx = 30, onRender }: Props) {
+export function MapRenderer({ onRender }: Props) {
     const { grid, engine, particles } = useContext(SimulationContext);
     const {
         state: {
-            settings: { mapType },
+            settings: { mapType, drawFieldSize },
         },
     } = useInteractionContext();
 
-    const canvasSizePx = fieldSizePx * grid.size;
+    const canvasSizePx = drawFieldSize * grid.size;
 
     const lastRenderRef = useRef<DOMHighResTimeStamp | null>(null);
     // temporary solution, entire rendering mechanism will be refactored soon
@@ -70,7 +68,7 @@ export function MapRenderer({ fieldSizePx = 30, onRender }: Props) {
                     height={canvasSizePx}
                 />
             )}
-            {(mapType === MapType.Neutral) && (
+            {mapType === MapType.Neutral && (
                 <ConfettiRenderer
                     width={canvasSizePx}
                     height={canvasSizePx}

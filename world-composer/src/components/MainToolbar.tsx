@@ -10,7 +10,9 @@ interface Props {
     onSpawnParticles: () => void;
     onRandomizeVelocity: () => void;
     onMapReset: () => void;
+    onTogglePlay: () => void;
 
+    isPlaying: boolean;
     controlPanelVisible: boolean;
 }
 
@@ -27,6 +29,8 @@ export function MainToolbar({
     onSpawnParticles,
     onRandomizeVelocity,
     onMapReset,
+    onTogglePlay,
+    isPlaying,
 }: Props) {
     const {
         state: {
@@ -53,6 +57,9 @@ export function MainToolbar({
                 title="Spawn 5k particles"
             >
                 <i className="fa fa-ravelry" />
+            </ToolbarButton>
+            <ToolbarButton onClick={onTogglePlay} title="Play/pause animation">
+                <i className={'fa fa-' + (isPlaying ? 'pause' : 'play')} />
             </ToolbarButton>
 
             <ToolbarSeparator />
@@ -87,7 +94,7 @@ export function MainToolbar({
 
             <ToolbarButton
                 onClick={() => onToggleControlPanel(!controlPanelVisible)}
-                title="Show statistics"
+                title="Show control panel"
                 active={controlPanelVisible}
             >
                 <i className="fa fa-bar-chart" />
