@@ -1,29 +1,42 @@
 import React from 'react';
 
 import { Toolbar, ToolbarButton, ToolbarSeparator } from './common/Toolbar';
-import { MapType } from './canvas/utils/CanvasUtils';
-import { MapSettings } from './map/InteractiveMap';
+import { useInteractionContext } from '../context/InteractionContext';
+import { MapType } from '../context/interaction/state';
+import { ActionType } from '../context/interaction/reducer';
 
 interface Props {
     onToggleControlPanel: (visible: boolean) => void;
-    onMapTypeChange: (mapType: MapType) => void;
     onSpawnParticles: () => void;
     onRandomizeVelocity: () => void;
     onMapReset: () => void;
 
     controlPanelVisible: boolean;
-    mapSettings: MapSettings;
+}
+
+function changeMapTypeAction(mapType: MapType) {
+    return {
+        type: ActionType.SetMapType,
+        payload: mapType,
+    };
 }
 
 export function MainToolbar({
-    onMapTypeChange,
     onToggleControlPanel,
     controlPanelVisible,
     onSpawnParticles,
-    mapSettings,
     onRandomizeVelocity,
     onMapReset,
 }: Props) {
+    const {
+        state: {
+            settings: { mapType },
+        },
+        dispatch,
+    } = useInteractionContext();
+    const dispachNewMapType = (mapType: MapType) =>
+        dispatch(changeMapTypeAction(mapType));
+
     return (
         <Toolbar>
             <ToolbarButton onClick={onMapReset} title="Reset map">
@@ -45,33 +58,33 @@ export function MainToolbar({
             <ToolbarSeparator />
 
             <ToolbarButton
-                active={mapSettings.mapType === MapType.Pressure}
-                onClick={() => onMapTypeChange(MapType.Pressure)}
+                active={mapType === MapType.Pressure}
+                onClick={() => dispachNewMapType(MapType.Pressure)}
                 disabled={true}
             >
                 Pressure
             </ToolbarButton>
             <ToolbarButton
-                active={mapSettings.mapType === MapType.Neutral}
-                onClick={() => onMapTypeChange(MapType.Neutral)}
+                active={mapType === MapType.Neutral}
+                onClick={() => dispachNewMapType(MapType.Neutral)}
             >
                 Neutral
             </ToolbarButton>
             <ToolbarButton
-                active={mapSettings.mapType === MapType.Velocity}
-                onClick={() => onMapTypeChange(MapType.Velocity)}
+                active={mapType === MapType.Velocity}
+                onClick={() => dispachNewMapType(MapType.Velocity)}
             >
                 Velocity
             </ToolbarButton>
             <ToolbarButton
-                active={mapSettings.mapType === MapType.Divergence}
-                onClick={() => onMapTypeChange(MapType.Divergence)}
+                active={mapType === MapType.Divergence}
+                onClick={() => dispachNewMapType(MapType.Divergence)}
             >
                 Divergence
             </ToolbarButton>
             <ToolbarButton
-                active={mapSettings.mapType === MapType.Wall}
-                onClick={() => onMapTypeChange(MapType.Wall)}
+                active={mapType === MapType.Wall}
+                onClick={() => dispachNewMapType(MapType.Wall)}
             >
                 Wall
             </ToolbarButton>

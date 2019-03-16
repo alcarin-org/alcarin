@@ -1,13 +1,13 @@
 import { createContext } from 'react';
 
-import * as MACGrid from '../../data/atmosphere/MACGrid';
-import { AtmosphereEngine } from '../../data/engine/AtmosphereEngine';
-import { ParticlesEngine } from '../../data/engine/ParticlesEngine';
+import * as MACGrid from '../data/atmosphere/MACGrid';
+import { AtmosphereEngine } from '../data/engine/AtmosphereEngine';
+import { ParticlesEngine } from '../data/engine/ParticlesEngine';
 import {
     FluidSourcesEngine,
     FluidSourceType,
-} from '../../data/engine/FluidSourcesEngine';
-import * as RandomizeField from '../../data/atmosphere/RandomizeField';
+} from '../data/engine/FluidSourcesEngine';
+import * as RandomizeField from '../data/atmosphere/RandomizeField';
 
 const DefaultWorldSize = 20;
 
@@ -72,4 +72,6 @@ export function createSimulationContext(
     };
 }
 
-export default createContext<SimulationContextType | null>(null);
+export const defaultContext = createSimulationContext();
+
+export default createContext<SimulationContextType>(defaultContext);

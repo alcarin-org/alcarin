@@ -5,26 +5,22 @@ import {
     coords,
     interpolateVelocity,
 } from '../../../data/atmosphere/MACGrid';
-import { AtmosphereEngine } from '../../../data/engine/AtmosphereEngine';
 import { magnitude } from '../../../utils/Math';
 import { DataContainer } from '../../../utils/Immutable';
-import Context from '../../context/SimulationContext';
-import { MapType } from '../utils/CanvasUtils';
+import SimulationContext from '../../../context/SimulationContext';
+import { MapType } from '../../../context/interaction/state';
 // import { PressureBackground } from './PressureBackground';
 import { DivergenceBackground } from './DivergenceBackground';
 import { VelocityBackground } from './VelocityBackground';
 
 interface Props {
-    atmo: MACGridData;
-    driver: AtmosphereEngine;
-    mapType: MapType;
     width: number;
     height: number;
+    mapType: MapType;
 }
 
-export function BackgroundRenderer({ mapType, width, height }: Props) {
-    const { grid, engine } = useContext(Context)!;
-
+export function BackgroundRenderer({ width, height, mapType }: Props) {
+    const { grid, engine } = useContext(SimulationContext);
     // const [pressureContainer, setPressureContainer] = useState({
     //     value: atmo.pressureVector,
     // });

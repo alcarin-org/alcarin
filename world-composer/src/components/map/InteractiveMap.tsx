@@ -11,22 +11,16 @@ import React, {
 import { round, Point } from '../../utils/Math';
 import { isBufferWall } from '../../data/atmosphere/MACGrid';
 import { MapRenderer } from '../canvas/MapRenderer';
-import { MapType } from '../canvas/utils/CanvasUtils';
-import SimulationContext from '../context/SimulationContext';
-import { useInteractionContext } from '../context/InteractionContext';
-import { ActionType, Dispatch } from '../context/interaction/reducer';
-
-export interface MapSettings {
-    drawFieldSize: number;
-    mapType: MapType;
-}
+import SimulationContext from '../../context/SimulationContext';
+import { useInteractionContext } from '../../context/InteractionContext';
+import { ActionType, Dispatch } from '../../context/interaction/reducer';
+import { MapType } from '../../context/interaction/state';
 
 export interface MapStats {
     renderFps: number;
 }
 
 interface Props {
-    settings: MapSettings;
     onTick?: (deltaTime: DOMHighResTimeStamp) => void;
     onWallToggle?: (mapPos: Point, value: boolean) => void;
 }
@@ -44,15 +38,18 @@ function updateFpsAction(fps: number) {
     };
 }
 
-export function InteractiveMap({ settings, onTick, onWallToggle }: Props) {
+export function InteractiveMap({ onTick, onWallToggle }: Props) {
+    const { grid } = useContext(SimulationContext);
+    const {
+        state: { settings },
+        dispatch,
+    } = useInteractionContext();
+
     const fpsRef = useRef<FpsCalc>({
         fps: 0,
         timeAcc: 0,
         fpsAcc: 0,
     });
-
-    const { grid, particles } = useContext(SimulationContext)!;
-    const { dispatch } = useInteractionContext();
 
     const [isCursorOnBuffer, setIsCursorOnBuffer] = useState(false)!;
 
@@ -102,9 +99,7 @@ export function InteractiveMap({ settings, onTick, onWallToggle }: Props) {
             onMouseMove={onMouseMove}
         >
             <MapRenderer
-                particlesEngine={particles}
                 fieldSizePx={settings.drawFieldSize}
-                mapType={settings.mapType}
                 onRender={onRender}
             />
         </div>

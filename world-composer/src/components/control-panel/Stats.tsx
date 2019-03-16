@@ -11,8 +11,8 @@ import {
     multiply,
     round,
 } from '../../utils/Math';
-import Context from '../context/SimulationContext';
-import { useInteractionContext } from '../context/InteractionContext';
+import Context from '../../context/SimulationContext';
+import { useInteractionContext } from '../../context/InteractionContext';
 
 interface Props {
     mouseOver: Point;
