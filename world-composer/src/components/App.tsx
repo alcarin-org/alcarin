@@ -2,31 +2,25 @@ import './App.scss';
 
 import React, { useEffect, useState, useCallback } from 'react';
 
-import SimulationContext from './context/SimulationContext';
+import SimulationContext, {
+    createSimulationContext,
+} from './context/SimulationContext';
 import { InteractionContextProvider } from './context/InteractionContext';
 import { InteractiveMap, MapSettings } from './map/InteractiveMap';
 import { MapType } from './canvas/utils/CanvasUtils';
-import * as MACGrid from '../data/atmosphere/MACGrid';
 import * as RandomizeField from '../data/atmosphere/RandomizeField';
-import { AtmosphereEngine } from '../data/engine/AtmosphereEngine';
-import { ParticlesEngine } from '../data/engine/ParticlesEngine';
-import {
-    FluidSourcesEngine,
-    FluidSourceType,
-} from '../data/engine/FluidSourcesEngine';
+
 import { round, Point } from '../utils/Math';
 import { ipcRenderer } from '../electron-bridge';
 import { ControlPanel } from './control-panel/ControlPanel';
 import { MainToolbar } from './MainToolbar';
-
-const WorldSize = 20;
 
 export function App() {
     useEffect(() => ipcRenderer.send('main-window-ready'), []);
 
     const [showControlPanel, setShowControlPanel] = useState(true);
     const [simulationContext, setSimulationContext] = useState(
-        recreateSimulationContext
+        createSimulationContext
     );
 
     const [mapSettings, setMapSettings] = useState<MapSettings>({
@@ -47,69 +41,17 @@ export function App() {
         ];
         const method =
             randomMethods[Math.floor(Math.random() * randomMethods.length)];
-        const newSimulationContext = recreateSimulationContext(method, true);
+
+        const newSimulationContext = createSimulationContext(
+            method,
+            simulationContext
+        );
         setSimulationContext(newSimulationContext);
     }
 
     function resetMap() {
-        const newSimulationContext = recreateSimulationContext();
+        const newSimulationContext = createSimulationContext();
         setSimulationContext(newSimulationContext);
-    }
-
-    function recreateSimulationContext(
-        randomMethod?: RandomizeField.RandomMethod,
-        preserveArtifacts?: boolean
-    ) {
-        const newGrid = MACGrid.create(
-            WorldSize,
-            preserveArtifacts ? simulationContext.grid.solids : undefined,
-            randomMethod
-        );
-        const newEngine = new AtmosphereEngine(newGrid);
-        const newParticlesEngine: ParticlesEngine = new ParticlesEngine(
-            newEngine,
-            preserveArtifacts
-                ? simulationContext.particles.particles
-                : undefined
-        );
-        const newSourcesEngine = new FluidSourcesEngine(
-            newEngine,
-            newParticlesEngine
-            // sourcesEngine
-        );
-        newEngine.onSimulationTick(deltaTimeSec =>
-            newSourcesEngine.update(deltaTimeSec)
-        );
-
-        // debug
-        newSourcesEngine.registerSource({
-            gridPosition: [
-                1 + Math.trunc(Math.random() * (newGrid.size - 2)),
-                1 + Math.trunc(Math.random() * (newGrid.size - 2)),
-            ],
-            type: FluidSourceType.Omni,
-            power: 15,
-            particlesColor: [30, 255, 30, 128],
-            particlesPerSecond: 105,
-        });
-
-        newSourcesEngine.registerSource({
-            gridPosition: [
-                1 + Math.trunc(Math.random() * (newGrid.size - 2)),
-                1 + Math.trunc(Math.random() * (newGrid.size - 2)),
-            ],
-            type: FluidSourceType.Sink,
-            power: -20,
-            particlesColor: [30, 255, 30, 128],
-            particlesPerSecond: 0,
-        });
-
-        return {
-            grid: newGrid,
-            engine: newEngine,
-            particles: newParticlesEngine,
-            sources: newSourcesEngine,
-        };
     }
 
     function spawnParticles() {
