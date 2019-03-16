@@ -7,7 +7,7 @@ import { VelocityFieldRenderer } from './VelocityFieldRenderer';
 import { ConfettiRenderer } from './ConfettiRenderer';
 import { MapType } from './utils/CanvasUtils';
 import { ParticlesEngine } from '../../data/engine/ParticlesEngine';
-import Context from '../SimulationContext';
+import Context from '../context/SimulationContext';
 
 interface Props {
     particlesEngine: ParticlesEngine;

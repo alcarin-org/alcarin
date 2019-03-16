@@ -2,8 +2,9 @@ import './App.scss';
 
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 
-import Context, { SimulationContext } from './SimulationContext';
-import { InteractiveMap, MapSettings, MapStats } from './map/InteractiveMap';
+import SimulationContext from './context/SimulationContext';
+import { InteractionContextProvider } from './context/InteractionContext';
+import { InteractiveMap, MapSettings } from './map/InteractiveMap';
 import { MapType } from './canvas/utils/CanvasUtils';
 import * as MACGrid from '../data/atmosphere/MACGrid';
 import * as RandomizeField from '../data/atmosphere/RandomizeField';
@@ -15,7 +16,7 @@ import {
 } from '../data/engine/FluidSourcesEngine';
 import { round, Point } from '../utils/Math';
 import { ipcRenderer } from '../electron-bridge';
-import Stats from './Stats';
+import { ControlPanel } from './control-panel/ControlPanel';
 import { MainToolbar } from './MainToolbar';
 
 const WorldSize = 20;
@@ -36,14 +37,12 @@ export function App() {
 
     useEffect(onMapReset, []);
 
-    const [isStatsVisible, setIsStatsVisible] = useState(true);
+    const [showControlPanel, setShowControlPanel] = useState(true);
 
     const [mapSettings, setMapSettings] = useState<MapSettings>({
         drawFieldSize: 25,
         mapType: MapType.Neutral,
     });
-
-    const [renderFps, setRenderFps] = useState(0);
 
     function onMapTypeChange(mapType: MapType) {
         setMapSettings({ ...mapSettings, mapType });
@@ -116,13 +115,14 @@ export function App() {
         setSourcesEngine(newSourcesEngine);
     }
 
-    const simulationContext = useMemo<SimulationContext | null>(
+    const simulationContext = useMemo(
         () =>
             atmoEngine
                 ? {
                       grid: atmoGrid!,
                       engine: atmoEngine!,
                       sources: sourcesEngine!,
+                      particles: particlesEngine!,
                   }
                 : null,
         [atmoGrid, atmoEngine, sourcesEngine]
@@ -144,10 +144,6 @@ export function App() {
         [atmoEngine, particlesEngine, mapSettings]
     );
 
-    function onMapStatsUpdated(stats: MapStats) {
-        setRenderFps(stats.renderFps);
-    }
-
     function onWallToggle(mapPos: Point, value: boolean) {
         if (mapSettings.mapType === MapType.Wall) {
             const gridPos = round(mapPos);
@@ -156,40 +152,39 @@ export function App() {
     }
 
     return atmoEngine ? (
-        <Context.Provider value={simulationContext}>
-            <div className="app">
-                <div className="app__toolbar">
-                    <MainToolbar
-                        mapSettings={mapSettings}
-                        onRandomizeVelocity={randomizeMap}
-                        statsVisible={isStatsVisible}
-                        onToggleStats={newState => setIsStatsVisible(newState)}
-                        onMapTypeChange={onMapTypeChange}
-                        onSpawnParticles={spawnParticles}
-                        onMapReset={() => onMapReset()}
-                    />
-                </div>
-                <div className="app__content">
-                    {isStatsVisible && (
-                        <div className="app__stats-panel">
-                            <Stats
-                                particlesEngine={particlesEngine!}
-                                mouseOver={[0, 0]}
-                                fps={renderFps}
-                            />
-                        </div>
-                    )}
-                    <div className="app__map">
-                        <InteractiveMap
-                            particlesEngine={particlesEngine!}
-                            settings={mapSettings}
-                            onTick={onRenderTick}
-                            onStatsUpdated={onMapStatsUpdated}
-                            onWallToggle={onWallToggle}
+        <SimulationContext.Provider value={simulationContext}>
+            <InteractionContextProvider>
+                <div className="app">
+                    <div className="app__toolbar">
+                        <MainToolbar
+                            mapSettings={mapSettings}
+                            onRandomizeVelocity={randomizeMap}
+                            controlPanelVisible={showControlPanel}
+                            onToggleControlPanel={newState =>
+                                setShowControlPanel(newState)
+                            }
+                            onMapTypeChange={onMapTypeChange}
+                            onSpawnParticles={spawnParticles}
+                            onMapReset={() => onMapReset()}
                         />
                     </div>
+                    <div className="app__content">
+                        {showControlPanel && (
+                            <div className="app__stats-panel">
+                                <ControlPanel />
+                            </div>
+                        )}
+                        <div className="app__map">
+                            <InteractiveMap
+                                particlesEngine={particlesEngine!}
+                                settings={mapSettings}
+                                onTick={onRenderTick}
+                                onWallToggle={onWallToggle}
+                            />
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </Context.Provider>
+            </InteractionContextProvider>
+        </SimulationContext.Provider>
     ) : null;
 }

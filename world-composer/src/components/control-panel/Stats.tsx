@@ -2,20 +2,28 @@ import './Stats.scss';
 
 import React, { useContext } from 'react';
 
-import * as MACGrid from '../data/atmosphere/MACGrid';
-import { ParticlesEngine } from '../data/engine/ParticlesEngine';
-import { Vector, Point, magnitude, add, multiply, round } from '../utils/Math';
-import Context from './SimulationContext';
+import * as MACGrid from '../../data/atmosphere/MACGrid';
+import {
+    Vector,
+    Point,
+    magnitude,
+    add,
+    multiply,
+    round,
+} from '../../utils/Math';
+import Context from '../context/SimulationContext';
+import { useInteractionContext } from '../context/InteractionContext';
 
 interface Props {
-    particlesEngine: ParticlesEngine;
     mouseOver: Point;
-    fps: number;
 }
 
 // This component waiting for refactor
-export default function Stats({ particlesEngine, mouseOver, fps }: Props) {
-    const { grid } = useContext(Context)!;
+export default function Stats({ mouseOver }: Props) {
+    const { grid, particles } = useContext(Context)!;
+    const {
+        state: { fps },
+    } = useInteractionContext();
 
     const divVector = MACGrid.divergenceVector(grid);
     const length = grid.size ** 2;
@@ -80,7 +88,7 @@ export default function Stats({ particlesEngine, mouseOver, fps }: Props) {
                 <dt>Render FPS</dt>
                 <dd>{fps}</dd>
                 <dt>Particles</dt>
-                <dd>{particlesEngine.particles.positions.length / 2}</dd>
+                <dd>{particles.particles.positions.length / 2}</dd>
             </dl>
         </div>
     );

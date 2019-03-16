@@ -8,7 +8,7 @@ import {
 import { AtmosphereEngine } from '../../../data/engine/AtmosphereEngine';
 import { magnitude } from '../../../utils/Math';
 import { DataContainer } from '../../../utils/Immutable';
-import Context from '../../SimulationContext';
+import Context from '../../context/SimulationContext';
 import { MapType } from '../utils/CanvasUtils';
 // import { PressureBackground } from './PressureBackground';
 import { DivergenceBackground } from './DivergenceBackground';

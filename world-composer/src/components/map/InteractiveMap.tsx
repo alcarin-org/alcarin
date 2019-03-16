@@ -13,7 +13,9 @@ import { isBufferWall } from '../../data/atmosphere/MACGrid';
 import { MapRenderer } from '../canvas/MapRenderer';
 import { ParticlesEngine } from '../../data/engine/ParticlesEngine';
 import { MapType } from '../canvas/utils/CanvasUtils';
-import Context from '../SimulationContext';
+import SimulationContext from '../context/SimulationContext';
+import { useInteractionContext } from '../context/InteractionContext';
+import { ActionType, Dispatch } from '../context/interaction/reducer';
 
 export interface MapSettings {
     drawFieldSize: number;
@@ -29,7 +31,6 @@ interface Props {
 
     settings: MapSettings;
     onTick?: (deltaTime: DOMHighResTimeStamp) => void;
-    onStatsUpdated?: (stats: MapStats) => void;
     onWallToggle?: (mapPos: Point, value: boolean) => void;
 }
 
@@ -39,10 +40,16 @@ interface FpsCalc {
     fpsAcc: number;
 }
 
+function updateFpsAction(fps: number) {
+    return {
+        payload: fps,
+        type: ActionType.UpdateFps,
+    };
+}
+
 export function InteractiveMap({
     settings,
     onTick,
-    onStatsUpdated,
     particlesEngine,
     onWallToggle,
 }: Props) {
@@ -52,7 +59,9 @@ export function InteractiveMap({
         fpsAcc: 0,
     });
 
-    const { grid } = useContext(Context)!;
+    const { grid } = useContext(SimulationContext)!;
+    const { dispatch } = useInteractionContext();
+
     const [isCursorOnBuffer, setIsCursorOnBuffer] = useState(false)!;
 
     const onRender = useCallback(
@@ -60,7 +69,7 @@ export function InteractiveMap({
             if (onTick) {
                 onTick(deltaTime);
             }
-            calculateFps(fpsRef, deltaTime, onStatsUpdated);
+            calculateFps(fpsRef, deltaTime, dispatch);
         },
         [onTick]
     );
@@ -113,7 +122,7 @@ export function InteractiveMap({
 function calculateFps(
     fpsCalcRef: MutableRefObject<FpsCalc>,
     deltaTime: DOMHighResTimeStamp,
-    onStatsUpdated: Props['onStatsUpdated']
+    dispatch: Dispatch
 ) {
     const fpsObj = fpsCalcRef.current;
     fpsObj.timeAcc += deltaTime;
@@ -121,11 +130,7 @@ function calculateFps(
         fpsObj.fps = fpsObj.fpsAcc;
         fpsObj.fpsAcc = 0;
         fpsObj.timeAcc = fpsObj.timeAcc % 1000;
-        if (onStatsUpdated) {
-            onStatsUpdated({
-                renderFps: fpsObj.fps,
-            });
-        }
+        dispatch(updateFpsAction(fpsObj.fps));
     }
     fpsObj.fpsAcc++;
 }

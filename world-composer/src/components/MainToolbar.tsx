@@ -5,20 +5,20 @@ import { MapType } from './canvas/utils/CanvasUtils';
 import { MapSettings } from './map/InteractiveMap';
 
 interface Props {
-    onToggleStats: (visible: boolean) => void;
+    onToggleControlPanel: (visible: boolean) => void;
     onMapTypeChange: (mapType: MapType) => void;
     onSpawnParticles: () => void;
     onRandomizeVelocity: () => void;
     onMapReset: () => void;
 
-    statsVisible: boolean;
+    controlPanelVisible: boolean;
     mapSettings: MapSettings;
 }
 
 export function MainToolbar({
     onMapTypeChange,
-    onToggleStats,
-    statsVisible,
+    onToggleControlPanel,
+    controlPanelVisible,
     onSpawnParticles,
     mapSettings,
     onRandomizeVelocity,
@@ -26,10 +26,7 @@ export function MainToolbar({
 }: Props) {
     return (
         <Toolbar>
-            <ToolbarButton
-                onClick={onMapReset}
-                title="Reset map"
-            >
+            <ToolbarButton onClick={onMapReset} title="Reset map">
                 <i className="fa fa-undo" />
             </ToolbarButton>
             <ToolbarButton
@@ -82,9 +79,9 @@ export function MainToolbar({
             <ToolbarSeparator />
 
             <ToolbarButton
-                onClick={() => onToggleStats(!statsVisible)}
+                onClick={() => onToggleControlPanel(!controlPanelVisible)}
                 title="Show statistics"
-                active={statsVisible}
+                active={controlPanelVisible}
             >
                 <i className="fa fa-bar-chart" />
             </ToolbarButton>
