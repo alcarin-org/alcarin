@@ -1,6 +1,6 @@
 import './App.scss';
 
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 
 import SimulationContext from './context/SimulationContext';
 import { InteractionContextProvider } from './context/InteractionContext';
@@ -24,20 +24,10 @@ const WorldSize = 20;
 export function App() {
     useEffect(() => ipcRenderer.send('main-window-ready'), []);
 
-    const [atmoGrid, setAtmoGrid] = useState<MACGrid.MACGridData | null>(null);
-    const [atmoEngine, setAtmoEngine] = useState<AtmosphereEngine | null>(null);
-    const [
-        particlesEngine,
-        setParticlesEngine,
-    ] = useState<ParticlesEngine | null>(null);
-    const [
-        sourcesEngine,
-        setSourcesEngine,
-    ] = useState<FluidSourcesEngine | null>(null);
-
-    useEffect(onMapReset, []);
-
     const [showControlPanel, setShowControlPanel] = useState(true);
+    const [simulationContext, setSimulationContext] = useState(
+        recreateSimulationContext
+    );
 
     const [mapSettings, setMapSettings] = useState<MapSettings>({
         drawFieldSize: 25,
@@ -57,23 +47,29 @@ export function App() {
         ];
         const method =
             randomMethods[Math.floor(Math.random() * randomMethods.length)];
-        onMapReset(method, true, true);
+        const newSimulationContext = recreateSimulationContext(method, true);
+        setSimulationContext(newSimulationContext);
     }
-    function onMapReset(
+
+    function resetMap() {
+        const newSimulationContext = recreateSimulationContext();
+        setSimulationContext(newSimulationContext);
+    }
+
+    function recreateSimulationContext(
         randomMethod?: RandomizeField.RandomMethod,
-        preserveParticles?: boolean,
-        preserveSolids?: boolean
+        preserveArtifacts?: boolean
     ) {
         const newGrid = MACGrid.create(
             WorldSize,
-            preserveSolids && atmoGrid ? atmoGrid.solids : undefined,
+            preserveArtifacts ? simulationContext.grid.solids : undefined,
             randomMethod
         );
         const newEngine = new AtmosphereEngine(newGrid);
-        const newParticlesEngine = new ParticlesEngine(
+        const newParticlesEngine: ParticlesEngine = new ParticlesEngine(
             newEngine,
-            preserveParticles && particlesEngine
-                ? particlesEngine.particles
+            preserveArtifacts
+                ? simulationContext.particles.particles
                 : undefined
         );
         const newSourcesEngine = new FluidSourcesEngine(
@@ -108,28 +104,16 @@ export function App() {
             particlesPerSecond: 0,
         });
 
-        setAtmoGrid(newGrid);
-        setAtmoEngine(newEngine);
-        setParticlesEngine(newParticlesEngine);
-        setParticlesEngine(newParticlesEngine);
-        setSourcesEngine(newSourcesEngine);
+        return {
+            grid: newGrid,
+            engine: newEngine,
+            particles: newParticlesEngine,
+            sources: newSourcesEngine,
+        };
     }
 
-    const simulationContext = useMemo(
-        () =>
-            atmoEngine
-                ? {
-                      grid: atmoGrid!,
-                      engine: atmoEngine!,
-                      sources: sourcesEngine!,
-                      particles: particlesEngine!,
-                  }
-                : null,
-        [atmoGrid, atmoEngine, sourcesEngine]
-    );
-
     function spawnParticles() {
-        particlesEngine!.spawnParticles(5000);
+        simulationContext.particles.spawnParticles(5000);
     }
 
     const onRenderTick = useCallback(
@@ -138,20 +122,20 @@ export function App() {
                 return;
             }
             const deltaTimeSec = deltaTime / 1000;
-            particlesEngine!.update(deltaTimeSec);
-            atmoEngine!.update(deltaTimeSec);
+            simulationContext.particles.update(deltaTimeSec);
+            simulationContext.engine.update(deltaTimeSec);
         },
-        [atmoEngine, particlesEngine, mapSettings]
+        [simulationContext, mapSettings]
     );
 
     function onWallToggle(mapPos: Point, value: boolean) {
         if (mapSettings.mapType === MapType.Wall) {
             const gridPos = round(mapPos);
-            atmoEngine!.toggleSolid(gridPos, value);
+            simulationContext.engine.toggleSolid(gridPos, value);
         }
     }
 
-    return atmoEngine ? (
+    return (
         <SimulationContext.Provider value={simulationContext}>
             <InteractionContextProvider>
                 <div className="app">
@@ -165,7 +149,7 @@ export function App() {
                             }
                             onMapTypeChange={onMapTypeChange}
                             onSpawnParticles={spawnParticles}
-                            onMapReset={() => onMapReset()}
+                            onMapReset={resetMap}
                         />
                     </div>
                     <div className="app__content">
@@ -176,7 +160,6 @@ export function App() {
                         )}
                         <div className="app__map">
                             <InteractiveMap
-                                particlesEngine={particlesEngine!}
                                 settings={mapSettings}
                                 onTick={onRenderTick}
                                 onWallToggle={onWallToggle}
@@ -186,5 +169,5 @@ export function App() {
                 </div>
             </InteractionContextProvider>
         </SimulationContext.Provider>
-    ) : null;
+    );
 }

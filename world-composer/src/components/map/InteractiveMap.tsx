@@ -11,7 +11,6 @@ import React, {
 import { round, Point } from '../../utils/Math';
 import { isBufferWall } from '../../data/atmosphere/MACGrid';
 import { MapRenderer } from '../canvas/MapRenderer';
-import { ParticlesEngine } from '../../data/engine/ParticlesEngine';
 import { MapType } from '../canvas/utils/CanvasUtils';
 import SimulationContext from '../context/SimulationContext';
 import { useInteractionContext } from '../context/InteractionContext';
@@ -27,8 +26,6 @@ export interface MapStats {
 }
 
 interface Props {
-    particlesEngine: ParticlesEngine;
-
     settings: MapSettings;
     onTick?: (deltaTime: DOMHighResTimeStamp) => void;
     onWallToggle?: (mapPos: Point, value: boolean) => void;
@@ -47,19 +44,14 @@ function updateFpsAction(fps: number) {
     };
 }
 
-export function InteractiveMap({
-    settings,
-    onTick,
-    particlesEngine,
-    onWallToggle,
-}: Props) {
+export function InteractiveMap({ settings, onTick, onWallToggle }: Props) {
     const fpsRef = useRef<FpsCalc>({
         fps: 0,
         timeAcc: 0,
         fpsAcc: 0,
     });
 
-    const { grid } = useContext(SimulationContext)!;
+    const { grid, particles } = useContext(SimulationContext)!;
     const { dispatch } = useInteractionContext();
 
     const [isCursorOnBuffer, setIsCursorOnBuffer] = useState(false)!;
@@ -110,7 +102,7 @@ export function InteractiveMap({
             onMouseMove={onMouseMove}
         >
             <MapRenderer
-                particlesEngine={particlesEngine}
+                particlesEngine={particles}
                 fieldSizePx={settings.drawFieldSize}
                 mapType={settings.mapType}
                 onRender={onRender}
