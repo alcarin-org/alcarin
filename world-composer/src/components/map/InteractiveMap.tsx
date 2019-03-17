@@ -1,11 +1,6 @@
 import './InteractiveMap.scss';
 
-import React, {
-    useCallback,
-    useRef,
-    useContext,
-    MutableRefObject,
-} from 'react';
+import React, { useContext } from 'react';
 
 import { round, Point } from '../../utils/Math';
 import { isBufferWall } from '../../data/atmosphere/MACGrid';
@@ -13,52 +8,17 @@ import { FluidSource } from '../../data/engine/FluidSourcesEngine';
 import { MapRenderer } from '../canvas/MapRenderer';
 import SimulationContext from '../../context/SimulationContext';
 import { useInteractionContext } from '../../context/InteractionContext';
-import { ActionType, Dispatch } from '../../context/interaction/reducer';
 import { MapMode } from '../../context/interaction/state';
 
 export interface MapStats {
     renderFps: number;
 }
 
-interface Props {
-    onTick?: (deltaTime: DOMHighResTimeStamp) => void;
-}
-
-interface FpsCalc {
-    fps: number;
-    timeAcc: number;
-    fpsAcc: number;
-}
-
-function updateFpsAction(fps: number) {
-    return {
-        payload: fps,
-        type: ActionType.UpdateFps,
-    };
-}
-
-export function InteractiveMap({ onTick }: Props) {
+export function InteractiveMap() {
     const { grid, engine, sources } = useContext(SimulationContext);
     const {
         state: { settings },
-        dispatch,
     } = useInteractionContext();
-
-    const fpsRef = useRef<FpsCalc>({
-        fps: 0,
-        timeAcc: 0,
-        fpsAcc: 0,
-    });
-
-    const onRender = useCallback(
-        (deltaTime: DOMHighResTimeStamp) => {
-            if (onTick) {
-                onTick(deltaTime);
-            }
-            calculateFps(fpsRef, deltaTime, dispatch);
-        },
-        [onTick]
-    );
 
     function eventToMapPosition(ev: React.MouseEvent<HTMLDivElement>) {
         return [
@@ -110,26 +70,7 @@ export function InteractiveMap({ onTick }: Props) {
             onMouseDown={onMapContainerDown}
             onMouseMove={onMouseMove}
         >
-            <MapRenderer
-                fieldSizePx={settings.drawFieldSize}
-                onRender={onRender}
-            />
+            <MapRenderer />
         </div>
     );
-}
-
-function calculateFps(
-    fpsCalcRef: MutableRefObject<FpsCalc>,
-    deltaTime: DOMHighResTimeStamp,
-    dispatch: Dispatch
-) {
-    const fpsObj = fpsCalcRef.current;
-    fpsObj.timeAcc += deltaTime;
-    if (fpsObj.timeAcc >= 1000) {
-        fpsObj.fps = fpsObj.fpsAcc;
-        fpsObj.fpsAcc = 0;
-        fpsObj.timeAcc = fpsObj.timeAcc % 1000;
-        dispatch(updateFpsAction(fpsObj.fps));
-    }
-    fpsObj.fpsAcc++;
 }

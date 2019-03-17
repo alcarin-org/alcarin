@@ -2,12 +2,12 @@ import React, { createContext, useReducer, ReactNode, useContext } from 'react';
 import defaultState from './interaction/state';
 import reducer, { Dispatch } from './interaction/reducer';
 
-interface InteractionContextType {
+export interface InteractionContextType {
     state: typeof defaultState;
     dispatch: Dispatch;
 }
 
-const InteractionContext = createContext<InteractionContextType>({
+const InteractionContextInstance = createContext<InteractionContextType>({
     state: defaultState,
     dispatch: () => null,
 });
@@ -20,12 +20,12 @@ export function InteractionContextProvider({
     const [state, dispatch] = useReducer(reducer, defaultState);
     const value = { state, dispatch };
     return (
-        <InteractionContext.Provider value={value}>
+        <InteractionContextInstance.Provider value={value}>
             {children}
-        </InteractionContext.Provider>
+        </InteractionContextInstance.Provider>
     );
 }
 
 export function useInteractionContext() {
-    return useContext(InteractionContext);
+    return useContext(InteractionContextInstance);
 }

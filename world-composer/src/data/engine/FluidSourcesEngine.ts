@@ -110,7 +110,7 @@ export class FluidSourcesEngine {
                         sourceInstance.source.gridPosition[0] - x,
                         sourceInstance.source.gridPosition[1] - y,
                     ]);
-                    if (distance < 0.1) {
+                    if (distance < 0.25) {
                         particlesIndToRemove[i] = null;
                     }
                 }

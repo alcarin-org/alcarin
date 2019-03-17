@@ -12,7 +12,6 @@ export enum MapMode {
 }
 
 const InteractionContextState = {
-    fps: 0,
     settings: {
         drawFieldSize: 25,
         // map type tell map render mode

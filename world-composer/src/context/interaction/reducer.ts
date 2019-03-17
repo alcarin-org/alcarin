@@ -2,7 +2,6 @@ import { Dispatch } from 'react';
 import InteractionContext from './state';
 
 export enum ActionType {
-    UpdateFps,
     SetMapType,
     SetMapMode,
 }
@@ -16,8 +15,6 @@ export type Dispatch = Dispatch<Action>;
 
 export default (state: typeof InteractionContext, action: Action) => {
     switch (action.type) {
-        case ActionType.UpdateFps:
-            return { ...state, fps: action.payload };
         case ActionType.SetMapType:
             return {
                 ...state,

@@ -15,9 +15,9 @@ const DefaultColor: Color = [30, 255, 30, 128];
 export const DefaultFluidSource: FluidSource = {
     type: FluidSourceType.Omni,
     gridPosition: [0, 0],
-    power: 10,
+    power: 5,
     particlesColor: DefaultColor,
-    particlesPerSecond: 50,
+    particlesPerSecond: 80,
 };
 
 export function FluidSourcePanel({ onSourceChanged }: Props) {
@@ -37,7 +37,6 @@ export function FluidSourcePanel({ onSourceChanged }: Props) {
 
     function randomizeColor() {
         const rand = () => Math.trunc(Math.random() * 256);
-        console.log([rand(), rand(), rand(), 255]);
         setColor([rand(), rand(), rand(), 255]);
     }
 
@@ -70,7 +69,7 @@ export function FluidSourcePanel({ onSourceChanged }: Props) {
                             id="power"
                             type="range"
                             min={1}
-                            max={30}
+                            max={20}
                             value={source.power}
                             onChange={onPowerChange}
                         />

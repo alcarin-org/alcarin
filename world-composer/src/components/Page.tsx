@@ -1,56 +1,87 @@
 import './Page.scss';
 
-import React, { useState, useContext, useCallback, useEffect } from 'react';
+import React, {
+    useState,
+    useContext,
+    useCallback,
+    useEffect,
+    useMemo,
+} from 'react';
 
 import SimulationContext, {
     SimulationContextType,
     createSimulationContext,
 } from '../context/SimulationContext';
-import { useInteractionContext } from '../context/InteractionContext';
+import {
+    useInteractionContext,
+    InteractionContextType,
+} from '../context/InteractionContext';
 import * as RandomizeField from '../data/atmosphere/RandomizeField';
 import { InteractiveMap } from './map/InteractiveMap';
 import { ControlPanel } from './control-panel/ControlPanel';
 import { MainToolbar } from './MainToolbar';
+import GlobalTimer from '../utils/Timer';
 
 interface Props {
     onContextRecreated: (context: SimulationContextType) => void;
 }
 
+interface SubProps {
+    onContextRecreated: (context: SimulationContextType) => void;
+    mapSettings: InteractionContextType['state']['settings'];
+}
+
 const KEY_SPACE = 32;
 
 export function Page({ onContextRecreated }: Props) {
-    const simulationContext = useContext(SimulationContext)!;
-
     const {
         state: { settings: mapSettings },
     } = useInteractionContext();
+    return useMemo(
+        () => (
+            <PageComponent
+                onContextRecreated={onContextRecreated}
+                mapSettings={mapSettings}
+            />
+        ),
+        [onContextRecreated, mapSettings]
+    );
+}
 
+function PageComponent({ onContextRecreated, mapSettings }: SubProps) {
+    const simulationContext = useContext(SimulationContext)!;
     const [showControlPanel, setShowControlPanel] = useState(true);
-    const [play, setPlay] = useState(true);
-
-    const onTogglePlay = useCallback(() => setPlay(val => !val), []);
-
-    const onRenderTick = useCallback(
-        (deltaTime: DOMHighResTimeStamp) => {
-            if (!play) {
-                return;
-            }
-            const deltaTimeSec = deltaTime / 1000;
-            simulationContext.particles.update(deltaTimeSec);
-            simulationContext.engine.update(deltaTimeSec);
-        },
-        [simulationContext, mapSettings, play]
+    const onTogglePlay = useCallback(
+        () =>
+            GlobalTimer.isRunning ? GlobalTimer.stop() : GlobalTimer.start(),
+        []
     );
 
     useEffect(() => {
-        function onKeyPress(ev: KeyboardEvent) {
-            if (ev.keyCode === KEY_SPACE) {
+        function onKeyDown(ev: KeyboardEvent) {
+            if (ev.ctrlKey && ev.keyCode === KEY_SPACE) {
                 onTogglePlay();
+                ev.stopPropagation();
+                ev.preventDefault();
             }
         }
-        window.addEventListener('keyup', onKeyPress, true);
-        return window.removeEventListener('keyup', onKeyPress);
+        window.addEventListener('keydown', onKeyDown, true);
+        // bug
+        // return () => window.removeEventListener('keyup', onKeyDown);
     }, []);
+
+    useEffect(
+        () => {
+            return GlobalTimer.onTick(onRenderTick);
+
+            function onRenderTick(deltaTimeSec: DOMHighResTimeStamp) {
+                simulationContext.particles.update(deltaTimeSec);
+                simulationContext.engine.update(deltaTimeSec);
+                // simulationContext.stats.update(deltaTimeSec);
+            }
+        },
+        [simulationContext, mapSettings]
+    );
 
     function randomizeMap() {
         const randomMethods = [
@@ -81,7 +112,7 @@ export function Page({ onContextRecreated }: Props) {
                     onRandomizeVelocity={randomizeMap}
                     controlPanelVisible={showControlPanel}
                     onTogglePlay={onTogglePlay}
-                    isPlaying={play}
+                    isPlaying={GlobalTimer.isRunning}
                     onToggleControlPanel={newState =>
                         setShowControlPanel(newState)
                     }
@@ -98,7 +129,7 @@ export function Page({ onContextRecreated }: Props) {
                     </div>
                 )}
                 <div className="page__map">
-                    <InteractiveMap onTick={onRenderTick} />
+                    <InteractiveMap />
                 </div>
             </div>
         </div>

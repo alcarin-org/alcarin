@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 
 import SimulationContext from '../../context/SimulationContext';
 import { useInteractionContext } from '../../context/InteractionContext';
@@ -7,12 +7,9 @@ import { BackgroundRenderer } from './background/BackgroundRenderer';
 import { SolidBackground } from './background/SolidBackground';
 import { VelocityFieldRenderer } from './VelocityFieldRenderer';
 import { ConfettiRenderer } from './ConfettiRenderer';
+import GlobalTimer from '../../utils/Timer';
 
-interface Props {
-    onRender?: (deltaTime: DOMHighResTimeStamp) => void;
-}
-
-export function MapRenderer({ onRender }: Props) {
+export function MapRenderer() {
     const { grid, engine, particles } = useContext(SimulationContext);
     const {
         state: {
@@ -22,33 +19,15 @@ export function MapRenderer({ onRender }: Props) {
 
     const canvasSizePx = drawFieldSize * grid.size;
 
-    const lastRenderRef = useRef<DOMHighResTimeStamp | null>(null);
     // temporary solution, entire rendering mechanism will be refactored soon
     const [, setRenderCount] = useState(0);
-
-    useEffect(
-        () => {
-            let requestAnimFrameId = requestAnimationFrame(renderAtmosphere);
-
-            function renderAtmosphere(timestamp: DOMHighResTimeStamp) {
-                if (lastRenderRef.current !== null) {
-                    const deltaTime = timestamp - lastRenderRef.current;
-                    if (onRender) {
-                        onRender(deltaTime);
-                    }
-                }
-                // this force rerender
-                lastRenderRef.current = timestamp;
-                requestAnimFrameId = requestAnimationFrame(renderAtmosphere);
-                setRenderCount(prev => prev + 1);
-            }
-
-            return () => {
-                cancelAnimationFrame(requestAnimFrameId);
-            };
-        },
-        [onRender]
-    );
+    useEffect(() => {
+        function rerender(timestamp: DOMHighResTimeStamp) {
+            // this force rerender
+            setRenderCount(prev => prev + 1);
+        }
+        return GlobalTimer.onTick(rerender);
+    }, []);
 
     return (
         <div

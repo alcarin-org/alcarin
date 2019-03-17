@@ -1,6 +1,6 @@
 import './Stats.scss';
 
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 
 import * as MACGrid from '../../data/atmosphere/MACGrid';
 import {
@@ -12,19 +12,31 @@ import {
     round,
 } from '../../utils/Math';
 import Context from '../../context/SimulationContext';
-import { useInteractionContext } from '../../context/InteractionContext';
+import { statsEngineFactory, create } from '../../data/engine/StatsEngine';
+import GlobalTimer from '../../utils/Timer';
 
 interface Props {
     mouseOver: Point;
 }
 
+const updateStats = statsEngineFactory();
+
 // This component waiting for refactor
 export default function Stats({ mouseOver }: Props) {
-    const { grid, particles } = useContext(Context)!;
-    const {
-        state: { fps },
-    } = useInteractionContext();
+    const { grid, particles } = useContext(Context);
+    const [statsData, setStatsData] = useState(create);
 
+    useEffect(
+        () => {
+            return GlobalTimer.onTick(deltaTimeSec => {
+                const newStats = updateStats(statsData, deltaTimeSec);
+                if (newStats !== statsData) {
+                    setStatsData(newStats);
+                }
+            });
+        },
+        [statsData]
+    );
     const divVector = MACGrid.divergenceVector(grid);
     const length = grid.size ** 2;
     const pressure = 0;
@@ -86,7 +98,7 @@ export default function Stats({ mouseOver }: Props) {
                 <dt>Clicked divergence</dt>
                 <dd>{clickedDivergence.toFixed(3)}</dd>
                 <dt>Render FPS</dt>
-                <dd>{fps}</dd>
+                <dd>{statsData.fps}</dd>
                 <dt>Particles</dt>
                 <dd>{particles.particles.positions.length / 2}</dd>
             </dl>
