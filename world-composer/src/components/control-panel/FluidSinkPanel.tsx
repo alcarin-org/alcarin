@@ -28,7 +28,7 @@ export function FluidSinkPanel({ onSinkChanged }: Props) {
     const onPowerChange = (ev: ChangeEvent<HTMLInputElement>) => {
         updateFluidSource({
             ...source,
-            power: -parseInt(ev.currentTarget.value, 10),
+            power: -parseInt(ev.currentTarget.value, 10) / 10,
         });
     };
 
@@ -43,8 +43,9 @@ export function FluidSinkPanel({ onSinkChanged }: Props) {
                             id="power"
                             type="range"
                             min={1}
-                            max={20}
-                            value={-source.power}
+                            max={200}
+                            step={5}
+                            value={-source.power * 10}
                             onChange={onPowerChange}
                         />
                     </div>

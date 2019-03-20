@@ -34,7 +34,6 @@ function SolidBackgroundComponent({
     const [imageDataContainer, setImageDataContainer] = useState<
         ImageDataContainer
     >();
-
     useEffect(
         () => {
             const dataContainer =
