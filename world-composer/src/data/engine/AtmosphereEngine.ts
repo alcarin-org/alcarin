@@ -8,7 +8,7 @@ const StepDelaySec = 0.05;
 type SimulationClickHandler = (deltaTime: DOMHighResTimeStamp) => void;
 
 export class AtmosphereEngine {
-    public readonly grid: MACGrid.MACGridData;
+    public grid: MACGrid.MACGridData;
 
     public lastDivergenceVector: Float32Array;
 
@@ -39,7 +39,7 @@ export class AtmosphereEngine {
         const newValue =
             value !== undefined ? value : this.grid.solids[ind] === 0;
         newSolids[ind] = newValue ? 1 : 0;
-        this.grid.solids = newSolids;
+        this.grid = { ...this.grid, solids: newSolids };
         this.neightboursMatrix = precalcNeighboursMatrix(this.grid);
     }
 

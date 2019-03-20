@@ -1,14 +1,15 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import {
     MACGridData,
     coords,
     interpolateVelocity,
 } from '../../../data/atmosphere/MACGrid';
+import { AtmosphereEngine } from '../../../data/engine/AtmosphereEngine';
 import { magnitude } from '../../../utils/Math';
 import { DataContainer } from '../../../utils/Immutable';
-import SimulationContext from '../../../context/SimulationContext';
-import { MapType } from '../../../context/interaction/state';
+import { connectContext } from '../../../context/SimulationContext';
+import { MapType } from '../../../context/state';
 // import { PressureBackground } from './PressureBackground';
 import { DivergenceBackground } from './DivergenceBackground';
 import { VelocityBackground } from './VelocityBackground';
@@ -16,11 +17,28 @@ import { VelocityBackground } from './VelocityBackground';
 interface Props {
     width: number;
     height: number;
+
     mapType: MapType;
+    grid: MACGridData;
+    engine: AtmosphereEngine;
 }
 
-export function BackgroundRenderer({ width, height, mapType }: Props) {
-    const { grid, engine } = useContext(SimulationContext);
+export const BackgroundRenderer = connectContext(
+    BackgroundRendererComponent,
+    ({ state }) => ({
+        grid: state.simulation.grid,
+        engine: state.simulation.engine,
+        mapType: state.settings.mapType,
+    })
+);
+
+function BackgroundRendererComponent({
+    width,
+    height,
+    mapType,
+    grid,
+    engine,
+}: Props) {
     // const [pressureContainer, setPressureContainer] = useState({
     //     value: atmo.pressureVector,
     // });

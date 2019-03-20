@@ -1,29 +1,53 @@
 import './InteractiveMap.scss';
 
-import React, { useContext } from 'react';
+import React from 'react';
 
 import { round, Point } from '../../utils/Math';
 import { isBufferWall } from '../../data/atmosphere/MACGrid';
 import { FluidSource } from '../../data/engine/FluidSourcesEngine';
 import { MapRenderer } from '../canvas/MapRenderer';
-import SimulationContext from '../../context/SimulationContext';
-import { useInteractionContext } from '../../context/InteractionContext';
-import { MapMode } from '../../context/interaction/state';
+import {
+    connectContext,
+    SimulationContextType,
+} from '../../context/SimulationContext';
+import { MapMode } from '../../context/state';
 
-export interface MapStats {
-    renderFps: number;
+export const InteractiveMap = connectContext(
+    InteractiveMapComponent,
+    ({ state, actions }) => ({
+        interaction: state.settings.mapInteraction,
+        drawFieldSize: state.settings.drawFieldSize,
+        gridSize: state.simulation.grid.size,
+
+        toggleSolid: actions.toggleSolid,
+        removeSourcesAt: actions.removeSourcesAt,
+        registerSource: actions.registerSource,
+    })
+);
+
+interface Props {
+    interaction: SimulationContextType['state']['settings']['mapInteraction'];
+    drawFieldSize: number;
+    gridSize: number;
+
+    toggleSolid: (gridPos: Point, solidNewState: boolean) => void;
+    removeSourcesAt: (gridPos: Point) => void;
+    registerSource: (source: FluidSource) => void;
 }
 
-export function InteractiveMap() {
-    const { grid, engine, sources } = useContext(SimulationContext);
-    const {
-        state: { settings },
-    } = useInteractionContext();
+function InteractiveMapComponent({
+    interaction,
+    drawFieldSize,
+    gridSize,
 
+    toggleSolid,
+    removeSourcesAt,
+    registerSource,
+}: Props) {
     function eventToMapPosition(ev: React.MouseEvent<HTMLDivElement>) {
         return [
-            ev.nativeEvent.offsetX / settings.drawFieldSize - 0.5,
-            ev.nativeEvent.offsetY / settings.drawFieldSize - 0.5,
+            ev.nativeEvent.offsetX / drawFieldSize - 0.5,
+            ev.nativeEvent.offsetY / drawFieldSize - 0.5,
         ] as Point;
     }
 
@@ -36,31 +60,31 @@ export function InteractiveMap() {
             return;
         }
         const mapPos = eventToMapPosition(ev);
-        if (isBufferWall(grid.size, round(mapPos))) {
+        if (isBufferWall(gridSize, round(mapPos))) {
             return;
         }
 
         const gridPos = round(mapPos);
         const leftButton = ev.buttons === 1;
 
-        switch (settings.mapInteraction.mode) {
+        switch (interaction.mode) {
             case MapMode.WallEditor:
-                engine.toggleSolid(gridPos, leftButton);
+                toggleSolid(gridPos, leftButton);
                 break;
             case MapMode.SourcesAndSinks:
-                sources.removeSourcesAt(gridPos);
+                removeSourcesAt(gridPos);
                 if (leftButton) {
                     const source: FluidSource = {
-                        ...(settings.mapInteraction.data as FluidSource),
+                        ...(interaction.data as FluidSource),
                         gridPosition: gridPos,
                     };
-                    sources.registerSource(source);
+                    registerSource(source);
                 }
                 break;
         }
     }
 
-    const showPointer = settings.mapInteraction.mode !== MapMode.Neutral;
+    const showPointer = interaction.mode !== MapMode.Neutral;
     return (
         <div
             className={

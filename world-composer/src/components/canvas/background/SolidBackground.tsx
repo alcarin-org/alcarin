@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { ImageDataCanvas } from './ImageDataCanvas';
 import { create, ImageDataContainer } from '../utils/ImageDataUtils';
 import { Color } from '../../../utils/Draw';
+import { connectContext } from '../../../context/SimulationContext';
 
 interface Props {
     solids: Int8Array;
@@ -16,7 +17,14 @@ interface Props {
 const SolidColor: Color = [100, 100, 100, 255];
 const TransparentColor: Color = [50, 50, 50, 0];
 
-export function SolidBackground({
+export const SolidBackground = connectContext(
+    SolidBackgroundComponent,
+    ({ state }) => ({
+        solids: state.simulation.grid.solids,
+    })
+);
+
+function SolidBackgroundComponent({
     solids,
     bgWidth,
     bgHeight,

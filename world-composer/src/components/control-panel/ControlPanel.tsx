@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import Stats from './Stats';
-import { useInteractionContext } from '../../context/InteractionContext';
-import { MapMode } from '../../context/interaction/state';
-import { ActionType } from '../../context/interaction/reducer';
+
+import { Stats } from './Stats';
+import { MapMode } from '../../context/state';
+import { connectContext } from '../../context/SimulationContext';
 import { FluidSource } from '../../data/engine/FluidSourcesEngine';
 import { FluidSourcePanel, DefaultFluidSource } from './FluidSourcePanel';
 import { FluidSinkPanel, DefaultFluidSink } from './FluidSinkPanel';
@@ -50,29 +50,29 @@ const TabsDefinition: Tab[] = [
     },
 ];
 
-function setMapModeAction(mapMode: MapMode, data?: any) {
-    return {
-        type: ActionType.SetMapMode,
-        payload: {
-            mode: mapMode,
-            data,
-        },
-    };
+interface Props {
+    setMapMode: (mode: MapMode, data?: any) => void;
 }
 
-export function ControlPanel() {
+export const ControlPanel = connectContext(
+    ControlPanelComponent,
+    ({ actions }) => ({
+        setMapMode: actions.setMapMode,
+    })
+);
+
+function ControlPanelComponent({ setMapMode }: Props) {
     const [currentTab, setCurrentTab] = useState(TabsDefinition[0]);
-    const { dispatch } = useInteractionContext();
 
     function setCurrentModePayload(
         mapMode: MapMode,
         payload: MapModeLegalPayload
     ) {
-        dispatch(setMapModeAction(mapMode, payload));
+        setMapMode(mapMode, payload);
     }
 
     function onPayloadChanged(payload: MapModeLegalPayload) {
-        dispatch(setMapModeAction(currentTab.mapMode, payload));
+        setMapMode(currentTab.mapMode, payload);
     }
 
     return (
@@ -115,7 +115,7 @@ function renderTab(
 ) {
     switch (mode) {
         case ControlPanelMode.Stats:
-            return <Stats mouseOver={[0, 0]} />;
+            return <Stats />;
         case ControlPanelMode.Sources:
             return (
                 <>

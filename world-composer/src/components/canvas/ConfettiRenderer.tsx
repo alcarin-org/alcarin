@@ -1,19 +1,34 @@
 // tslint:disable no-bitwise
 import React, { useEffect, useRef } from 'react';
 
+import { connectContext } from '../../context/SimulationContext';
 import { useCanvas } from './utils/CanvasUtils';
 import { Particles } from '../../data/convectable/Particles';
-import { MACGridData } from '../../data/atmosphere/MACGrid';
 
 interface Props {
     particles: Particles;
-    atmo: MACGridData;
+    gridSize: number;
 
     width: number;
     height: number;
 }
 
-export function ConfettiRenderer({ atmo, particles, width, height }: Props) {
+
+
+export const ConfettiRenderer = connectContext(
+    ConfettiRendererComponent,
+    ({ state }) => ({
+        gridSize: state.simulation.grid.size,
+        particles: state.simulation.particles.particles,
+    })
+);
+
+function ConfettiRendererComponent({
+    gridSize,
+    particles,
+    width,
+    height,
+}: Props) {
     const domCanvasRef = useRef<HTMLCanvasElement>(null);
     const [, displayCtxRef] = useCanvas(width, height, domCanvasRef);
 
@@ -23,7 +38,7 @@ export function ConfettiRenderer({ atmo, particles, width, height }: Props) {
             renderConfetti(
                 displayCtxRef.current!,
                 particles,
-                width / atmo.size,
+                width / gridSize,
                 width,
                 height
             );
