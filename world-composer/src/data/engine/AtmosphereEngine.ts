@@ -1,7 +1,13 @@
 import * as MACGrid from '../atmosphere/MACGrid';
 import { precalcNeighboursMatrix, calculateFieldPressure } from './EngineUtils';
 
-import { Point, multiply, add } from '../../utils/Math';
+import {
+    Point,
+    multiply,
+    add,
+    normalize,
+    perpendicular,
+} from '../../utils/Math';
 
 const StepDelaySec = 0.05;
 
@@ -32,12 +38,14 @@ export class AtmosphereEngine {
         // this.lastPressureVector = this.calculatePressure(1);
     }
 
-    public toggleSolid(pos: Point, value?: boolean) {
+    public toggleSolid(pos: Point, value: boolean) {
         const ind = MACGrid.index(this.grid, pos);
-        const newSolids = this.grid.solids.slice(0);
+        const newValue = value ? 1 : 0;
+        if (this.grid.solids[ind] === newValue) {
+            return;
+        }
 
-        const newValue =
-            value !== undefined ? value : this.grid.solids[ind] === 0;
+        const newSolids = this.grid.solids.slice(0);
         newSolids[ind] = newValue ? 1 : 0;
         this.grid = { ...this.grid, solids: newSolids };
         this.neightboursMatrix = precalcNeighboursMatrix(this.grid);
@@ -78,20 +86,37 @@ export class AtmosphereEngine {
     }
 
     public applyExternalForces(deltaTime: DOMHighResTimeStamp) {
-        // const halfP: Point = [-this.atmo.size / 2, -this.atmo.size / 2];
-        // for (let i = 0; i < this.atmo.vectorSize; i++) {
-        //     if (this.atmo.solidsVector[i] === 1) {
+        // const halfP: Point = [
+        //     -Math.trunc(this.grid.size / 2),
+        //     -Math.trunc(this.grid.size / 2),
+        // ];
+        // for (let i = 0; i < this.grid.solids.length; i++) {
+        //     if (this.grid.solids[i] === 1) {
         //         continue;
         //     }
-        //     const p = add(this.atmo.coords(i), halfP);
-        //     const cor = multiply(normalize(perpendicular(p)), 0.05 * deltaTime);
-        //     const centr = multiply(normalize(p), 0 * deltaTime);
-        //     this.atmo.velX[i] += cor[0] + centr[0];
-        //     this.atmo.velY[i] += cor[1] + centr[1];
+        //     const coords = MACGrid.coords(this.grid, i);
+        //     const vx = add([coords[0] - 0.5, coords[1]], halfP);
+        //     const vy = add([coords[0], coords[1] - 0.5], halfP);
+
+        //     const corFactor = 0.01;
+        //     const corX = multiply(
+        //         normalize(perpendicular(vx)),
+        //         corFactor * deltaTime
+        //     );
+        //     const corY = multiply(
+        //         normalize(perpendicular(vy)),
+        //         corFactor * deltaTime
+        //     );
+        //     const centrFactor = 0.2;
+        //     const centrX = multiply(normalize(vx), centrFactor * deltaTime);
+        //     const centrY = multiply(normalize(vy), centrFactor * deltaTime);
+        //     this.grid.field.velX[i] += centrX[0] + corX[0];
+        //     this.grid.field.velY[i] += centrY[1] + corY[0];
         // }
+
         // gravity
         // for (let i = 0; i < this.atmo.vectorSize; i++) {
-        //     if (this.atmo.solidsVector[i] === 1) {
+        //     if (this.atmo.solids[i] === 1) {
         //         continue;
         //     }
         //     this.atmo.velY[i] += deltaTime * 1;

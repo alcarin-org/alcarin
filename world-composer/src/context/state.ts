@@ -22,12 +22,7 @@ export enum MapMode {
 export function createSimulationContext(
     randomMethod?: RandomizeField.RandomMethod
 ) {
-    const newGrid = MACGrid.create(
-        DefaultWorldSize,
-        // baseContext ? baseContext.grid.solids : undefined,
-        undefined,
-        randomMethod
-    );
+    const newGrid = MACGrid.create(DefaultWorldSize);
     const newEngine = new AtmosphereEngine(newGrid);
     const newParticlesEngine: ParticlesEngine = new ParticlesEngine(
         newEngine,
