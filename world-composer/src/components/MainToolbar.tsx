@@ -1,35 +1,45 @@
 import React from 'react';
 
 import { Toolbar, ToolbarButton, ToolbarSeparator } from './common/Toolbar';
-import { MapType } from './canvas/utils/CanvasUtils';
-import { MapSettings } from './map/InteractiveMap';
+import { useInteractionContext } from '../context/InteractionContext';
+import { MapType } from '../context/interaction/state';
+import { ActionType } from '../context/interaction/reducer';
 
 interface Props {
-    onToggleStats: (visible: boolean) => void;
-    onMapTypeChange: (mapType: MapType) => void;
+    onToggleControlPanel: (visible: boolean) => void;
     onSpawnParticles: () => void;
     onRandomizeVelocity: () => void;
     onMapReset: () => void;
 
-    statsVisible: boolean;
-    mapSettings: MapSettings;
+    controlPanelVisible: boolean;
+}
+
+function changeMapTypeAction(mapType: MapType) {
+    return {
+        type: ActionType.SetMapType,
+        payload: mapType,
+    };
 }
 
 export function MainToolbar({
-    onMapTypeChange,
-    onToggleStats,
-    statsVisible,
+    onToggleControlPanel,
+    controlPanelVisible,
     onSpawnParticles,
-    mapSettings,
     onRandomizeVelocity,
     onMapReset,
 }: Props) {
+    const {
+        state: {
+            settings: { mapType },
+        },
+        dispatch,
+    } = useInteractionContext();
+    const dispachNewMapType = (mapType: MapType) =>
+        dispatch(changeMapTypeAction(mapType));
+
     return (
         <Toolbar>
-            <ToolbarButton
-                onClick={onMapReset}
-                title="Reset map"
-            >
+            <ToolbarButton onClick={onMapReset} title="Reset map">
                 <i className="fa fa-undo" />
             </ToolbarButton>
             <ToolbarButton
@@ -48,43 +58,37 @@ export function MainToolbar({
             <ToolbarSeparator />
 
             <ToolbarButton
-                active={mapSettings.mapType === MapType.Pressure}
-                onClick={() => onMapTypeChange(MapType.Pressure)}
+                active={mapType === MapType.Pressure}
+                onClick={() => dispachNewMapType(MapType.Pressure)}
                 disabled={true}
             >
                 Pressure
             </ToolbarButton>
             <ToolbarButton
-                active={mapSettings.mapType === MapType.Neutral}
-                onClick={() => onMapTypeChange(MapType.Neutral)}
+                active={mapType === MapType.Neutral}
+                onClick={() => dispachNewMapType(MapType.Neutral)}
             >
                 Neutral
             </ToolbarButton>
             <ToolbarButton
-                active={mapSettings.mapType === MapType.Velocity}
-                onClick={() => onMapTypeChange(MapType.Velocity)}
+                active={mapType === MapType.Velocity}
+                onClick={() => dispachNewMapType(MapType.Velocity)}
             >
                 Velocity
             </ToolbarButton>
             <ToolbarButton
-                active={mapSettings.mapType === MapType.Divergence}
-                onClick={() => onMapTypeChange(MapType.Divergence)}
+                active={mapType === MapType.Divergence}
+                onClick={() => dispachNewMapType(MapType.Divergence)}
             >
                 Divergence
-            </ToolbarButton>
-            <ToolbarButton
-                active={mapSettings.mapType === MapType.Wall}
-                onClick={() => onMapTypeChange(MapType.Wall)}
-            >
-                Wall
             </ToolbarButton>
 
             <ToolbarSeparator />
 
             <ToolbarButton
-                onClick={() => onToggleStats(!statsVisible)}
+                onClick={() => onToggleControlPanel(!controlPanelVisible)}
                 title="Show statistics"
-                active={statsVisible}
+                active={controlPanelVisible}
             >
                 <i className="fa fa-bar-chart" />
             </ToolbarButton>

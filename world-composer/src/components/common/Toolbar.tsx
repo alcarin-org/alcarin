@@ -23,7 +23,7 @@ export function Toolbar({ children }: Props) {
 }
 
 export function ToolbarSeparator() {
-    return <div className="toolbar__separator pure-menu-separator"/>;
+    return <div className="toolbar__separator pure-menu-separator" />;
 }
 
 export function ToolbarButton({

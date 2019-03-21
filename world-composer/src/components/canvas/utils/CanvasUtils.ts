@@ -1,13 +1,5 @@
 import { useEffect, useRef, RefObject } from 'react';
 
-export enum MapType {
-    Neutral,
-    Pressure,
-    Velocity,
-    Divergence,
-    Wall,
-}
-
 export function useCanvas(
     width: number,
     height: number,

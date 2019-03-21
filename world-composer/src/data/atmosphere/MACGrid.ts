@@ -22,6 +22,11 @@ export interface MACGridData {
     // solids is coded as 1/0 values vector
     solids: Int8Array;
 
+    // artificant pressure modificators. when given field got positive pressure
+    // modificator it starts "spread" fluid around. negative pressure will
+    // pull fluid inside
+    pressureModifiers: Float32Array;
+
     // the assumption is that the field is a square, so we need only one
     // size factor
     readonly size: number;
@@ -53,6 +58,7 @@ export function create(
         },
         solids,
         size,
+        pressureModifiers: new Float32Array(vectorSize),
     };
 
     if (fieldInitMethod) {
@@ -95,7 +101,9 @@ export function divergenceVector(
         const velX2 = grid.field.velX[iCell + 1];
         const velY2 = grid.field.velY[iCell + grid.size];
 
-        divVector[iCell] = multiplier * (velX2 - velX + velY2 - velY);
+        divVector[iCell] =
+            multiplier *
+            (velX2 - velX + velY2 - velY - grid.pressureModifiers[iCell]);
     }
 
     return divVector;

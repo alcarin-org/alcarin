@@ -1,19 +1,19 @@
 @import 'variables';
 
-.app {
+.page {
     display: flex;
     flex-flow: column;
     height: 100%;
-    text-align: center;
 
     &__toolbar {
         display: flex;
     }
 
-    &__stats-panel {
+    &__control-panel {
         border: 1px solid $panel-border;
         background-color: $panel-bg;
-        width: 500px;
+        padding: 10px;
+        width: 550px;
     }
 
     &__content {

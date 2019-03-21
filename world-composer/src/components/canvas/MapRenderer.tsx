@@ -1,28 +1,26 @@
 import React, { useEffect, useRef, useState, useContext } from 'react';
 
+import SimulationContext from '../../context/SimulationContext';
+import { useInteractionContext } from '../../context/InteractionContext';
+import { MapType } from '../../context/interaction/state';
 import { BackgroundRenderer } from './background/BackgroundRenderer';
 import { SolidBackground } from './background/SolidBackground';
 import { VelocityFieldRenderer } from './VelocityFieldRenderer';
 // import { ParticlesRenderer } from './ParticlesRenderer';
 import { ConfettiRenderer } from './ConfettiRenderer';
-import { MapType } from './utils/CanvasUtils';
-import { ParticlesEngine } from '../../data/engine/ParticlesEngine';
-import Context from '../SimulationContext';
 
 interface Props {
-    particlesEngine: ParticlesEngine;
     fieldSizePx?: number;
-    mapType: MapType;
     onRender?: (deltaTime: DOMHighResTimeStamp) => void;
 }
 
-export function MapRenderer({
-    fieldSizePx = 30,
-    mapType = MapType.Pressure,
-    onRender,
-    particlesEngine,
-}: Props) {
-    const { grid, engine } = useContext(Context)!;
+export function MapRenderer({ fieldSizePx = 30, onRender }: Props) {
+    const { grid, engine, particles } = useContext(SimulationContext);
+    const {
+        state: {
+            settings: { mapType },
+        },
+    } = useInteractionContext();
 
     const canvasSizePx = fieldSizePx * grid.size;
 
@@ -60,8 +58,6 @@ export function MapRenderer({
             style={{ width: canvasSizePx, height: canvasSizePx }}
         >
             <BackgroundRenderer
-                atmo={grid}
-                driver={engine}
                 width={canvasSizePx}
                 height={canvasSizePx}
                 mapType={mapType}
@@ -74,12 +70,12 @@ export function MapRenderer({
                     height={canvasSizePx}
                 />
             )}
-            {(mapType === MapType.Neutral || mapType === MapType.Wall) && (
+            {(mapType === MapType.Neutral) && (
                 <ConfettiRenderer
                     width={canvasSizePx}
                     height={canvasSizePx}
                     atmo={grid}
-                    particles={particlesEngine.particles}
+                    particles={particles.particles}
                 />
             )}
             <SolidBackground

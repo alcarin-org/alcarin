@@ -1,7 +1,11 @@
 .interactive-map {
     display: flex;
+    justify-content: center;
+
+    user-select: none;
 
     &--active {
         cursor: pointer;
     }
+
 }
