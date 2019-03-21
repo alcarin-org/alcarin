@@ -1,7 +1,7 @@
 import * as MACGrid from '../atmosphere/MACGrid';
 import * as Particles from '../convectable/Particles';
 import { Color, colorToNumber } from '../../utils/Draw';
-import { Point, round } from '../../utils/Math';
+import { Point, round, magnitude } from '../../utils/Math';
 
 export enum FluidSourceType {
     Directional,
@@ -25,16 +25,11 @@ interface SourceInstance {
 
 export interface FluidSourcesData {
     sources: SourceInstance[];
-    // time accumulator to optimize removing
-    // particles. changes here do not need to
-    // be propagate as UX rerender
-    removeTimeAcc: number;
 }
 
 export function create(): FluidSourcesData {
     return {
         sources: [],
-        removeTimeAcc: 0,
     };
 }
 
@@ -54,25 +49,6 @@ export function registerSource(
     // }
 }
 
-export function update(
-    fluidSources: FluidSourcesData,
-    deltaTimeSec: DOMHighResTimeStamp
-): FluidSourcesData {
-    // fluidSources.sources.forEach((source, index) =>
-    //     this.applySource(source, index, deltaTimeSec)
-    // );
-
-    fluidSources.removeTimeAcc += deltaTimeSec;
-    // if (fluidSources.removeTimeAcc < 1) {
-    //     // the change do not need to trigger any view rerender
-    //     return fluidSources;
-    //     // fluidSources.removeTimeAcc -= 1;
-    //     // this.cleanupSinks();
-    // }
-
-    return { ...fluidSources };
-}
-
 export function removeSourcesAt(
     fluidSources: FluidSourcesData,
     gridPos: Point
@@ -83,33 +59,31 @@ export function removeSourcesAt(
             source.gridPosition[1] !== gridPos[1]
     );
     return { ...fluidSources };
-    // this.reapplyPressureModifiers();
 }
 
-// private cleanupSinks() {
-//     // todo refactor together with particles buffer refactor
-//     // const particles = this.particles;
-//     // const particlesIndToRemove: Particles.HashTable = {};
-//     // this.sources
-//     //     .filter(sourceInstance => sourceInstance.source.power < 0)
-//     //     .forEach(sourceInstance => {
-//     //         for (let i = 0; i < particles.colors.length; i++) {
-//     //             const x = particles.positions[2 * i];
-//     //             const y = particles.positions[2 * i + 1];
-//     //             const distance = magnitude([
-//     //                 sourceInstance.source.gridPosition[0] - x,
-//     //                 sourceInstance.source.gridPosition[1] - y,
-//     //             ]);
-//     //             if (distance < 0.25) {
-//     //                 particlesIndToRemove[i] = null;
-//     //             }
-//     //         }
-//     //     });
-//     // this.particles = Particles.removeParticlesOnIndexes(
-//     //     this.particlesEngine.particles,
-//     //     particlesIndToRemove
-//     // );
-// }
+export function cleanupSinksOn(
+    particles: Particles.ParticlesData,
+    fluidSources: FluidSourcesData
+) {
+    // todo refactor together with particles buffer refactor
+    const particlesIndToRemove: Particles.HashTable = {};
+    fluidSources.sources
+        .filter(sourceInstance => sourceInstance.source.power < 0)
+        .forEach(sourceInstance => {
+            for (let i = 0; i < particles.colors.length; i++) {
+                const x = particles.positions[2 * i];
+                const y = particles.positions[2 * i + 1];
+                const distance = magnitude([
+                    sourceInstance.source.gridPosition[0] - x,
+                    sourceInstance.source.gridPosition[1] - y,
+                ]);
+                if (distance < 0.25) {
+                    particlesIndToRemove[i] = null;
+                }
+            }
+        });
+    return Particles.removeParticlesOnIndexes(particles, particlesIndToRemove);
+}
 
 export function applyPressureModifiersOn(
     grid: MACGrid.MACGridData,
@@ -198,9 +172,11 @@ function generateOmniParticles(
 
 function assert(pos: Point) {
     if (process.env.REACT_APP_DEBUG === '1') {
-        if (pos[0] !== Math.floor(pos[0]) || pos[1] !== Math.floor(pos[0])) {
+        if (pos[0] !== Math.floor(pos[0]) || pos[1] !== Math.floor(pos[1])) {
             throw new Error(
-                'Fluid source should be positioned only on center of grid cells.'
+                `Fluid source should be positioned only on center of grid cells. Given: (${
+                    pos[0]
+                }, ${pos[1]})`
             );
         }
     }

@@ -12,7 +12,11 @@ import * as Particles from '../../data/convectable/Particles';
 
 export type Dispatch = Dispatch<AllActionTypes>;
 
-const StepDelaySec = 0.1;
+const VelocityFieldUpdateDelaySec = 0.1;
+const ParticlesCleanupDelaySec = 1;
+
+const velocityFieldNeedUpdate = timePassChecker(VelocityFieldUpdateDelaySec);
+const particlesNeedCleanup = timePassChecker(ParticlesCleanupDelaySec);
 
 export default (
     state: typeof SimulationState,
@@ -25,21 +29,24 @@ export default (
             const deltaTimeSec = action.payload.deltaTimeSec;
             let currentGrid = grid;
 
-            let newEngineTimeAccSec =
-                state.simulation.engineTimeAccSec + deltaTimeSec;
-            if (newEngineTimeAccSec >= StepDelaySec) {
-                currentGrid = AtmosphereEngine.update(
-                    grid,
-                    newEngineTimeAccSec
-                );
-                newEngineTimeAccSec = 0;
+            // progress velocity field
+            const [velNeedUpdate, velTimePassSec] = velocityFieldNeedUpdate(
+                deltaTimeSec
+            );
+            if (velNeedUpdate) {
+                currentGrid = AtmosphereEngine.update(grid, velTimePassSec);
             }
 
-            const newSources = FluidSources.update(sources, deltaTimeSec);
+            // progress particles
+            const [partNeedCleanup] = particlesNeedCleanup(deltaTimeSec);
+
+            const cleanedParticles = partNeedCleanup
+                ? FluidSources.cleanupSinksOn(particles, sources)
+                : particles;
 
             const newParticles = FluidSources.applyFluidSourcesOn(
                 currentGrid,
-                particles,
+                cleanedParticles,
                 sources,
                 deltaTimeSec
             );
@@ -56,8 +63,6 @@ export default (
                     ...state.simulation,
                     grid: currentGrid,
                     particles: movedParticles,
-                    sources: newSources,
-                    engineTimeAccSec: newEngineTimeAccSec,
                 },
             };
             break;
@@ -113,4 +118,20 @@ function getRandomFillMethod() {
         RandomizeField.RightWave,
     ];
     return randomMethods[Math.floor(Math.random() * randomMethods.length)];
+}
+
+function timePassChecker(intervalSec: number) {
+    let timer = 0;
+    return function timePassed(
+        deltaTimeSec: DOMHighResTimeStamp
+    ): [boolean, number] {
+        timer += deltaTimeSec;
+        if (timer >= intervalSec) {
+            const timerState = timer;
+            timer = 0;
+            return [true, timerState];
+        }
+
+        return [false, 0];
+    };
 }

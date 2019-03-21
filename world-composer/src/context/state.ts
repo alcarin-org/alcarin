@@ -29,11 +29,6 @@ export function createSimulationContext(
         grid: newGrid,
         particles: newParticles,
         sources: newSourcesEngine,
-
-        // engine do not need to be updated every frame, it's enough
-        // to update it few times per second. we used it to decide if
-        // enough time pass
-        engineTimeAccSec: 0,
     };
 }
 
