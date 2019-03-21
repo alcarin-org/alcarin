@@ -5,8 +5,8 @@ import {
     Point,
     multiply,
     add,
-    normalize,
-    perpendicular,
+    // normalize,
+    // perpendicular,
 } from '../../utils/Math';
 
 const StepDelaySec = 0.05;
@@ -97,7 +97,6 @@ export class AtmosphereEngine {
         //     const coords = MACGrid.coords(this.grid, i);
         //     const vx = add([coords[0] - 0.5, coords[1]], halfP);
         //     const vy = add([coords[0], coords[1] - 0.5], halfP);
-
         //     const corFactor = 0.01;
         //     const corX = multiply(
         //         normalize(perpendicular(vx)),
@@ -113,7 +112,6 @@ export class AtmosphereEngine {
         //     this.grid.field.velX[i] += centrX[0] + corX[0];
         //     this.grid.field.velY[i] += centrY[1] + corY[0];
         // }
-
         // gravity
         // for (let i = 0; i < this.atmo.vectorSize; i++) {
         //     if (this.atmo.solids[i] === 1) {

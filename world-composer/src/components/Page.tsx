@@ -28,11 +28,14 @@ function PageComponent({
     spawnParticles,
 }: Props) {
     const [showControlPanel, setShowControlPanel] = useState(true);
-    const onTogglePlay = useCallback(
-        () =>
-            GlobalTimer.isRunning ? GlobalTimer.stop() : GlobalTimer.start(),
-        []
-    );
+    const [isPlaying, setIsPlaying] = useState(true);
+    const onTogglePlay = useCallback(() => {
+        setIsPlaying(isPlaying => {
+            // side effect
+            isPlaying ? GlobalTimer.stop() : GlobalTimer.start();
+            return !isPlaying;
+        });
+    }, []);
 
     useEffect(() => {
         function onKeyDown(ev: KeyboardEvent) {
@@ -54,7 +57,7 @@ function PageComponent({
                     onRandomizeVelocity={randomizeVelocityField}
                     controlPanelVisible={showControlPanel}
                     onTogglePlay={onTogglePlay}
-                    isPlaying={GlobalTimer.isRunning}
+                    isPlaying={isPlaying}
                     onToggleControlPanel={newState =>
                         setShowControlPanel(newState)
                     }
