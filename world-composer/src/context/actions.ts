@@ -10,6 +10,7 @@ export enum ActionType {
     RemoveSources,
     AddSources,
     ResetMap,
+    SpawnParticles,
 }
 
 export interface Action {
@@ -53,6 +54,10 @@ const actions = {
     }),
 
     resetMap: () => ({ type: ActionType.ResetMap as ActionType.ResetMap }),
+    spawnParticles: (count: number) => ({
+        type: ActionType.SpawnParticles as ActionType.SpawnParticles,
+        payload: { count },
+    }),
 };
 
 type ValueOf<T> = T[keyof T];

@@ -80,6 +80,17 @@ export default (state: typeof InteractionContext, action: AllActionTypes) => {
                 },
             };
 
+        case ActionType.SpawnParticles:
+            // side effect
+            state.simulation.particles.spawnParticles(action.payload.count)
+            return {
+                ...state,
+                simulation: {
+                    ...state.simulation,
+                    // particles: { ...state.simulation.particles },
+                },
+            };
+
         default:
             console.warn('Unknown action', action);
             return state;

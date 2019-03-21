@@ -11,6 +11,7 @@ import GlobalTimer from '../utils/Timer';
 interface Props {
     resetMap: () => void;
     randomizeVelocityField: () => void;
+    spawnParticles: (count: number) => void;
 }
 
 const KEY_SPACE = 32;
@@ -18,9 +19,14 @@ const KEY_SPACE = 32;
 export const Page = connectContext(PageComponent, ({ state, actions }) => ({
     resetMap: actions.resetMap,
     randomizeVelocityField: actions.randomizeVelocityField,
+    spawnParticles: actions.spawnParticles,
 }));
 
-function PageComponent({ resetMap, randomizeVelocityField }: Props) {
+function PageComponent({
+    resetMap,
+    randomizeVelocityField,
+    spawnParticles,
+}: Props) {
     const [showControlPanel, setShowControlPanel] = useState(true);
     const onTogglePlay = useCallback(
         () =>
@@ -52,10 +58,7 @@ function PageComponent({ resetMap, randomizeVelocityField }: Props) {
                     onToggleControlPanel={newState =>
                         setShowControlPanel(newState)
                     }
-                    onSpawnParticles={
-                        () => null
-                        // simulationContext.particles.spawnParticles(5000)
-                    }
+                    onSpawnParticles={() => spawnParticles(5000)}
                     onMapReset={resetMap}
                 />
             </div>
