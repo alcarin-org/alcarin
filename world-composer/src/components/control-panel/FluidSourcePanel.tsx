@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 
 import {
     FluidSource,
@@ -22,6 +22,8 @@ export const DefaultFluidSource: FluidSource = {
 
 export function FluidSourcePanel({ onSourceChanged }: Props) {
     const [source, setSource] = useState(DefaultFluidSource);
+
+    useEffect(randomizeColor, []);
 
     const updateFluidSource = (newSource: FluidSource) => {
         setSource(newSource);
