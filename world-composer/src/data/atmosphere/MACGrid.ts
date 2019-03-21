@@ -32,24 +32,18 @@ export interface MACGridData {
     readonly size: number;
 }
 
-export function create(
-    mapSize: number,
-    solidsVector?: Int8Array,
-    fieldInitMethod?: RandomMethod
-): MACGridData {
+export function create(mapSize: number): MACGridData {
     // we create additionall buffer of solids around our map
     const size = mapSize + 2;
     const vectorSize = size ** 2;
 
-    const solids =
-        solidsVector ||
-        new Int8Array(vectorSize).map((_, ind) => {
-            // prefedined solids for now, should be dynamic later.
+    const solids = new Int8Array(vectorSize).map((_, ind) => {
+        // prefedined solids for now, should be dynamic later.
 
-            const x = ind % size;
-            const y = Math.floor(ind / size);
-            return isBufferWall(size, [x, y]) ? 1 : 0;
-        });
+        const x = ind % size;
+        const y = Math.floor(ind / size);
+        return isBufferWall(size, [x, y]) ? 1 : 0;
+    });
 
     const grid: MACGridData = {
         field: {
@@ -61,21 +55,22 @@ export function create(
         pressureModifiers: new Float32Array(vectorSize),
     };
 
-    if (fieldInitMethod) {
-        for (let x = 0; x < size; x++) {
-            for (let y = 0; y < size; y++) {
-                const vel = fieldInitMethod(grid, [x, y]);
-                const ind = index(grid, [x, y]);
-                const onLeftBorder = solids[ind] === 1 || solids[ind - 1] === 1;
-                const onTopBorder =
-                    solids[ind] === 1 || solids[ind - size] === 1;
-                grid.field.velX[ind] = onLeftBorder ? 0 : vel[0];
-                grid.field.velY[ind] = onTopBorder ? 0 : vel[1];
-            }
+    return grid;
+}
+
+export function fillGridVelocityBy(grid: MACGridData, method: RandomMethod) {
+    for (let x = 0; x < grid.size; x++) {
+        for (let y = 0; y < grid.size; y++) {
+            const vel = method(grid, [x, y]);
+            const ind = index(grid, [x, y]);
+            const onLeftBorder =
+                grid.solids[ind] === 1 || grid.solids[ind - 1] === 1;
+            const onTopBorder =
+                grid.solids[ind] === 1 || grid.solids[ind - grid.size] === 1;
+            grid.field.velX[ind] = onLeftBorder ? 0 : vel[0];
+            grid.field.velY[ind] = onTopBorder ? 0 : vel[1];
         }
     }
-
-    return grid;
 }
 
 export function isBufferWall(gridSize: number, [x, y]: Point) {
@@ -111,6 +106,10 @@ export function divergenceVector(
 
 export function index(grid: MACGridData, p: Point) {
     return p[1] * grid.size + p[0];
+}
+
+export function indexForSize(gridSize: number, p: Point) {
+    return p[1] * gridSize + p[0];
 }
 
 export function coords(grid: MACGridData, index: number): Point {

@@ -12,7 +12,7 @@ interface Props {
 export const DefaultFluidSink: FluidSource = {
     type: FluidSourceType.Omni,
     gridPosition: [0, 0],
-    power: -10,
+    power: -5,
     particlesColor: [0, 0, 0, 0],
     particlesPerSecond: 0,
 };
@@ -28,7 +28,7 @@ export function FluidSinkPanel({ onSinkChanged }: Props) {
     const onPowerChange = (ev: ChangeEvent<HTMLInputElement>) => {
         updateFluidSource({
             ...source,
-            power: -parseInt(ev.currentTarget.value, 10),
+            power: -parseInt(ev.currentTarget.value, 10) / 10,
         });
     };
 
@@ -38,13 +38,14 @@ export function FluidSinkPanel({ onSinkChanged }: Props) {
                 <fieldset>
                     <legend>New sink characteristic</legend>
                     <div className="pure-control-group">
-                        <label htmlFor="power">Source power</label>
+                        <label htmlFor="power">Sink power</label>
                         <input
                             id="power"
                             type="range"
                             min={1}
-                            max={30}
-                            value={-source.power}
+                            max={200}
+                            step={5}
+                            value={-source.power * 10}
                             onChange={onPowerChange}
                         />
                     </div>

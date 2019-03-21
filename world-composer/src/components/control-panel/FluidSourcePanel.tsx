@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent } from 'react';
+import React, { useState, useEffect, ChangeEvent } from 'react';
 
 import {
     FluidSource,
@@ -15,23 +15,37 @@ const DefaultColor: Color = [30, 255, 30, 128];
 export const DefaultFluidSource: FluidSource = {
     type: FluidSourceType.Omni,
     gridPosition: [0, 0],
-    power: 10,
+    power: 5,
     particlesColor: DefaultColor,
-    particlesPerSecond: 50,
+    particlesPerSecond: 80,
 };
 
 export function FluidSourcePanel({ onSourceChanged }: Props) {
     const [source, setSource] = useState(DefaultFluidSource);
+
+    useEffect(randomizeColor, []);
 
     const updateFluidSource = (newSource: FluidSource) => {
         setSource(newSource);
         onSourceChanged(newSource);
     };
 
+    function setColor(color: Color) {
+        updateFluidSource({
+            ...source,
+            particlesColor: color,
+        });
+    }
+
+    function randomizeColor() {
+        const rand = () => Math.trunc(Math.random() * 256);
+        setColor([rand(), rand(), rand(), 255]);
+    }
+
     const onPowerChange = (ev: ChangeEvent<HTMLInputElement>) => {
         updateFluidSource({
             ...source,
-            power: parseInt(ev.currentTarget.value, 10),
+            power: parseInt(ev.currentTarget.value, 10) / 10,
         });
     };
 
@@ -43,10 +57,7 @@ export function FluidSourcePanel({ onSourceChanged }: Props) {
     };
 
     const onColorChange = (ev: ChangeEvent<HTMLInputElement>) => {
-        updateFluidSource({
-            ...source,
-            particlesColor: hexToColor(ev.currentTarget.value),
-        });
+        setColor(hexToColor(ev.currentTarget.value));
     };
 
     return (
@@ -60,8 +71,8 @@ export function FluidSourcePanel({ onSourceChanged }: Props) {
                             id="power"
                             type="range"
                             min={1}
-                            max={30}
-                            value={source.power}
+                            max={200}
+                            value={source.power * 10}
                             onChange={onPowerChange}
                         />
                     </div>
@@ -88,6 +99,13 @@ export function FluidSourcePanel({ onSourceChanged }: Props) {
                             value={colorToHex(source.particlesColor)}
                             onChange={onColorChange}
                         />
+                        <button
+                            className="pure-button"
+                            type="button"
+                            onClick={randomizeColor}
+                        >
+                            <i className="fa fa-random" />
+                        </button>
                     </div>
                 </fieldset>
             </form>

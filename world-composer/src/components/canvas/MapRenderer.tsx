@@ -1,89 +1,61 @@
-import React, { useEffect, useRef, useState, useContext } from 'react';
+import React, { useEffect, useState } from 'react';
 
-import SimulationContext from '../../context/SimulationContext';
-import { useInteractionContext } from '../../context/InteractionContext';
-import { MapType } from '../../context/interaction/state';
+import { connectContext } from '../../context/SimulationContext';
+import { MapType } from '../../context/state';
 import { BackgroundRenderer } from './background/BackgroundRenderer';
 import { SolidBackground } from './background/SolidBackground';
 import { VelocityFieldRenderer } from './VelocityFieldRenderer';
-// import { ParticlesRenderer } from './ParticlesRenderer';
 import { ConfettiRenderer } from './ConfettiRenderer';
+import GlobalTimer from '../../utils/Timer';
 
 interface Props {
-    fieldSizePx?: number;
-    onRender?: (deltaTime: DOMHighResTimeStamp) => void;
+    gridSize: number;
+    drawFieldSize: number;
+    mapType: MapType;
 }
 
-export function MapRenderer({ fieldSizePx = 30, onRender }: Props) {
-    const { grid, engine, particles } = useContext(SimulationContext);
-    const {
-        state: {
-            settings: { mapType },
-        },
-    } = useInteractionContext();
+export const MapRenderer = connectContext(
+    MapRendererComponent,
+    ({ state }) => ({
+        gridSize: state.simulation.grid.size,
+        drawFieldSize: state.settings.drawFieldSize,
+        mapType: state.settings.mapType,
+    })
+);
 
-    const canvasSizePx = fieldSizePx * grid.size;
+function MapRendererComponent({ mapType, gridSize, drawFieldSize }: Props) {
+    const canvasSizePx = drawFieldSize * gridSize;
 
-    const lastRenderRef = useRef<DOMHighResTimeStamp | null>(null);
     // temporary solution, entire rendering mechanism will be refactored soon
     const [, setRenderCount] = useState(0);
-
-    useEffect(
-        () => {
-            let requestAnimFrameId = requestAnimationFrame(renderAtmosphere);
-
-            function renderAtmosphere(timestamp: DOMHighResTimeStamp) {
-                if (lastRenderRef.current !== null) {
-                    const deltaTime = timestamp - lastRenderRef.current;
-                    if (onRender) {
-                        onRender(deltaTime);
-                    }
-                }
-                // this force rerender
-                lastRenderRef.current = timestamp;
-                requestAnimFrameId = requestAnimationFrame(renderAtmosphere);
-                setRenderCount(prev => prev + 1);
-            }
-
-            return () => {
-                cancelAnimationFrame(requestAnimFrameId);
-            };
-        },
-        [onRender]
-    );
+    useEffect(() => {
+        function rerender(timestamp: DOMHighResTimeStamp) {
+            // this force rerender
+            setRenderCount(prev => prev + 1);
+        }
+        return GlobalTimer.onTick(rerender);
+    }, []);
 
     return (
         <div
             className="map-renderer"
             style={{ width: canvasSizePx, height: canvasSizePx }}
         >
-            <BackgroundRenderer
-                width={canvasSizePx}
-                height={canvasSizePx}
-                mapType={mapType}
-            />
+            <BackgroundRenderer width={canvasSizePx} height={canvasSizePx} />
             {mapType === MapType.Velocity && (
                 <VelocityFieldRenderer
-                    atmo={grid}
-                    driver={engine}
                     width={canvasSizePx}
                     height={canvasSizePx}
                 />
             )}
-            {(mapType === MapType.Neutral) && (
-                <ConfettiRenderer
-                    width={canvasSizePx}
-                    height={canvasSizePx}
-                    atmo={grid}
-                    particles={particles.particles}
-                />
+            {mapType === MapType.Neutral && (
+                <ConfettiRenderer width={canvasSizePx} height={canvasSizePx} />
             )}
             <SolidBackground
-                solids={grid.solids}
                 canvasWidth={canvasSizePx}
                 canvasHeight={canvasSizePx}
-                bgWidth={grid.size}
-                bgHeight={grid.size}
+                bgWidth={gridSize}
+                bgHeight={gridSize}
             />
         </div>
     );

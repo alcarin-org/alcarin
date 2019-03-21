@@ -2,16 +2,16 @@ import React, { useEffect, useRef } from 'react';
 
 import { useCanvas } from './utils/CanvasUtils';
 import { Point, multiply, clamp, magnitude, normalize } from '../../utils/Math';
+import { connectContext } from '../../context/SimulationContext';
 import {
     MACGridData,
     index,
     interpolateVelocity,
 } from '../../data/atmosphere/MACGrid';
-import { AtmosphereEngine } from '../../data/engine/AtmosphereEngine';
 
 interface Props {
-    atmo: MACGridData;
-    driver: AtmosphereEngine;
+    grid: MACGridData;
+    simulationStep: number;
 
     width: number;
     height: number;
@@ -19,15 +19,28 @@ interface Props {
 
 const VelocityDrawFactor = 1.3;
 
-export function VelocityFieldRenderer({ atmo, driver, width, height }: Props) {
+export const VelocityFieldRenderer = connectContext(
+    VelocityFieldRendererComponent,
+    ({ state }) => ({
+        simulationStep: state.simulation.engine.step,
+        grid: state.simulation.grid,
+    })
+);
+
+function VelocityFieldRendererComponent({
+    grid,
+    simulationStep,
+    width,
+    height,
+}: Props) {
     const domCanvasRef = useRef<HTMLCanvasElement>(null);
     const [, displayCtxRef] = useCanvas(width, height, domCanvasRef);
 
     useEffect(
         () => {
-            renderVelocities(displayCtxRef.current!, atmo, width / atmo.size);
+            renderVelocities(displayCtxRef.current!, grid, width / grid.size);
         },
-        [driver.step]
+        [simulationStep]
     );
 
     return (
@@ -42,7 +55,7 @@ export function VelocityFieldRenderer({ atmo, driver, width, height }: Props) {
 
 export function renderVelocities(
     ctx: CanvasRenderingContext2D,
-    atmo: MACGridData,
+    grid: MACGridData,
     fieldSizePx: number
 ) {
     function drawVectorFromTo(from: Point, to: Point) {
@@ -52,17 +65,17 @@ export function renderVelocities(
         ctx.fillRect(to[0] - 2, to[1] - 2, 4, 4);
     }
 
-    ctx.clearRect(0, 0, fieldSizePx * atmo.size, fieldSizePx * atmo.size);
+    ctx.clearRect(0, 0, fieldSizePx * grid.size, fieldSizePx * grid.size);
     ctx.beginPath();
     ctx.fillStyle = 'yellow';
     ctx.strokeStyle = 'black';
-    for (let i = 0; i < atmo.size; i++) {
-        for (let j = 0; j < atmo.size; j++) {
-            const ind = index(atmo, [i, j]);
-            if (atmo.solids[ind] === 1) {
+    for (let i = 0; i < grid.size; i++) {
+        for (let j = 0; j < grid.size; j++) {
+            const ind = index(grid, [i, j]);
+            if (grid.solids[ind] === 1) {
                 continue;
             }
-            const vel = interpolateVelocity(atmo, [i, j]);
+            const vel = interpolateVelocity(grid, [i, j]);
             const offset = [(i + 0.5) * fieldSizePx, (j + 0.5) * fieldSizePx];
             const vPower = clamp(0.1, 1, magnitude(vel) * VelocityDrawFactor);
             const vNorm = normalize(vel);
