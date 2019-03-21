@@ -1,9 +1,11 @@
 import * as MACGrid from '../atmosphere/MACGrid';
+import { AtmosphereEngine } from '../engine/AtmosphereEngine';
 import { Point, round } from '../../utils/Math';
 import { ConvectValue } from './ConvectableValues';
 import { Color, colorToNumber } from '../../utils/Draw';
 
-export interface Particles {
+export interface ParticlesData {
+    count: number;
     // bundled Points as Float32Array.
     // code format: [x1, y1, x2, y2, x3, y3, ...]
     positions: Float32Array;
@@ -11,7 +13,7 @@ export interface Particles {
     colors: Uint32Array;
 }
 
-export const convectParticle: ConvectValue<Point, Particles> = (
+export const convectParticle: ConvectValue<Point, ParticlesData> = (
     lastPos: Point
 ) => {
     // for particle it's new value is just it last position
@@ -19,21 +21,33 @@ export const convectParticle: ConvectValue<Point, Particles> = (
 };
 
 const ParticleColors: Color[] = [
-    // [168, 100, 253, 255],
+    [168, 100, 253, 255],
     [41, 205, 255, 255],
-    // [120, 255, 68, 255],
-    // [255, 113, 141, 255],
-    // [253, 255, 106, 255],
+    [120, 255, 68, 255],
+    [255, 113, 141, 255],
+    [253, 255, 106, 255],
 ];
 
 export interface HashTable {
     [key: string]: null;
 }
 
+function sampleColor(): Color {
+    return ParticleColors[Math.floor(Math.random() * ParticleColors.length)];
+}
+
+export function create(): ParticlesData {
+    return {
+        count: 0,
+        positions: new Float32Array(0),
+        colors: new Uint32Array(0),
+    };
+}
+
 export function removeParticlesOnIndexes(
-    particles: Particles,
+    particles: ParticlesData,
     indexesHash: HashTable
-): Particles {
+): ParticlesData {
     const size = Object.keys(indexesHash).length;
     const newPositions = new Float32Array(
         particles.positions.length - size * 2
@@ -54,12 +68,16 @@ export function removeParticlesOnIndexes(
     });
 
     return {
+        ...particles,
         positions: newPositions,
         colors: newColors,
     };
 }
 
-export function concatParticles(part1: Particles, part2: Particles): Particles {
+export function concatParticles(
+    part1: ParticlesData,
+    part2: ParticlesData
+): ParticlesData {
     const positions = new Float32Array(
         part1.positions.length + part2.positions.length
     );
@@ -71,6 +89,7 @@ export function concatParticles(part1: Particles, part2: Particles): Particles {
     colors.set(part2.colors, part1.colors.length);
 
     return {
+        count: colors.length,
         positions,
         colors,
     };
@@ -79,10 +98,11 @@ export function concatParticles(part1: Particles, part2: Particles): Particles {
 export function createRandomParticles(
     count: number,
     grid: MACGrid.MACGridData,
-    colors = ParticleColors
-): Particles {
-    const colorsAsNumbers = ParticleColors.map(colorToNumber);
-    const particles: Particles = {
+    color?: Color
+): ParticlesData {
+    const colorAsNumbers = colorToNumber(color || sampleColor());
+    const particles: ParticlesData = {
+        count,
         positions: new Float32Array(2 * count),
         colors: new Uint32Array(count),
     };
@@ -100,8 +120,34 @@ export function createRandomParticles(
 
         particles.positions.set(p, 2 * i);
 
-        particles.colors[i] =
-            colorsAsNumbers[Math.floor(Math.random() * colorsAsNumbers.length)];
+        particles.colors[i] = colorAsNumbers;
     }
     return particles;
+}
+
+export function fillWithRandomParticles(
+    particles: ParticlesData,
+    count: number,
+    grid: MACGrid.MACGridData
+): ParticlesData {
+    return concatParticles(particles, createRandomParticles(count, grid));
+}
+
+export function update(
+    particles: ParticlesData,
+    deltaTime: DOMHighResTimeStamp,
+    engine: AtmosphereEngine
+): ParticlesData {
+    const positions = particles.positions;
+    for (let i = 0; i < positions.length / 2; i++) {
+        const i2 = i * 2;
+
+        const newPos = engine.convectValue(
+            deltaTime,
+            [positions[i2], positions[i2 + 1]],
+            lastPos => convectParticle(lastPos, particles, engine.grid)
+        );
+        positions.set(newPos, i2);
+    }
+    return { ...particles };
 }

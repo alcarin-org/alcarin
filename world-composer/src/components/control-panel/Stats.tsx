@@ -6,23 +6,23 @@ import * as MACGrid from '../../data/atmosphere/MACGrid';
 import { Vector, magnitude, add, multiply } from '../../utils/Math';
 import { connectContext } from '../../context/SimulationContext';
 import { statsEngineFactory, create } from '../../data/engine/StatsEngine';
-import { ParticlesEngine } from '../../data/engine/ParticlesEngine';
+// import Particles from '../../data/engine/Particles';
 import GlobalTimer from '../../utils/Timer';
 
 interface Props {
     grid: MACGrid.MACGridData;
-    particles: ParticlesEngine;
+    particlesCount: number;
 }
 
 const updateStats = statsEngineFactory();
 
 export const Stats = connectContext(StatsComponent, ({ state }) => ({
     grid: state.simulation.grid,
-    particles: state.simulation.particles,
+    particlesCount: state.simulation.particles.count,
 }));
 
 // This component waiting for refactor
-function StatsComponent({ grid, particles }: Props) {
+function StatsComponent({ grid, particlesCount }: Props) {
     const [statsData, setStatsData] = useState(create);
 
     useEffect(
@@ -82,7 +82,7 @@ function StatsComponent({ grid, particles }: Props) {
                 <dt>Render FPS</dt>
                 <dd>{statsData.fps}</dd>
                 <dt>Particles</dt>
-                <dd>{particles.particles.positions.length / 2}</dd>
+                <dd>{particlesCount}</dd>
             </dl>
         </div>
     );

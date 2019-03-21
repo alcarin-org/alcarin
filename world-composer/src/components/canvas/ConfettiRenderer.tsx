@@ -3,23 +3,21 @@ import React, { useEffect, useRef } from 'react';
 
 import { connectContext } from '../../context/SimulationContext';
 import { useCanvas } from './utils/CanvasUtils';
-import { Particles } from '../../data/convectable/Particles';
+import { ParticlesData } from '../../data/convectable/Particles';
 
 interface Props {
-    particles: Particles;
+    particles: ParticlesData;
     gridSize: number;
 
     width: number;
     height: number;
 }
 
-
-
 export const ConfettiRenderer = connectContext(
     ConfettiRendererComponent,
     ({ state }) => ({
         gridSize: state.simulation.grid.size,
-        particles: state.simulation.particles.particles,
+        particles: state.simulation.particles,
     })
 );
 

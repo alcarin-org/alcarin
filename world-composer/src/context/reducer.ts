@@ -1,13 +1,61 @@
-import { Dispatch } from 'react';
-import InteractionContext, {createSimulationContext} from './state';
+import React from 'react';
+import SimulationState, { createSimulationContext } from './state';
 import { ActionType, AllActionTypes } from './actions';
 import { fillGridVelocityBy } from '../data/atmosphere/MACGrid';
+import * as Particles from '../data/convectable/Particles';
+import * as FluidSources from '../data/engine/FluidSourcesEngine';
 import * as RandomizeField from '../data/atmosphere/RandomizeField';
+import ParticlesReducer from './reducers/particles-reducer';
+import SourecesReducer from './reducers/sources-reducer';
 
-export type Dispatch = Dispatch<AllActionTypes>;
+export type Dispatch = React.Dispatch<AllActionTypes>;
+export type Reducer = React.Reducer<typeof SimulationState, AllActionTypes>;
 
-export default (state: typeof InteractionContext, action: AllActionTypes) => {
+export function composeReducers(reducers: Reducer[]): Reducer {
+    return function composedReducer(
+        state: typeof SimulationState,
+        action: AllActionTypes
+    ) {
+        return reducers.reduce(
+            (state, reducer) => reducer(state, action),
+            state
+        );
+    };
+}
+
+export default composeReducers([reducer, ParticlesReducer, SourecesReducer]);
+
+function reducer(state: typeof SimulationState, action: AllActionTypes) {
+    const { grid, particles, sources, engine } = state.simulation;
     switch (action.type) {
+        case ActionType.UpdateSimulation:
+            // tmp solution
+            engine.grid = grid;
+            const deltaTimeSec = action.payload.deltaTimeSec;
+            const newSources = FluidSources.update(sources, deltaTimeSec);
+
+            const newParticles = FluidSources.applyFluidSourcesOn(
+                grid,
+                particles,
+                sources,
+                deltaTimeSec
+            );
+
+            const movedParticles = Particles.update(
+                newParticles,
+                deltaTimeSec,
+                engine
+            );
+
+            return {
+                ...state,
+                simulation: {
+                    ...state.simulation,
+                    particles: movedParticles,
+                    sources: newSources,
+                },
+            };
+            break;
         case ActionType.SetMapType:
             return {
                 ...state,
@@ -37,32 +85,6 @@ export default (state: typeof InteractionContext, action: AllActionTypes) => {
                 },
             };
 
-        case ActionType.RemoveSources:
-            // side effects for performance, think about dropping them
-            state.simulation.sources.removeSourcesAt(action.payload.gridPos);
-
-            return {
-                ...state,
-                simulation: {
-                    ...state.simulation,
-                    // sources should be data only
-                    // sources: { ...state.simulation.sources },
-                },
-            };
-
-        case ActionType.AddSources:
-            // side effects for performance, think about dropping them
-            state.simulation.sources.registerSource(action.payload.source);
-
-            return {
-                ...state,
-                simulation: {
-                    ...state.simulation,
-                    // sources should be data only, now its a class
-                    // sources: { ...state.simulation.sources },
-                },
-            };
-
         case ActionType.ResetMap:
             return {
                 ...state,
@@ -80,22 +102,10 @@ export default (state: typeof InteractionContext, action: AllActionTypes) => {
                 },
             };
 
-        case ActionType.SpawnParticles:
-            // side effect
-            state.simulation.particles.spawnParticles(action.payload.count)
-            return {
-                ...state,
-                simulation: {
-                    ...state.simulation,
-                    // particles: { ...state.simulation.particles },
-                },
-            };
-
         default:
-            console.warn('Unknown action', action);
             return state;
     }
-};
+}
 
 function getRandomFillMethod() {
     const randomMethods = [

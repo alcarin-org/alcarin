@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-import { ParticlesEngine } from '../data/engine/ParticlesEngine';
+import * as Particles from '../data/convectable/Particles';
 import { AtmosphereEngine } from '../data/engine/AtmosphereEngine';
 
 import {
@@ -25,27 +25,33 @@ export function App() {
     );
 }
 
-const mapper = ({ state }: SimulationContextType) => ({
+const mapper = ({ state, actions }: SimulationContextType) => ({
     particles: state.simulation.particles,
     engine: state.simulation.engine,
+    updateSimulation: actions.updateSimulation,
 });
 const SimulationRunner = connectContext(SimulationRunnerComponent, mapper);
 
 interface Props {
     engine: AtmosphereEngine;
-    particles: ParticlesEngine;
+    particles: Particles.ParticlesData;
+    updateSimulation: (deltaTimeSec: DOMHighResTimeStamp) => void;
 }
-function SimulationRunnerComponent({ engine, particles }: Props) {
+function SimulationRunnerComponent({
+    engine,
+    particles,
+    updateSimulation,
+}: Props) {
     useEffect(
         () => {
             return GlobalTimer.onTick(onRenderTick);
 
             function onRenderTick(deltaTimeSec: DOMHighResTimeStamp) {
-                particles.update(deltaTimeSec);
+                updateSimulation(deltaTimeSec);
                 engine.update(deltaTimeSec);
             }
         },
-        [engine, particles]
+        [engine, particles, updateSimulation]
     );
     return null;
 }
