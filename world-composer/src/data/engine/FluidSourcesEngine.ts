@@ -3,6 +3,8 @@ import * as Particles from '../convectable/Particles';
 import { Color, colorToNumber } from '../../utils/Draw';
 import { Point, round, magnitude } from '../../utils/Math';
 
+const CleanupParticlesDistance = 0.1;
+
 export enum FluidSourceType {
     Directional,
     // to create a sink, just create omni fluid source with negative power
@@ -44,9 +46,6 @@ export function registerSource(
     return {
         ...fluids,
     };
-    // if (source.type === FluidSourceType.Omni) {
-    //     this.reapplyPressureModifiers();
-    // }
 }
 
 export function removeSourcesAt(
@@ -70,14 +69,14 @@ export function cleanupSinksOn(
     fluidSources.sources
         .filter(sourceInstance => sourceInstance.source.power < 0)
         .forEach(sourceInstance => {
-            for (let i = 0; i < particles.colors.length; i++) {
+            for (let i = 0; i < particles.count; i++) {
                 const x = particles.positions[2 * i];
                 const y = particles.positions[2 * i + 1];
                 const distance = magnitude([
                     sourceInstance.source.gridPosition[0] - x,
                     sourceInstance.source.gridPosition[1] - y,
                 ]);
-                if (distance < 0.25) {
+                if (distance < CleanupParticlesDistance) {
                     particlesIndToRemove[i] = null;
                 }
             }

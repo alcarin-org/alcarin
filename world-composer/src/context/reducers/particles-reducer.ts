@@ -11,7 +11,6 @@ export default (
 ): SimulationContextStateType => {
     switch (action.type) {
         case ActionType.SpawnParticles:
-            // side effect
             const newParticles = Particles.fillWithRandomParticles(
                 state.simulation.particles,
                 action.payload.count,

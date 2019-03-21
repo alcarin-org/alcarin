@@ -1,8 +1,13 @@
 import * as MACGrid from '../atmosphere/MACGrid';
 import * as AtmosphereEngine from '../engine/AtmosphereEngine';
 import { Point, round } from '../../utils/Math';
-import { ConvectValue } from './ConvectableValues';
 import { Color, colorToNumber } from '../../utils/Draw';
+
+// particles are often removed and added.
+// we create bigger particles buffer every time we need
+// add some particles, so we can minimize recreation of entire
+// structure
+const ParticlesBufferSize = 1500;
 
 export interface ParticlesData {
     count: number;
@@ -12,13 +17,6 @@ export interface ParticlesData {
     // colors encoded at float64 numbers (every 8-bit from 32-bits represent in order r,g,b,a values)
     colors: Uint32Array;
 }
-
-export const convectParticle: ConvectValue<Point, ParticlesData> = (
-    lastPos: Point
-) => {
-    // for particle it's new value is just it last position
-    return lastPos;
-};
 
 const ParticleColors: Color[] = [
     [168, 100, 253, 255],
@@ -36,63 +34,102 @@ function sampleColor(): Color {
     return ParticleColors[Math.floor(Math.random() * ParticleColors.length)];
 }
 
+// prepare new Particles structure if the new count of particles are bigger than
+// provided particles buffer. if not, just return provided "particles" with updated
+// count
+function prepareParticlesBuffer(
+    particles: ParticlesData,
+    count: number
+): ParticlesData {
+    const currentBufferSize = particles.colors.length;
+    if (currentBufferSize > count) {
+        return {
+            ...particles,
+            count,
+        };
+    }
+    const newPositions = new Float32Array(2 * (count + ParticlesBufferSize));
+    newPositions.set(particles.positions, 0);
+
+    const newColors = new Uint32Array(count + ParticlesBufferSize);
+    newColors.set(particles.colors, 0);
+
+    return {
+        count,
+        positions: newPositions,
+        colors: newColors,
+    };
+}
+
 export function create(): ParticlesData {
     return {
         count: 0,
-        positions: new Float32Array(0),
-        colors: new Uint32Array(0),
+        positions: new Float32Array(2 * ParticlesBufferSize),
+        colors: new Uint32Array(ParticlesBufferSize),
     };
+}
+
+function firstKey(obj: {}): string {
+    // tslint:disable forin
+    for (const key in obj) {
+        return key;
+    }
+
+    return '-1';
 }
 
 export function removeParticlesOnIndexes(
     particles: ParticlesData,
     indexesHash: HashTable
 ): ParticlesData {
-    const size = Object.keys(indexesHash).length;
-    const newPositions = new Float32Array(
-        particles.positions.length - size * 2
-    );
-    const newColors = new Uint32Array(particles.colors.length - size);
+    let particlesToRemove = Object.keys(indexesHash).length;
+    const newCount = particles.count - particlesToRemove;
 
-    let newInd = 0;
-
-    particles.colors.forEach((_, ind) => {
-        if (ind in indexesHash) {
-            return;
+    for (let ind = particles.count - 1; ind >= 0; ind--) {
+        if (particlesToRemove === 0) {
+            break;
         }
-        newColors[newInd] = particles.colors[ind];
-        newPositions[2 * newInd] = particles.positions[2 * ind];
-        newPositions[2 * newInd + 1] = particles.positions[2 * ind + 1];
-
-        newInd++;
-    });
+        // if we got particles to remove on particles tail, we just ignore
+        // it, it will be automatically removed by decreasing buffer "count"
+        if (ind in indexesHash) {
+            delete indexesHash[ind];
+            particlesToRemove--;
+            continue;
+        }
+        // if we got proper particle on the end, we use it to plug some other
+        // particle that should be removed
+        const indToRemove = parseInt(firstKey(indexesHash), 10);
+        particles.colors[indToRemove] = particles.colors[ind];
+        particles.positions[2 * indToRemove] = particles.positions[2 * ind];
+        particles.positions[2 * indToRemove + 1] =
+            particles.positions[2 * ind + 1];
+        delete indexesHash[indToRemove];
+        particlesToRemove--;
+    }
 
     return {
         ...particles,
-        positions: newPositions,
-        colors: newColors,
+        count: newCount,
     };
 }
 
+/**
+ * contact part1 particles with part2.
+ * if part1 particles buffer is enough in size, it will be reused,
+ * so should be used carefuly
+ */
 export function concatParticles(
     part1: ParticlesData,
     part2: ParticlesData
 ): ParticlesData {
-    const positions = new Float32Array(
-        part1.positions.length + part2.positions.length
-    );
-    positions.set(part1.positions, 0);
-    positions.set(part2.positions, part1.positions.length);
+    const originalCount = part1.count;
+    const newCount = part1.count + part2.count;
+    const resultParticles = prepareParticlesBuffer(part1, newCount);
 
-    const colors = new Uint32Array(part1.colors.length + part2.colors.length);
-    colors.set(part1.colors, 0);
-    colors.set(part2.colors, part1.colors.length);
+    resultParticles.positions.set(part2.positions, 2 * originalCount);
+    resultParticles.colors.set(part2.colors, originalCount);
 
-    return {
-        count: colors.length,
-        positions,
-        colors,
-    };
+    return resultParticles;
 }
 
 export function createRandomParticles(
@@ -139,16 +176,21 @@ export function update(
     deltaTime: DOMHighResTimeStamp
 ): ParticlesData {
     const positions = particles.positions;
-    for (let i = 0; i < positions.length / 2; i++) {
+    for (let i = 0; i < particles.count; i++) {
         const i2 = i * 2;
 
         const newPos = AtmosphereEngine.convectValue(
             grid,
             deltaTime,
             [positions[i2], positions[i2 + 1]],
-            lastPos => convectParticle(lastPos, particles, grid)
+            convectParticle
         );
         positions.set(newPos, i2);
     }
     return { ...particles };
+}
+
+function convectParticle(lastPos: Point) {
+    // for particle it's new value is just it last position
+    return lastPos;
 }

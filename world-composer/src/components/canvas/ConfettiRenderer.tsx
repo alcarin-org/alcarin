@@ -67,8 +67,7 @@ function renderConfetti(
 
     const pixelData = ctx.getImageData(0, 0, width, height);
     const data = new Uint32Array(pixelData.data.buffer);
-
-    for (let i = 0; i < particles.positions.length / 2; i++) {
+    for (let i = 0; i < particles.count; i++) {
         const i2 = 2 * i;
         const pos = particles.positions.slice(i2, i2 + 2);
         const pxPos = [

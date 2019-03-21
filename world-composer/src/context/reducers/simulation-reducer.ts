@@ -13,7 +13,7 @@ import * as Particles from '../../data/convectable/Particles';
 export type Dispatch = Dispatch<AllActionTypes>;
 
 const VelocityFieldUpdateDelaySec = 0.1;
-const ParticlesCleanupDelaySec = 1;
+const ParticlesCleanupDelaySec = 0.2;
 
 const velocityFieldNeedUpdate = timePassChecker(VelocityFieldUpdateDelaySec);
 const particlesNeedCleanup = timePassChecker(ParticlesCleanupDelaySec);
@@ -74,7 +74,6 @@ export default (
             };
 
         case ActionType.RandomizeMap:
-            // side effect
             MACGrid.fillGridVelocityBy(
                 state.simulation.grid,
                 getRandomFillMethod()
@@ -88,9 +87,6 @@ export default (
             };
 
         case ActionType.ToggleSolid: {
-            // side effects for performance, think about dropping them
-            // action.payload.gridPos
-
             const newGrid = MACGrid.toggleSolid(
                 grid,
                 action.payload.gridPos,
