@@ -46,8 +46,7 @@ function PageComponent({
             }
         }
         window.addEventListener('keydown', onKeyDown, true);
-        // bug
-        // return () => window.removeEventListener('keyup', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown, true);
     }, []);
 
     return (
