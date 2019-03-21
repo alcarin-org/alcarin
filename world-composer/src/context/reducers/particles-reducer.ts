@@ -1,11 +1,14 @@
 import { Dispatch } from 'react';
-import SimulationState from '../state';
+import SimulationState, { SimulationContextStateType } from '../state';
 import { ActionType, AllActionTypes } from '../actions';
 import * as Particles from '../../data/convectable/Particles';
 
 export type Dispatch = Dispatch<AllActionTypes>;
 
-export default (state: typeof SimulationState, action: AllActionTypes) => {
+export default (
+    state: typeof SimulationState,
+    action: AllActionTypes
+): SimulationContextStateType => {
     switch (action.type) {
         case ActionType.SpawnParticles:
             // side effect

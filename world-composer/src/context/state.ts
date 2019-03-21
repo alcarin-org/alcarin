@@ -32,6 +32,11 @@ export function createSimulationContext(
         engine: newEngine,
         particles: newParticles,
         sources: newSourcesEngine,
+
+        // engine do not need to be updated every frame, it's enough
+        // to update it few times per second. we used it to decide if
+        // enough time pass
+        engineTimeAccSec: 0,
     };
 }
 
@@ -48,7 +53,8 @@ const SimulationContextState = {
             data: null as any,
         },
     },
-    test: 0,
 };
+
+export type SimulationContextStateType = typeof SimulationContextState;
 
 export default SimulationContextState;

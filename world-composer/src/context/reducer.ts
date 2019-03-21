@@ -1,15 +1,19 @@
 import React from 'react';
-import SimulationState, { createSimulationContext } from './state';
+import SimulationState, { SimulationContextStateType } from './state';
 import { ActionType, AllActionTypes } from './actions';
-import { fillGridVelocityBy } from '../data/atmosphere/MACGrid';
-import * as Particles from '../data/convectable/Particles';
-import * as FluidSources from '../data/engine/FluidSourcesEngine';
-import * as RandomizeField from '../data/atmosphere/RandomizeField';
 import ParticlesReducer from './reducers/particles-reducer';
 import SourecesReducer from './reducers/sources-reducer';
+import SimulationReducer from './reducers/simulation-reducer';
 
 export type Dispatch = React.Dispatch<AllActionTypes>;
 export type Reducer = React.Reducer<typeof SimulationState, AllActionTypes>;
+
+export default composeReducers([
+    baseReducer,
+    ParticlesReducer,
+    SourecesReducer,
+    SimulationReducer,
+]);
 
 export function composeReducers(reducers: Reducer[]): Reducer {
     return function composedReducer(
@@ -23,39 +27,11 @@ export function composeReducers(reducers: Reducer[]): Reducer {
     };
 }
 
-export default composeReducers([reducer, ParticlesReducer, SourecesReducer]);
-
-function reducer(state: typeof SimulationState, action: AllActionTypes) {
-    const { grid, particles, sources, engine } = state.simulation;
+function baseReducer(
+    state: typeof SimulationState,
+    action: AllActionTypes
+): SimulationContextStateType {
     switch (action.type) {
-        case ActionType.UpdateSimulation:
-            // tmp solution
-            engine.grid = grid;
-            const deltaTimeSec = action.payload.deltaTimeSec;
-            const newSources = FluidSources.update(sources, deltaTimeSec);
-
-            const newParticles = FluidSources.applyFluidSourcesOn(
-                grid,
-                particles,
-                sources,
-                deltaTimeSec
-            );
-
-            const movedParticles = Particles.update(
-                newParticles,
-                deltaTimeSec,
-                engine
-            );
-
-            return {
-                ...state,
-                simulation: {
-                    ...state.simulation,
-                    particles: movedParticles,
-                    sources: newSources,
-                },
-            };
-            break;
         case ActionType.SetMapType:
             return {
                 ...state,
@@ -85,34 +61,7 @@ function reducer(state: typeof SimulationState, action: AllActionTypes) {
                 },
             };
 
-        case ActionType.ResetMap:
-            return {
-                ...state,
-                simulation: createSimulationContext(),
-            };
-
-        case ActionType.RandomizeMap:
-            // side effect
-            fillGridVelocityBy(state.simulation.grid, getRandomFillMethod());
-            return {
-                ...state,
-                simulation: {
-                    ...state.simulation,
-                    grid: { ...state.simulation.grid },
-                },
-            };
-
         default:
             return state;
     }
-}
-
-function getRandomFillMethod() {
-    const randomMethods = [
-        RandomizeField.Chaotic,
-        RandomizeField.GlobalCurl,
-        RandomizeField.LeftWave,
-        RandomizeField.RightWave,
-    ];
-    return randomMethods[Math.floor(Math.random() * randomMethods.length)];
 }

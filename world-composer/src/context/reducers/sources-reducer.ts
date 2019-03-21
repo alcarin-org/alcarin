@@ -1,11 +1,14 @@
 import { Dispatch } from 'react';
-import SimulationState from '../state';
+import SimulationState, { SimulationContextStateType } from '../state';
 import { ActionType, AllActionTypes } from '../actions';
 import * as FluidSources from '../../data/engine/FluidSourcesEngine';
 
 export type Dispatch = Dispatch<AllActionTypes>;
 
-export default (state: typeof SimulationState, action: AllActionTypes) => {
+export default (
+    state: typeof SimulationState,
+    action: AllActionTypes
+): SimulationContextStateType => {
     const { grid, sources } = state.simulation;
     switch (action.type) {
         case ActionType.RemoveSources: {

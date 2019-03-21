@@ -13,6 +13,13 @@ const StepDelaySec = 0.05;
 
 type SimulationClickHandler = (deltaTime: DOMHighResTimeStamp) => void;
 
+export interface EngineStateType {
+    // lastDivergenceVector: Float32Array;
+    // lastPressureVector: Float32Array;
+
+    step: number;
+}
+
 export class AtmosphereEngine {
     public grid: MACGrid.MACGridData;
 
@@ -22,13 +29,10 @@ export class AtmosphereEngine {
 
     public step: number = 0;
 
-    private fluidSourcePos?: Point;
-
-    private deltaTimeAcc: DOMHighResTimeStamp = 0;
+    // private deltaTimeAcc: DOMHighResTimeStamp = 0;
 
     private neightboursMatrix: Int8Array;
 
-    private onTickHandlers: SimulationClickHandler[] = [];
 
     public constructor(grid: MACGrid.MACGridData) {
         this.grid = grid;
@@ -63,26 +67,15 @@ export class AtmosphereEngine {
     }
 
     public update(deltaTimeSec: DOMHighResTimeStamp) {
-        this.deltaTimeAcc += deltaTimeSec;
-        if (this.deltaTimeAcc >= StepDelaySec) {
-            this.evolve(this.deltaTimeAcc);
-            this.onTickHandlers.forEach(handler => handler(this.deltaTimeAcc));
-            this.deltaTimeAcc = 0;
-        }
-    }
-
-    public onSimulationTick(handler: SimulationClickHandler) {
-        this.onTickHandlers.push(handler);
-    }
-
-    public setFluidSource(p: Point) {
-        const ind = MACGrid.index(this.grid, p);
-        const itsSamePoint =
-            this.fluidSourcePos &&
-            p[0] === this.fluidSourcePos[0] &&
-            p[1] === this.fluidSourcePos[1];
-        this.fluidSourcePos =
-            itsSamePoint || this.grid.solids[ind] === 1 ? undefined : p;
+        this.convectVelocity(deltaTimeSec);
+        this.applyExternalForces(deltaTimeSec);
+        this.lastPressureVector = calculateFieldPressure(
+            this.grid,
+            this.neightboursMatrix,
+            deltaTimeSec
+        );
+        this.adjustVelocityFromPressure(this.lastPressureVector, deltaTimeSec);
+        this.step++;
     }
 
     public applyExternalForces(deltaTime: DOMHighResTimeStamp) {
@@ -169,49 +162,6 @@ export class AtmosphereEngine {
                 : posPressure - gridPressureVector[ind - this.grid.size];
             return vel - deltaTime * pressureGradientY;
         });
-    }
-
-    private evolve(deltaTime: DOMHighResTimeStamp) {
-        this.generateFluid(deltaTime);
-
-        this.convectVelocity(deltaTime);
-        this.applyExternalForces(deltaTime);
-        this.lastPressureVector = calculateFieldPressure(
-            this.grid,
-            this.neightboursMatrix,
-            deltaTime
-        );
-        this.adjustVelocityFromPressure(this.lastPressureVector, deltaTime);
-        this.step++;
-    }
-
-    private generateFluid(deltaTime: DOMHighResTimeStamp) {
-        // const p = this.fluidSourcePos;
-        // if (!p) {
-        //     return;
-        // }
-        // const ind = this.atmo.index(p);
-        // const FluidPower = 5;
-        // const ParticlesPerSec = 220;
-        // const SpeadRange = 0.5;
-        // const fluidDir = normalize(
-        //     multiply(add(p, [-this.atmo.size / 2, -this.atmo.size / 2]), -1)
-        // );
-        // const flow = multiply(fluidDir, FluidPower);
-        // this.atmo.velX[ind] += flow[0];
-        // this.atmo.velY[ind] += flow[1];
-        // const newParticles = new Array(Math.floor(deltaTime * ParticlesPerSec))
-        //     .fill(null)
-        //     .map(() =>
-        //         add(p, [
-        //             SpeadRange - 2 * SpeadRange * Math.random(),
-        //             SpeadRange - 2 * SpeadRange * Math.random(),
-        //         ])
-        //     )
-        //     .filter(
-        //         p => this.atmo.solidsVector[this.atmo.index(round(p))] === 0
-        //     );
-        // this.particles = this.particles.concat(newParticles);
     }
 
     private convectVelocity(deltaTime: DOMHighResTimeStamp) {

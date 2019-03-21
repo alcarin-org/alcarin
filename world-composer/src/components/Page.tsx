@@ -12,6 +12,7 @@ interface Props {
     resetMap: () => void;
     randomizeVelocityField: () => void;
     spawnParticles: (count: number) => void;
+    updateSimulation: (lapsedTimeSec: DOMHighResTimeStamp) => void;
 }
 
 const KEY_SPACE = 32;
@@ -20,12 +21,14 @@ export const Page = connectContext(PageComponent, ({ state, actions }) => ({
     resetMap: actions.resetMap,
     randomizeVelocityField: actions.randomizeVelocityField,
     spawnParticles: actions.spawnParticles,
+    updateSimulation: actions.updateSimulation,
 }));
 
 function PageComponent({
     resetMap,
     randomizeVelocityField,
     spawnParticles,
+    updateSimulation,
 }: Props) {
     const [showControlPanel, setShowControlPanel] = useState(true);
     const [isPlaying, setIsPlaying] = useState(true);
@@ -48,6 +51,8 @@ function PageComponent({
         window.addEventListener('keydown', onKeyDown, true);
         return () => window.removeEventListener('keydown', onKeyDown, true);
     }, []);
+
+    useEffect(() => GlobalTimer.onTick(updateSimulation), []);
 
     return (
         <div className="page">
