@@ -1,5 +1,11 @@
 import * as MACGrid from '../atmosphere/MACGrid';
-import { add, Vector, resolveLinearByJacobi } from '../../utils/Math';
+import {
+    Point,
+    multiply,
+    add,
+    Vector,
+    resolveLinearByJacobi,
+} from '../../utils/Math';
 
 const relNeighbours: Vector[] = [[-1, 0], [1, 0], [0, -1], [0, 1]];
 
@@ -63,4 +69,100 @@ export function calculateFieldPressure(
                 : fluidPressureSolveVector[iFluidCellInd++];
     });
     return globalPressureVector;
+}
+
+export function convectVelocity(
+    grid: MACGrid.MACGridData,
+    deltaTime: DOMHighResTimeStamp
+) {
+    const newVelX = grid.field.velX.map((_, ind) => {
+        const p = MACGrid.coords(grid, ind);
+
+        // we expecting that a walls are on entire left border of the map
+        return grid.solids[ind] === 1 || grid.solids[ind - 1] === 1
+            ? 0
+            : traceBackParticleVelocity(grid, [p[0] - 0.5, p[1]], deltaTime)[0];
+    });
+
+    const newVelY = grid.field.velX.map((_, ind) => {
+        const p = MACGrid.coords(grid, ind);
+        // we expecting that a walls are on entire top border of the map
+        return grid.solids[ind] === 1 || grid.solids[ind - grid.size] === 1
+            ? 0
+            : traceBackParticleVelocity(grid, [p[0], p[1] - 0.5], deltaTime)[1];
+    });
+
+    return {
+        ...grid,
+        field: {
+            velX: newVelX,
+            velY: newVelY,
+        },
+    };
+}
+
+export function traceBackParticleVelocity(
+    grid: MACGrid.MACGridData,
+    p: Point,
+    deltaTime: DOMHighResTimeStamp
+): Point {
+    const v = MACGrid.interpolateVelocity(grid, p);
+    const lastKnownP: Point = add(p, multiply(v, -0.5 * deltaTime));
+    const avVelocity = MACGrid.interpolateVelocity(grid, lastKnownP);
+
+    const particlePos = add(p, multiply(avVelocity, -deltaTime));
+    return MACGrid.interpolateVelocity(grid, particlePos);
+}
+
+export function adjustVelocityFromPressure(
+    grid: MACGrid.MACGridData,
+    gridPressureVector: Float32Array,
+    deltaTime: DOMHighResTimeStamp
+): MACGrid.MACGridData {
+    const fieldVelX = grid.field.velX.map((vel, ind) => {
+        if (grid.solids[ind] === 1) {
+            return 0;
+        }
+        const pos = MACGrid.coords(grid, ind);
+
+        if (process.env.REACT_APP_DEBUG === '1') {
+            MACGrid.assert(grid, pos);
+            MACGrid.assert(grid, [pos[0] - 1, pos[1]]);
+        }
+
+        const posPressure = gridPressureVector[ind];
+        const onLeftBorder = grid.solids[ind - 1] === 1;
+        const pressureGradientX = onLeftBorder
+            ? 0
+            : posPressure - gridPressureVector[ind - 1];
+        return vel - deltaTime * pressureGradientX;
+    });
+
+    const fieldVelY = grid.field.velY.map((vel, ind) => {
+        if (grid.solids[ind] === 1) {
+            return 0;
+        }
+        const pos = MACGrid.coords(grid, ind);
+
+        if (process.env.REACT_APP_DEBUG === '1') {
+            MACGrid.assert(grid, pos);
+            MACGrid.assert(grid, [pos[0], pos[1] - 1]);
+        }
+
+        const posPressure = gridPressureVector[ind];
+        const onTopBorder = grid.solids[ind - grid.size] === 1;
+        const pressureGradientY = onTopBorder
+            ? 0
+            : posPressure - gridPressureVector[ind - grid.size];
+        return vel - deltaTime * pressureGradientY;
+    });
+
+    return {
+        ...grid,
+        field: {
+            ...grid.field,
+            velX: fieldVelX,
+            velY: fieldVelY,
+        },
+    };
 }

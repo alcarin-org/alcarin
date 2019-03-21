@@ -1,7 +1,6 @@
 import * as MACGrid from '../data/atmosphere/MACGrid';
-import { AtmosphereEngine } from '../data/engine/AtmosphereEngine';
-import { ParticlesEngine } from '../data/engine/ParticlesEngine';
-import { FluidSourcesEngine } from '../data/engine/FluidSourcesEngine';
+import * as Particles from '../data/convectable/Particles';
+import * as FluidSources from '../data/engine/FluidSourcesEngine';
 import * as RandomizeField from '../data/atmosphere/RandomizeField';
 
 const DefaultWorldSize = 20;
@@ -23,30 +22,17 @@ export function createSimulationContext(
     randomMethod?: RandomizeField.RandomMethod
 ) {
     const newGrid = MACGrid.create(DefaultWorldSize);
-    const newEngine = new AtmosphereEngine(newGrid);
-    const newParticlesEngine: ParticlesEngine = new ParticlesEngine(
-        newEngine,
-        // baseContext ? baseContext.particles.particles : undefined
-        undefined
-    );
-    const newSourcesEngine = new FluidSourcesEngine(
-        newEngine,
-        newParticlesEngine
-        // sourcesEngine
-    );
-    newEngine.onSimulationTick(deltaTimeSec =>
-        newSourcesEngine.update(deltaTimeSec)
-    );
+    const newParticles: Particles.ParticlesData = Particles.create();
+    const newSourcesEngine = FluidSources.create();
 
     return {
         grid: newGrid,
-        engine: newEngine,
-        particles: newParticlesEngine,
+        particles: newParticles,
         sources: newSourcesEngine,
     };
 }
 
-const InteractionContextState = {
+const SimulationContextState = {
     simulation: createSimulationContext(),
     settings: {
         drawFieldSize: 25,
@@ -59,7 +45,8 @@ const InteractionContextState = {
             data: null as any,
         },
     },
-    test: 0,
 };
 
-export default InteractionContextState;
+export type SimulationContextStateType = typeof SimulationContextState;
+
+export default SimulationContextState;

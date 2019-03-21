@@ -3,14 +3,19 @@ import { Point } from '../utils/Math';
 import { FluidSource } from '../data/engine/FluidSourcesEngine';
 
 export enum ActionType {
+    UpdateSimulation,
+
     SetMapType,
     SetMapMode,
+
     RandomizeMap,
     ToggleSolid,
+    ResetMap,
+
+    SpawnParticles,
+
     RemoveSources,
     AddSources,
-    ResetMap,
-    SpawnParticles,
 }
 
 export interface Action {
@@ -19,6 +24,11 @@ export interface Action {
 }
 
 const actions = {
+    updateSimulation: (deltaTimeSec: DOMHighResTimeStamp) => ({
+        type: ActionType.UpdateSimulation as ActionType.UpdateSimulation,
+        payload: { deltaTimeSec },
+    }),
+
     randomizeVelocityField: () => ({
         type: ActionType.RandomizeMap as ActionType.RandomizeMap,
     }),

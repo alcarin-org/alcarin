@@ -3,23 +3,21 @@ import React, { useEffect, useRef } from 'react';
 
 import { connectContext } from '../../context/SimulationContext';
 import { useCanvas } from './utils/CanvasUtils';
-import { Particles } from '../../data/convectable/Particles';
+import { ParticlesData } from '../../data/convectable/Particles';
 
 interface Props {
-    particles: Particles;
+    particles: ParticlesData;
     gridSize: number;
 
     width: number;
     height: number;
 }
 
-
-
 export const ConfettiRenderer = connectContext(
     ConfettiRendererComponent,
     ({ state }) => ({
         gridSize: state.simulation.grid.size,
-        particles: state.simulation.particles.particles,
+        particles: state.simulation.particles,
     })
 );
 
@@ -69,8 +67,7 @@ function renderConfetti(
 
     const pixelData = ctx.getImageData(0, 0, width, height);
     const data = new Uint32Array(pixelData.data.buffer);
-
-    for (let i = 0; i < particles.positions.length / 2; i++) {
+    for (let i = 0; i < particles.count; i++) {
         const i2 = 2 * i;
         const pos = particles.positions.slice(i2, i2 + 2);
         const pxPos = [

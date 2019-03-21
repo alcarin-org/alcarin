@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import { connectContext } from '../../context/SimulationContext';
 import { MapType } from '../../context/state';
@@ -6,7 +6,6 @@ import { BackgroundRenderer } from './background/BackgroundRenderer';
 import { SolidBackground } from './background/SolidBackground';
 import { VelocityFieldRenderer } from './VelocityFieldRenderer';
 import { ConfettiRenderer } from './ConfettiRenderer';
-import GlobalTimer from '../../utils/Timer';
 
 interface Props {
     gridSize: number;
@@ -25,16 +24,6 @@ export const MapRenderer = connectContext(
 
 function MapRendererComponent({ mapType, gridSize, drawFieldSize }: Props) {
     const canvasSizePx = drawFieldSize * gridSize;
-
-    // temporary solution, entire rendering mechanism will be refactored soon
-    const [, setRenderCount] = useState(0);
-    useEffect(() => {
-        function rerender(timestamp: DOMHighResTimeStamp) {
-            // this force rerender
-            setRenderCount(prev => prev + 1);
-        }
-        return GlobalTimer.onTick(rerender);
-    }, []);
 
     return (
         <div

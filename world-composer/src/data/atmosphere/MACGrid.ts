@@ -32,6 +32,22 @@ export interface MACGridData {
     readonly size: number;
 }
 
+export function toggleSolid(
+    grid: MACGridData,
+    pos: Point,
+    value: boolean
+): MACGridData {
+    const ind = index(grid, pos);
+    const newValue = value ? 1 : 0;
+    if (grid.solids[ind] === newValue) {
+        return grid;
+    }
+
+    const newSolids = grid.solids.slice(0);
+    newSolids[ind] = newValue ? 1 : 0;
+    return { ...grid, solids: newSolids };
+}
+
 export function create(mapSize: number): MACGridData {
     // we create additionall buffer of solids around our map
     const size = mapSize + 2;
