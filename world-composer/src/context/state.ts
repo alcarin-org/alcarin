@@ -1,5 +1,4 @@
 import * as MACGrid from '../data/atmosphere/MACGrid';
-import { AtmosphereEngine } from '../data/engine/AtmosphereEngine';
 import * as Particles from '../data/convectable/Particles';
 import * as FluidSources from '../data/engine/FluidSourcesEngine';
 import * as RandomizeField from '../data/atmosphere/RandomizeField';
@@ -23,13 +22,11 @@ export function createSimulationContext(
     randomMethod?: RandomizeField.RandomMethod
 ) {
     const newGrid = MACGrid.create(DefaultWorldSize);
-    const newEngine = new AtmosphereEngine(newGrid);
     const newParticles: Particles.ParticlesData = Particles.create();
     const newSourcesEngine = FluidSources.create();
 
     return {
         grid: newGrid,
-        engine: newEngine,
         particles: newParticles,
         sources: newSourcesEngine,
 

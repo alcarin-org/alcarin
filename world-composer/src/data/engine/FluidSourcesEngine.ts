@@ -1,8 +1,7 @@
-import { AtmosphereEngine } from './AtmosphereEngine';
 import * as MACGrid from '../atmosphere/MACGrid';
 import * as Particles from '../convectable/Particles';
 import { Color, colorToNumber } from '../../utils/Draw';
-import { Point, round, magnitude } from '../../utils/Math';
+import { Point, round } from '../../utils/Math';
 
 export enum FluidSourceType {
     Directional,

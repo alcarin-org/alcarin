@@ -2,7 +2,7 @@ import { MACGridData } from './MACGrid';
 import { Vector, Point } from '../../utils/Math';
 
 const RandomRange = 0.1;
-const DefaultRange = 5;
+const DefaultRange = 2;
 
 export type RandomMethod = (grid: MACGridData, pos: Point) => Vector;
 

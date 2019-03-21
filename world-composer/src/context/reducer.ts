@@ -45,21 +45,6 @@ function baseReducer(
                 ...state,
                 settings: { ...state.settings, mapInteraction: action.payload },
             };
-        case ActionType.ToggleSolid:
-            // side effects for performance, think about dropping them
-            // action.payload.gridPos
-            state.simulation.engine.toggleSolid(
-                action.payload.gridPos,
-                action.payload.solidNewState
-            );
-
-            return {
-                ...state,
-                simulation: {
-                    ...state.simulation,
-                    grid: state.simulation.engine.grid,
-                },
-            };
 
         default:
             return state;

@@ -5,13 +5,13 @@ import {
     coords,
     interpolateVelocity,
 } from '../../../data/atmosphere/MACGrid';
-import { AtmosphereEngine } from '../../../data/engine/AtmosphereEngine';
+// import { AtmosphereEngine } from '../../../data/engine/AtmosphereEngine';
 import { magnitude } from '../../../utils/Math';
 import { DataContainer } from '../../../utils/Immutable';
 import { connectContext } from '../../../context/SimulationContext';
 import { MapType } from '../../../context/state';
 // import { PressureBackground } from './PressureBackground';
-import { DivergenceBackground } from './DivergenceBackground';
+// import { DivergenceBackground } from './DivergenceBackground';
 import { VelocityBackground } from './VelocityBackground';
 
 interface Props {
@@ -20,31 +20,23 @@ interface Props {
 
     mapType: MapType;
     grid: MACGridData;
-    engine: AtmosphereEngine;
 }
 
 export const BackgroundRenderer = connectContext(
     BackgroundRendererComponent,
     ({ state }) => ({
         grid: state.simulation.grid,
-        engine: state.simulation.engine,
         mapType: state.settings.mapType,
     })
 );
 
-function BackgroundRendererComponent({
-    width,
-    height,
-    mapType,
-    grid,
-    engine,
-}: Props) {
+function BackgroundRendererComponent({ width, height, mapType, grid }: Props) {
     // const [pressureContainer, setPressureContainer] = useState({
     //     value: atmo.pressureVector,
     // });
-    const [divergenceContainer, setDivergenceContainer] = useState({
-        value: engine.lastDivergenceVector,
-    });
+    // const [divergenceContainer, setDivergenceContainer] = useState({
+    //     value: engine.lastDivergenceVector,
+    // });
     const [velocityMagnitudeField, setVelocityMagnitudeField] = useState<
         DataContainer<Float32Array>
     >({ value: getAtmoVelocityMagnitudeVector(grid) });
@@ -56,11 +48,11 @@ function BackgroundRendererComponent({
                 //     setPressureContainer({
                 //         value: grid.pressureVector,
                 //     });
-                case MapType.Divergence:
-                    setDivergenceContainer({
-                        value: engine.lastDivergenceVector,
-                    });
-                    break;
+                // case MapType.Divergence:
+                //     setDivergenceContainer({
+                //         value: engine.lastDivergenceVector,
+                //     });
+                //     break;
                 case MapType.Velocity:
                     setVelocityMagnitudeField({
                         value: getAtmoVelocityMagnitudeVector(grid),
@@ -68,7 +60,7 @@ function BackgroundRendererComponent({
                     break;
             }
         },
-        [engine.step]
+        [grid]
     );
 
     switch (mapType) {
@@ -94,16 +86,16 @@ function BackgroundRendererComponent({
                     bgHeight={grid.size}
                 />
             );
-        case MapType.Divergence:
-            return (
-                <DivergenceBackground
-                    divergence={divergenceContainer}
-                    canvasWidth={width}
-                    canvasHeight={height}
-                    bgWidth={grid.size}
-                    bgHeight={grid.size}
-                />
-            );
+        // case MapType.Divergence:
+        //     return (
+        //         <DivergenceBackground
+        //             divergence={divergenceContainer}
+        //             canvasWidth={width}
+        //             canvasHeight={height}
+        //             bgWidth={grid.size}
+        //             bgHeight={grid.size}
+        //         />
+        //     );
         default:
             return null;
     }

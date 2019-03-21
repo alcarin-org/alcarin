@@ -11,7 +11,6 @@ import {
 
 interface Props {
     grid: MACGridData;
-    simulationStep: number;
 
     width: number;
     height: number;
@@ -22,17 +21,11 @@ const VelocityDrawFactor = 1.3;
 export const VelocityFieldRenderer = connectContext(
     VelocityFieldRendererComponent,
     ({ state }) => ({
-        simulationStep: state.simulation.engine.step,
         grid: state.simulation.grid,
     })
 );
 
-function VelocityFieldRendererComponent({
-    grid,
-    simulationStep,
-    width,
-    height,
-}: Props) {
+function VelocityFieldRendererComponent({ grid, width, height }: Props) {
     const domCanvasRef = useRef<HTMLCanvasElement>(null);
     const [, displayCtxRef] = useCanvas(width, height, domCanvasRef);
 
@@ -40,7 +33,7 @@ function VelocityFieldRendererComponent({
         () => {
             renderVelocities(displayCtxRef.current!, grid, width / grid.size);
         },
-        [simulationStep]
+        [grid]
     );
 
     return (

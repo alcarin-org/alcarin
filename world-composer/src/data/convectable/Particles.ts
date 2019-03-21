@@ -1,5 +1,5 @@
 import * as MACGrid from '../atmosphere/MACGrid';
-import { AtmosphereEngine } from '../engine/AtmosphereEngine';
+import * as AtmosphereEngine from '../engine/AtmosphereEngine';
 import { Point, round } from '../../utils/Math';
 import { ConvectValue } from './ConvectableValues';
 import { Color, colorToNumber } from '../../utils/Draw';
@@ -135,17 +135,18 @@ export function fillWithRandomParticles(
 
 export function update(
     particles: ParticlesData,
-    deltaTime: DOMHighResTimeStamp,
-    engine: AtmosphereEngine
+    grid: MACGrid.MACGridData,
+    deltaTime: DOMHighResTimeStamp
 ): ParticlesData {
     const positions = particles.positions;
     for (let i = 0; i < positions.length / 2; i++) {
         const i2 = i * 2;
 
-        const newPos = engine.convectValue(
+        const newPos = AtmosphereEngine.convectValue(
+            grid,
             deltaTime,
             [positions[i2], positions[i2 + 1]],
-            lastPos => convectParticle(lastPos, particles, engine.grid)
+            lastPos => convectParticle(lastPos, particles, grid)
         );
         positions.set(newPos, i2);
     }

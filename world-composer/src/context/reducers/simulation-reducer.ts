@@ -4,39 +4,41 @@ import SimulationState, {
     createSimulationContext,
 } from '../state';
 import { ActionType, AllActionTypes } from '../actions';
-import { fillGridVelocityBy } from '../../data/atmosphere/MACGrid';
+import * as MACGrid from '../../data/atmosphere/MACGrid';
+import * as AtmosphereEngine from '../../data/engine/AtmosphereEngine';
 import * as RandomizeField from '../../data/atmosphere/RandomizeField';
 import * as FluidSources from '../../data/engine/FluidSourcesEngine';
 import * as Particles from '../../data/convectable/Particles';
 
 export type Dispatch = Dispatch<AllActionTypes>;
 
-const StepDelaySec = 0.05;
+const StepDelaySec = 0.1;
 
 export default (
     state: typeof SimulationState,
     action: AllActionTypes
 ): SimulationContextStateType => {
-    const { grid, particles, sources, engine } = state.simulation;
+    const { grid, particles, sources } = state.simulation;
 
     switch (action.type) {
         case ActionType.UpdateSimulation:
-            // tmp solution
-            engine.grid = grid;
-
             const deltaTimeSec = action.payload.deltaTimeSec;
+            let currentGrid = grid;
 
             let newEngineTimeAccSec =
                 state.simulation.engineTimeAccSec + deltaTimeSec;
-            if (newEngineTimeAccSec > StepDelaySec) {
-                engine.update(newEngineTimeAccSec);
+            if (newEngineTimeAccSec >= StepDelaySec) {
+                currentGrid = AtmosphereEngine.update(
+                    grid,
+                    newEngineTimeAccSec
+                );
                 newEngineTimeAccSec = 0;
             }
 
             const newSources = FluidSources.update(sources, deltaTimeSec);
 
             const newParticles = FluidSources.applyFluidSourcesOn(
-                grid,
+                currentGrid,
                 particles,
                 sources,
                 deltaTimeSec
@@ -44,14 +46,15 @@ export default (
 
             const movedParticles = Particles.update(
                 newParticles,
-                deltaTimeSec,
-                engine
+                currentGrid,
+                deltaTimeSec
             );
 
             return {
                 ...state,
                 simulation: {
                     ...state.simulation,
+                    grid: currentGrid,
                     particles: movedParticles,
                     sources: newSources,
                     engineTimeAccSec: newEngineTimeAccSec,
@@ -67,7 +70,10 @@ export default (
 
         case ActionType.RandomizeMap:
             // side effect
-            fillGridVelocityBy(state.simulation.grid, getRandomFillMethod());
+            MACGrid.fillGridVelocityBy(
+                state.simulation.grid,
+                getRandomFillMethod()
+            );
             return {
                 ...state,
                 simulation: {
@@ -76,6 +82,24 @@ export default (
                 },
             };
 
+        case ActionType.ToggleSolid: {
+            // side effects for performance, think about dropping them
+            // action.payload.gridPos
+
+            const newGrid = MACGrid.toggleSolid(
+                grid,
+                action.payload.gridPos,
+                action.payload.solidNewState
+            );
+
+            return {
+                ...state,
+                simulation: {
+                    ...state.simulation,
+                    grid: newGrid,
+                },
+            };
+        }
         default:
             return state;
     }
