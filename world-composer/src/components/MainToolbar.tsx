@@ -64,7 +64,6 @@ function MainToolbarComponent({
             <ToolbarButton
                 active={mapType === MapType.Pressure}
                 onClick={() => setMapType(MapType.Pressure)}
-                disabled={true}
             >
                 Pressure
             </ToolbarButton>

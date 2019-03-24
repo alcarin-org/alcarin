@@ -2,13 +2,12 @@ import React, { useState, useEffect } from 'react';
 
 import { ImageDataCanvas } from './ImageDataCanvas';
 import { create, ImageDataContainer } from '../utils/ImageDataUtils';
-import { DataContainer } from '../../../utils/Immutable';
+import { connectContext } from '../../../context/SimulationContext';
 import { Color } from '../../../utils/Draw';
 
 interface Props {
-    pressure: DataContainer<Float32Array>;
-    bgWidth: number;
-    bgHeight: number;
+    pressure: Float32Array;
+    gridSize: number;
 
     canvasWidth: number;
     canvasHeight: number;
@@ -21,10 +20,17 @@ function pressureColor(pressure: number): Color {
     return [255 * factor, 0, 255 * (1 - factor), 255];
 }
 
-export function PressureBackground({
+export const PressureBackground = connectContext(
+    PressureBackgroundComponent,
+    ({ state }) => ({
+        gridSize: state.simulation.grid.size,
+        pressure: state.simulation.artifacts.lastPressureVector,
+    })
+);
+
+export function PressureBackgroundComponent({
     pressure,
-    bgWidth,
-    bgHeight,
+    gridSize,
     canvasWidth,
     canvasHeight,
 }: Props) {
@@ -35,11 +41,11 @@ export function PressureBackground({
     useEffect(
         () => {
             const dataContainer =
-                imageDataContainer || create(bgWidth, bgHeight);
+                imageDataContainer || create(gridSize, gridSize);
 
             const imageDataPixels = dataContainer.value.data;
 
-            pressure.value.forEach((pressureValue, ind) => {
+            pressure.forEach((pressureValue, ind) => {
                 const imageDataOffset = ind * 4;
                 imageDataPixels.set(
                     pressureColor(pressureValue),

@@ -22,19 +22,26 @@ export default (
     state: typeof SimulationState,
     action: AllActionTypes
 ): SimulationContextStateType => {
-    const { grid, particles, sources } = state.simulation;
+    const { grid, particles, sources, artifacts } = state.simulation;
 
     switch (action.type) {
         case ActionType.UpdateSimulation:
             const deltaTimeSec = action.payload.deltaTimeSec;
             let currentGrid = grid;
+            let lastPressureVector = artifacts.lastPressureVector;
 
             // progress velocity field
             const [velNeedUpdate, velTimePassSec] = velocityFieldNeedUpdate(
                 deltaTimeSec
             );
             if (velNeedUpdate) {
-                currentGrid = AtmosphereEngine.update(grid, velTimePassSec);
+                const engineUpdateResult = AtmosphereEngine.update(
+                    grid,
+                    velTimePassSec
+                );
+                currentGrid = engineUpdateResult.grid;
+                lastPressureVector =
+                    engineUpdateResult.artifacts.pressureVector;
             }
 
             // progress particles
@@ -63,6 +70,9 @@ export default (
                     ...state.simulation,
                     grid: currentGrid,
                     particles: movedParticles,
+                    artifacts: {
+                        lastPressureVector,
+                    },
                 },
             };
             break;

@@ -29,6 +29,9 @@ export function createSimulationContext(
         grid: newGrid,
         particles: newParticles,
         sources: newSourcesEngine,
+        artifacts: {
+            lastPressureVector: new Float32Array(newGrid.size ** 2),
+        },
     };
 }
 
