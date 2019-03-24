@@ -36,7 +36,8 @@ export function convectValue<T>(
 
 export function update(
     grid: MACGrid.MACGridData,
-    deltaTimeSec: DOMHighResTimeStamp
+    deltaTimeSec: DOMHighResTimeStamp,
+    calcDetailsFactor: number
 ): EngineUpdateResult {
     const convectedGrid = convectVelocity(grid, deltaTimeSec);
     const neightboursMatrix = precalcNeighbours(convectedGrid);
@@ -44,6 +45,7 @@ export function update(
     const fieldPressure = calculateFieldPressure(
         convectedGrid,
         neightboursMatrix,
+        calcDetailsFactor,
         deltaTimeSec
     );
     const newMACGrid = adjustVelocityFromPressure(
@@ -54,10 +56,7 @@ export function update(
     return {
         grid: newMACGrid,
         artifacts: {
-            pressureVector: calculateFieldPressure(
-                convectedGrid,
-                neightboursMatrix
-            ),
+            pressureVector: fieldPressure,
         },
     };
 }

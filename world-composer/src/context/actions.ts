@@ -7,6 +7,8 @@ export enum ActionType {
 
     SetMapType,
     SetMapMode,
+    SetTimeFactor,
+    SetCalcDetailsFactor,
 
     RandomizeMap,
     ToggleSolid,
@@ -43,6 +45,14 @@ const actions = {
     setMapType: (mapType: MapType) => ({
         type: ActionType.SetMapType as ActionType.SetMapType,
         payload: { mapType },
+    }),
+    setTimeFactor: (timeFactor: number) => ({
+        type: ActionType.SetTimeFactor as ActionType.SetTimeFactor,
+        payload: { timeFactor },
+    }),
+    setCalcDetailsFactor: (calcDetailsFactor: number) => ({
+        type: ActionType.SetCalcDetailsFactor as ActionType.SetCalcDetailsFactor,
+        payload: { calcDetailsFactor },
     }),
 
     toggleSolid: (gridPos: Point, solidNewState: boolean) => ({

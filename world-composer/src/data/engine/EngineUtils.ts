@@ -45,6 +45,7 @@ export function precalcNeighboursMatrix(grid: MACGrid.MACGridData): Int8Array {
 export function calculateFieldPressure(
     grid: MACGrid.MACGridData,
     neighboursMatrix: Int8Array,
+    calcDetailsFactor = 10,
     deltaTime: DOMHighResTimeStamp = 1
 ) {
     const fieldDivergenceVector = MACGrid.divergenceVector(grid, 1 / deltaTime);
@@ -57,7 +58,8 @@ export function calculateFieldPressure(
 
     const fluidPressureSolveVector = resolveLinearByJacobi(
         neighboursMatrixA,
-        divergenceVectorB
+        divergenceVectorB,
+        calcDetailsFactor
     );
 
     let iFluidCellInd = 0;
