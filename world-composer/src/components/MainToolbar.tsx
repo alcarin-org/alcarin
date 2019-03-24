@@ -62,12 +62,6 @@ function MainToolbarComponent({
             <ToolbarSeparator />
 
             <ToolbarButton
-                active={mapType === MapType.Pressure}
-                onClick={() => setMapType(MapType.Pressure)}
-            >
-                Pressure
-            </ToolbarButton>
-            <ToolbarButton
                 active={mapType === MapType.Neutral}
                 onClick={() => setMapType(MapType.Neutral)}
             >
@@ -80,10 +74,10 @@ function MainToolbarComponent({
                 Velocity
             </ToolbarButton>
             <ToolbarButton
-                active={mapType === MapType.Divergence}
-                onClick={() => setMapType(MapType.Divergence)}
+                active={mapType === MapType.Pressure}
+                onClick={() => setMapType(MapType.Pressure)}
             >
-                Divergence
+                Pressure
             </ToolbarButton>
 
             <ToolbarSeparator />
