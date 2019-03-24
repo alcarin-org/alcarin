@@ -10,6 +10,13 @@ import { memoizeOnce } from '../../utils/Immutable';
 
 import { Point, multiply, add } from '../../utils/Math';
 
+interface EngineUpdateResult {
+    grid: MACGrid.MACGridData;
+    artifacts: {
+        pressureVector: Float32Array;
+    };
+}
+
 const precalcNeighbours = memoizeOnce(
     grid => grid.solids,
     precalcNeighboursMatrix
@@ -30,7 +37,7 @@ export function convectValue<T>(
 export function update(
     grid: MACGrid.MACGridData,
     deltaTimeSec: DOMHighResTimeStamp
-): MACGrid.MACGridData {
+): EngineUpdateResult {
     const convectedGrid = convectVelocity(grid, deltaTimeSec);
     const neightboursMatrix = precalcNeighbours(convectedGrid);
     // this.applyExternalForces(deltaTimeSec);
@@ -39,11 +46,20 @@ export function update(
         neightboursMatrix,
         deltaTimeSec
     );
-    return adjustVelocityFromPressure(
+    const newMACGrid = adjustVelocityFromPressure(
         convectedGrid,
         fieldPressure,
         deltaTimeSec
     );
+    return {
+        grid: newMACGrid,
+        artifacts: {
+            pressureVector: calculateFieldPressure(
+                convectedGrid,
+                neightboursMatrix
+            ),
+        },
+    };
 }
 
 //     public applyExternalForces(deltaTime: DOMHighResTimeStamp) {

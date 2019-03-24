@@ -5,13 +5,11 @@ import {
     coords,
     interpolateVelocity,
 } from '../../../data/atmosphere/MACGrid';
-// import { AtmosphereEngine } from '../../../data/engine/AtmosphereEngine';
 import { magnitude } from '../../../utils/Math';
 import { DataContainer } from '../../../utils/Immutable';
 import { connectContext } from '../../../context/SimulationContext';
 import { MapType } from '../../../context/state';
-// import { PressureBackground } from './PressureBackground';
-// import { DivergenceBackground } from './DivergenceBackground';
+import { PressureBackground } from './PressureBackground';
 import { VelocityBackground } from './VelocityBackground';
 
 interface Props {
@@ -31,9 +29,6 @@ export const BackgroundRenderer = connectContext(
 );
 
 function BackgroundRendererComponent({ width, height, mapType, grid }: Props) {
-    // const [pressureContainer, setPressureContainer] = useState({
-    //     value: atmo.pressureVector,
-    // });
     // const [divergenceContainer, setDivergenceContainer] = useState({
     //     value: engine.lastDivergenceVector,
     // });
@@ -44,10 +39,6 @@ function BackgroundRendererComponent({ width, height, mapType, grid }: Props) {
     useEffect(
         () => {
             switch (mapType) {
-                // case MapType.Pressure:
-                //     setPressureContainer({
-                //         value: grid.pressureVector,
-                //     });
                 // case MapType.Divergence:
                 //     setDivergenceContainer({
                 //         value: engine.lastDivergenceVector,
@@ -65,17 +56,9 @@ function BackgroundRendererComponent({ width, height, mapType, grid }: Props) {
 
     switch (mapType) {
         case MapType.Pressure:
-            console.warn('todo: handle temp pressure');
-            return null;
-        // (
-        //     <PressureBackground
-        //         pressure={pressureContainer}
-        //         canvasWidth={width}
-        //         canvasHeight={height}
-        //         bgWidth={atmo.size}
-        //         bgHeight={atmo.size}
-        //     />
-        // );
+            return (
+                <PressureBackground canvasWidth={width} canvasHeight={height} />
+            );
         case MapType.Velocity:
             return (
                 <VelocityBackground

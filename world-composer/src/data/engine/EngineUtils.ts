@@ -62,11 +62,11 @@ export function calculateFieldPressure(
 
     let iFluidCellInd = 0;
     const globalPressureVector = new Float32Array(grid.size ** 2);
-    globalPressureVector.forEach((_, ind, pressure) => {
-        pressure[ind] =
-            grid.solids[ind] === 1
-                ? 0
-                : fluidPressureSolveVector[iFluidCellInd++];
+    globalPressureVector.forEach((_, ind) => {
+        if (grid.solids[ind] === 0) {
+            globalPressureVector[ind] =
+                fluidPressureSolveVector[iFluidCellInd++];
+        }
     });
     return globalPressureVector;
 }
