@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 
 import { Stats } from './Stats';
+import { GeneralSettings } from './GeneralSettings';
 import { MapMode } from '../../context/state';
 import { connectContext } from '../../context/SimulationContext';
 import { FluidSource } from '../../data/engine/FluidSourcesEngine';
@@ -8,6 +9,7 @@ import { FluidSourcePanel, DefaultFluidSource } from './FluidSourcePanel';
 import { FluidSinkPanel, DefaultFluidSink } from './FluidSinkPanel';
 
 export enum ControlPanelMode {
+    General,
     Stats,
     Walls,
     Sources,
@@ -24,6 +26,12 @@ interface Tab {
 }
 
 const TabsDefinition: Tab[] = [
+    {
+        mode: ControlPanelMode.General,
+        mapMode: MapMode.Neutral,
+        label: 'General',
+        defaultPayload: null,
+    },
     {
         mode: ControlPanelMode.Stats,
         mapMode: MapMode.Neutral,
@@ -114,6 +122,8 @@ function renderTab(
     onPayloadChanged: (payload: MapModeLegalPayload) => void
 ) {
     switch (mode) {
+        case ControlPanelMode.General:
+            return <GeneralSettings />
         case ControlPanelMode.Stats:
             return <Stats />;
         case ControlPanelMode.Sources:

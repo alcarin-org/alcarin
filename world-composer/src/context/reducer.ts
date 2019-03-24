@@ -46,6 +46,24 @@ function baseReducer(
                 settings: { ...state.settings, mapInteraction: action.payload },
             };
 
+        case ActionType.SetTimeFactor:
+            return {
+                ...state,
+                settings: {
+                    ...state.settings,
+                    timeFactor: action.payload.timeFactor,
+                },
+            };
+
+        case ActionType.SetCalcDetailsFactor:
+            return {
+                ...state,
+                settings: {
+                    ...state.settings,
+                    calcDetailsFactor: action.payload.calcDetailsFactor,
+                },
+            };
+
         default:
             return state;
     }

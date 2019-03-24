@@ -26,7 +26,8 @@ export default (
 
     switch (action.type) {
         case ActionType.UpdateSimulation:
-            const deltaTimeSec = action.payload.deltaTimeSec;
+            const deltaTimeSec =
+                action.payload.deltaTimeSec * state.settings.timeFactor;
             let currentGrid = grid;
             let lastPressureVector = artifacts.lastPressureVector;
 
@@ -37,7 +38,8 @@ export default (
             if (velNeedUpdate) {
                 const engineUpdateResult = AtmosphereEngine.update(
                     grid,
-                    velTimePassSec
+                    velTimePassSec,
+                    state.settings.calcDetailsFactor
                 );
                 currentGrid = engineUpdateResult.grid;
                 lastPressureVector =
