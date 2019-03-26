@@ -12,16 +12,27 @@ export function useCanvas(
     const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
     const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
 
-    useEffect(() => {
-        const canvas = sourceCanvasRef
-            ? sourceCanvasRef.current!
-            : document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d')!;
-        setCanvas(canvas);
-        setCtx(ctx);
-    }, []);
+    const sourceCanvasWidth =
+        sourceCanvasRef &&
+        sourceCanvasRef.current &&
+        sourceCanvasRef.current.width;
+    const sourceCanvasHeight =
+        sourceCanvasRef &&
+        sourceCanvasRef.current &&
+        sourceCanvasRef.current.height;
+    useEffect(
+        () => {
+            const canvas = sourceCanvasRef
+                ? sourceCanvasRef.current!
+                : document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d')!;
+            setCanvas(canvas);
+            setCtx(ctx);
+        },
+        [sourceCanvasRef, sourceCanvasWidth, sourceCanvasHeight]
+    );
 
     return [canvas, ctx, setCtx];
 }

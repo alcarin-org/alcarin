@@ -9,6 +9,8 @@ export enum ActionType {
     SetMapMode,
     SetTimeFactor,
     SetCalcDetailsFactor,
+    IncreaseMapView,
+    DecreaseMapView,
 
     RandomizeMap,
     ToggleSolid,
@@ -26,6 +28,14 @@ export interface Action {
 }
 
 const actions = {
+    increaseMapView: () => ({
+        type: ActionType.IncreaseMapView as ActionType.IncreaseMapView,
+    }),
+
+    decreaseMapView: () => ({
+        type: ActionType.DecreaseMapView as ActionType.DecreaseMapView,
+    }),
+
     updateSimulation: (deltaTimeSec: DOMHighResTimeStamp) => ({
         type: ActionType.UpdateSimulation as ActionType.UpdateSimulation,
         payload: { deltaTimeSec },
