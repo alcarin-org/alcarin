@@ -2,7 +2,8 @@ import React from 'react';
 
 import { connectContext } from '../../context/SimulationContext';
 import { MapType } from '../../context/state';
-import { BackgroundRenderer } from './background/BackgroundRenderer';
+import { PressureBackground } from './background/PressureBackground';
+import { VelocityBackground } from './background/VelocityBackground';
 import { SolidBackground } from './background/SolidBackground';
 import { VelocityFieldRenderer } from './VelocityFieldRenderer';
 import { ConfettiRenderer } from './ConfettiRenderer';
@@ -30,7 +31,7 @@ function MapRendererComponent({ mapType, gridSize, drawFieldSize }: Props) {
             className="map-renderer"
             style={{ width: canvasSizePx, height: canvasSizePx }}
         >
-            <BackgroundRenderer width={canvasSizePx} height={canvasSizePx} />
+            {renderBackground(mapType, canvasSizePx)}
             {mapType === MapType.Velocity && (
                 <VelocityFieldRenderer
                     width={canvasSizePx}
@@ -43,9 +44,28 @@ function MapRendererComponent({ mapType, gridSize, drawFieldSize }: Props) {
             <SolidBackground
                 canvasWidth={canvasSizePx}
                 canvasHeight={canvasSizePx}
-                bgWidth={gridSize}
-                bgHeight={gridSize}
             />
         </div>
     );
+}
+
+function renderBackground(mapType: MapType, canvasSizePx: number) {
+    switch (mapType) {
+        case MapType.Neutral:
+            return null;
+        case MapType.Pressure:
+            return (
+                <PressureBackground
+                    canvasWidth={canvasSizePx}
+                    canvasHeight={canvasSizePx}
+                />
+            );
+        case MapType.Velocity:
+            return (
+                <VelocityBackground
+                    canvasWidth={canvasSizePx}
+                    canvasHeight={canvasSizePx}
+                />
+            );
+    }
 }

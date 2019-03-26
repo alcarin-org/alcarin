@@ -28,20 +28,22 @@ function ConfettiRendererComponent({
     height,
 }: Props) {
     const domCanvasRef = useRef<HTMLCanvasElement>(null);
-    const [, displayCtxRef] = useCanvas(width, height, domCanvasRef);
+    const [, displayCtx] = useCanvas(width, height, domCanvasRef);
 
     useEffect(
         () => {
-            displayCtxRef.current!.clearRect(0, 0, width, height);
-            renderConfetti(
-                displayCtxRef.current!,
-                particles,
-                width / gridSize,
-                width,
-                height
-            );
+            if (displayCtx) {
+                displayCtx.clearRect(0, 0, width, height);
+                renderConfetti(
+                    displayCtx,
+                    particles,
+                    width / gridSize,
+                    width,
+                    height
+                );
+            }
         },
-        [particles]
+        [displayCtx, particles]
     );
 
     return (

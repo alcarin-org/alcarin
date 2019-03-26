@@ -1,10 +1,9 @@
 import React, { useRef, useEffect } from 'react';
-import { ImageDataContainer } from '../utils/ImageDataUtils';
 import { useCanvas } from '../utils/CanvasUtils';
 
 interface Props {
     id?: string;
-    pixels: ImageDataContainer;
+    pixels: ImageData;
     width: number;
     height: number;
     smoothingEnabled: boolean;
@@ -22,32 +21,27 @@ export function ImageDataCanvas({
     const domCanvasRef = useRef<HTMLCanvasElement>(null);
     const [, displayCtx] = useCanvas(width, height, domCanvasRef);
 
-    const [pixelCanvas, pixelCtx] = useCanvas(
-        pixels.value.width,
-        pixels.value.height
+    const [pixelCanvas, pixelCtx, setCtx] = useCanvas(
+        pixels.width,
+        pixels.height
     );
 
     useEffect(
         () => {
-            displayCtx.current!.imageSmoothingEnabled = smoothingEnabled;
+            if (displayCtx) {
+                displayCtx.imageSmoothingEnabled = smoothingEnabled;
+                // force redraw, as context changed
+                setCtx(pixelCtx!);
+            }
         },
-        [width, height, smoothingEnabled]
+        [displayCtx, smoothingEnabled]
     );
 
-    useEffect(
-        () => {
-            displayCtx.current!.clearRect(0, 0, width, height);
-            pixelCtx.current!.putImageData(pixels.value, 0, 0);
-            displayCtx.current!.drawImage(
-                pixelCanvas.current!,
-                0,
-                0,
-                width,
-                height
-            );
-        },
-        [pixels]
-    );
+    if (pixelCanvas && displayCtx && pixelCtx) {
+        displayCtx.clearRect(0, 0, width, height);
+        pixelCtx.putImageData(pixels, 0, 0);
+        displayCtx.drawImage(pixelCanvas, 0, 0, width, height);
+    }
 
     return <canvas id={id} width={width} height={height} ref={domCanvasRef} />;
 }

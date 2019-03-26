@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import * as MACGrid from '../../../data/atmosphere/MACGrid';
 import { ImageDataCanvas } from './ImageDataCanvas';
-import { create, ImageDataContainer } from '../utils/ImageDataUtils';
+import { createImageData } from '../utils/CanvasUtils';
 import { Color } from '../../../utils/Draw';
 import { connectContext } from '../../../context/SimulationContext';
 import { magnitude } from '../../../utils/Math';
@@ -34,9 +34,18 @@ export function VelocityBackgroundComponent({
     canvasHeight,
     grid,
 }: Props) {
-    const [imageDataContainer, setImageDataContainer] = useState<
-        ImageDataContainer
-    >();
+    const [imageData, setImageData] = useState<ImageData>();
+
+    useEffect(
+        () => {
+            setImageData(createImageData(grid.size, grid.size));
+        },
+        [grid.size]
+    );
+
+    if (!imageData) {
+        return null;
+    }
 
     const magnitudeVector = new Float32Array(grid.size ** 2).map((_, ind) =>
         grid.solids[ind] === 1
@@ -46,35 +55,19 @@ export function VelocityBackgroundComponent({
               )
     );
 
-    useEffect(
-        () => {
-            const dataContainer =
-                imageDataContainer || create(grid.size, grid.size);
+    const imageDataPixels = imageData.data;
 
-            const imageDataPixels = dataContainer.value.data;
-
-            magnitudeVector.forEach((velocityMagnitudeValue, ind) => {
-                const imageDataOffset = ind * 4;
-                imageDataPixels.set(
-                    velocityColor(velocityMagnitudeValue),
-                    imageDataOffset
-                );
-            });
-
-            setImageDataContainer({
-                value: dataContainer.value,
-            });
-        },
-        [magnitudeVector]
+    magnitudeVector.forEach((velocityMagnitudeValue, ind) =>
+        imageDataPixels.set(velocityColor(velocityMagnitudeValue), ind * 4)
     );
 
-    return imageDataContainer ? (
+    return (
         <ImageDataCanvas
             id="velocity-canvas"
-            pixels={imageDataContainer}
+            pixels={imageData}
             smoothingEnabled={true}
             width={canvasWidth}
             height={canvasHeight}
         />
-    ) : null;
+    );
 }

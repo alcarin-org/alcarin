@@ -1,15 +1,16 @@
-import { useEffect, useRef, RefObject } from 'react';
+import { useEffect, useState, RefObject } from 'react';
 
 export function useCanvas(
     width: number,
     height: number,
     sourceCanvasRef?: RefObject<HTMLCanvasElement>
 ): [
-    RefObject<HTMLCanvasElement | null>,
-    RefObject<CanvasRenderingContext2D | null>
+    HTMLCanvasElement | null,
+    CanvasRenderingContext2D | null,
+    (ctx: CanvasRenderingContext2D) => void
 ] {
-    const canvasRef = useRef<HTMLCanvasElement | null>(null);
-    const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+    const [canvas, setCanvas] = useState<HTMLCanvasElement | null>(null);
+    const [ctx, setCtx] = useState<CanvasRenderingContext2D | null>(null);
 
     useEffect(() => {
         const canvas = sourceCanvasRef
@@ -18,9 +19,17 @@ export function useCanvas(
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext('2d')!;
-        canvasRef.current = canvas;
-        ctxRef.current = ctx;
+        setCanvas(canvas);
+        setCtx(ctx);
     }, []);
 
-    return [canvasRef, ctxRef];
+    return [canvas, ctx, setCtx];
+}
+
+export function createImageData(width: number, height: number): ImageData {
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const context2d = canvas.getContext('2d');
+    return context2d!.getImageData(0, 0, width, height);
 }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 import { ImageDataCanvas } from './ImageDataCanvas';
-import { create, ImageDataContainer } from '../utils/ImageDataUtils';
+import { createImageData } from '../utils/CanvasUtils';
 import { connectContext } from '../../../context/SimulationContext';
 import { Color } from '../../../utils/Draw';
 
@@ -34,39 +34,32 @@ export function PressureBackgroundComponent({
     canvasWidth,
     canvasHeight,
 }: Props) {
-    const [imageDataContainer, setImageDataContainer] = useState<
-        ImageDataContainer
-    >();
+    const [imageData, setImageData] = useState<ImageData>();
 
     useEffect(
         () => {
-            const dataContainer =
-                imageDataContainer || create(gridSize, gridSize);
-
-            const imageDataPixels = dataContainer.value.data;
-
-            pressure.forEach((pressureValue, ind) => {
-                const imageDataOffset = ind * 4;
-                imageDataPixels.set(
-                    pressureColor(pressureValue),
-                    imageDataOffset
-                );
-            });
-
-            setImageDataContainer({
-                value: dataContainer.value,
-            });
+            setImageData(createImageData(gridSize, gridSize));
         },
-        [pressure]
+        [gridSize]
     );
 
-    return imageDataContainer ? (
+    if (!imageData) {
+        return null;
+    }
+
+    const imageDataPixels = imageData.data;
+
+    pressure.forEach((pressureValue, ind) =>
+        imageDataPixels.set(pressureColor(pressureValue), ind * 4)
+    );
+
+    return (
         <ImageDataCanvas
             id="pressure-canvas"
-            pixels={imageDataContainer}
+            pixels={imageData}
             smoothingEnabled={true}
             width={canvasWidth}
             height={canvasHeight}
         />
-    ) : null;
+    );
 }

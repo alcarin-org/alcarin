@@ -9,7 +9,6 @@ export enum MapType {
     Neutral,
     Pressure,
     Velocity,
-    Divergence,
 }
 
 export enum MapMode {

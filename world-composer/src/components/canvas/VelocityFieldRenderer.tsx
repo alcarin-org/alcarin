@@ -27,13 +27,15 @@ export const VelocityFieldRenderer = connectContext(
 
 function VelocityFieldRendererComponent({ grid, width, height }: Props) {
     const domCanvasRef = useRef<HTMLCanvasElement>(null);
-    const [, displayCtxRef] = useCanvas(width, height, domCanvasRef);
+    const [, displayCtx] = useCanvas(width, height, domCanvasRef);
 
     useEffect(
         () => {
-            renderVelocities(displayCtxRef.current!, grid, width / grid.size);
+            if (displayCtx) {
+                renderVelocities(displayCtx, grid, width / grid.size);
+            }
         },
-        [grid]
+        [displayCtx, grid]
     );
 
     return (
