@@ -15,6 +15,8 @@ interface Props {
     controlPanelVisible: boolean;
 
     setMapType: (type: MapType) => void;
+    increaseMapView: () => void;
+    decreaseMapView: () => void;
     mapType: MapType;
 }
 
@@ -23,6 +25,8 @@ export const MainToolbar = connectContext(
     ({ state, actions }) => ({
         setMapType: actions.setMapType,
         mapType: state.settings.mapType,
+        increaseMapView: actions.increaseMapView,
+        decreaseMapView: actions.decreaseMapView,
     })
 );
 
@@ -37,6 +41,8 @@ function MainToolbarComponent({
 
     setMapType,
     mapType,
+    increaseMapView,
+    decreaseMapView,
 }: Props) {
     return (
         <Toolbar>
@@ -61,23 +67,23 @@ function MainToolbarComponent({
 
             <ToolbarSeparator />
 
-            <ToolbarButton
-                active={mapType === MapType.Neutral}
-                onClick={() => setMapType(MapType.Neutral)}
+            <select
+                value={mapType}
+                title="Map type"
+                onChange={ev =>
+                    setMapType(parseInt(ev.target.value, 10) as MapType)
+                }
             >
-                Neutral
+                <option value={MapType.Neutral}>Neutral</option>
+                <option value={MapType.Velocity}>Velocity</option>
+                <option value={MapType.Pressure}>Pressure</option>
+            </select>
+
+            <ToolbarButton onClick={decreaseMapView} title="Zoom in">
+                <i className="fa fa-search-plus" />
             </ToolbarButton>
-            <ToolbarButton
-                active={mapType === MapType.Velocity}
-                onClick={() => setMapType(MapType.Velocity)}
-            >
-                Velocity
-            </ToolbarButton>
-            <ToolbarButton
-                active={mapType === MapType.Pressure}
-                onClick={() => setMapType(MapType.Pressure)}
-            >
-                Pressure
+            <ToolbarButton onClick={increaseMapView} title="Zoom out">
+                <i className="fa fa-search-minus" />
             </ToolbarButton>
 
             <ToolbarSeparator />

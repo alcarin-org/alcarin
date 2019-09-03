@@ -16,7 +16,7 @@ interface ButtonProps {
 
 export function Toolbar({ children }: Props) {
     return (
-        <div className="toolbar pure-button-group" role="toolbar">
+        <div className="toolbar pure-button-group pure-form" role="toolbar">
             {children}
         </div>
     );

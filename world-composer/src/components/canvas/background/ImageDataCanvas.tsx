@@ -20,28 +20,16 @@ export function ImageDataCanvas({
 }: Props) {
     const domCanvasRef = useRef<HTMLCanvasElement>(null);
     const [, displayCtx] = useCanvas(width, height, domCanvasRef);
+    const [pixelCanvas, pixelCtx] = useCanvas(pixels.width, pixels.height);
 
-    const [pixelCanvas, pixelCtx, setCtx] = useCanvas(
-        pixels.width,
-        pixels.height
-    );
-
-    useEffect(
-        () => {
-            if (displayCtx) {
-                displayCtx.imageSmoothingEnabled = smoothingEnabled;
-                // force redraw, as context changed
-                setCtx(pixelCtx!);
-            }
-        },
-        [displayCtx, smoothingEnabled]
-    );
-
-    if (pixelCanvas && displayCtx && pixelCtx) {
-        displayCtx.clearRect(0, 0, width, height);
-        pixelCtx.putImageData(pixels, 0, 0);
-        displayCtx.drawImage(pixelCanvas, 0, 0, width, height);
-    }
+    useEffect(() => {
+        if (pixelCanvas && displayCtx && pixelCtx) {
+            displayCtx.imageSmoothingEnabled = smoothingEnabled;
+            displayCtx.clearRect(0, 0, width, height);
+            pixelCtx.putImageData(pixels, 0, 0);
+            displayCtx.drawImage(pixelCanvas, 0, 0, width, height);
+        }
+    });
 
     return <canvas id={id} width={width} height={height} ref={domCanvasRef} />;
 }

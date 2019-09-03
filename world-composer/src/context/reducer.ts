@@ -32,6 +32,27 @@ function baseReducer(
     action: AllActionTypes
 ): SimulationContextStateType {
     switch (action.type) {
+        case ActionType.IncreaseMapView: {
+            const newSize = Math.max(5, state.settings.drawFieldSize - 5);
+            return {
+                ...state,
+                settings: {
+                    ...state.settings,
+                    drawFieldSize: newSize,
+                },
+            };
+        }
+        case ActionType.DecreaseMapView: {
+            const newSize = Math.min(50, state.settings.drawFieldSize + 5);
+            return {
+                ...state,
+                settings: {
+                    ...state.settings,
+                    drawFieldSize: newSize,
+                },
+            };
+        }
+
         case ActionType.SetMapType:
             return {
                 ...state,

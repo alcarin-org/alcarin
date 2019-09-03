@@ -13,7 +13,7 @@
         border: 1px solid $panel-border;
         background-color: $panel-bg;
         padding: 10px;
-        width: 550px;
+        width: 400px;
     }
 
     &__content {
@@ -22,8 +22,11 @@
     }
 
     &__map {
+        display: flex;
         flex: 1;
-        align-self: center;
+        align-items: center;
+        justify-content: center;
+        overflow: scroll;
     }
 }
 
