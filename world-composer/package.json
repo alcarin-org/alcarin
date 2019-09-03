@@ -23,7 +23,7 @@
     "electron-ipc-mock": "0.0.3",
     "nodemon": "1.19.2",
     "prettier": "1.15.3",
-    "sass-lint": "1.12.1"
+    "sass-lint": "1.13.1"
   },
   "scripts": {
     "start": "cross-env BROWSER=none SASS_PATH=node_modules:src/styles react-scripts start",
