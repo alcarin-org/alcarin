@@ -35,7 +35,7 @@ function VelocityFieldRendererComponent({ grid, width, height }: Props) {
                 renderVelocities(displayCtx, grid, width / grid.size);
             }
         },
-        [displayCtx, grid]
+        [displayCtx, grid, width]
     );
 
     return (

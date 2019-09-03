@@ -43,7 +43,7 @@ function ConfettiRendererComponent({
                 );
             }
         },
-        [displayCtx, particles]
+        [displayCtx, particles, gridSize, width, height]
     );
 
     return (

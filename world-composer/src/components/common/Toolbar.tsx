@@ -40,7 +40,6 @@ export function ToolbarButton({
                 'toolbar__button pure-button' +
                 (active ? ' pure-button-active' : '')
             }
-            role="button"
             title={title}
             disabled={disabled}
         >

@@ -50,9 +50,9 @@ function PageComponent({
         }
         window.addEventListener('keydown', onKeyDown, true);
         return () => window.removeEventListener('keydown', onKeyDown, true);
-    }, []);
+    }, [onTogglePlay]);
 
-    useEffect(() => GlobalTimer.onTick(updateSimulation), []);
+    useEffect(() => GlobalTimer.onTick(updateSimulation), [updateSimulation]);
 
     return (
         <div className="page">

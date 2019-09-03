@@ -102,7 +102,6 @@ function ControlPanelComponent({ setMapMode }: Props) {
                                 ? ' pure-button-active'
                                 : '')
                         }
-                        role="button"
                     >
                         {tab.label}
                     </button>
@@ -123,7 +122,7 @@ function renderTab(
 ) {
     switch (mode) {
         case ControlPanelMode.General:
-            return <GeneralSettings />
+            return <GeneralSettings />;
         case ControlPanelMode.Stats:
             return <Stats />;
         case ControlPanelMode.Sources:

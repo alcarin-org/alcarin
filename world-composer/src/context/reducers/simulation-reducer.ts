@@ -77,7 +77,6 @@ export default (
                     },
                 },
             };
-            break;
 
         case ActionType.ResetMap:
             return {

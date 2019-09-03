@@ -31,7 +31,7 @@ export function useCanvas(
             setCanvas(canvas);
             setCtx(ctx);
         },
-        [sourceCanvasRef, sourceCanvasWidth, sourceCanvasHeight]
+        [sourceCanvasRef, sourceCanvasWidth, sourceCanvasHeight, width, height]
     );
 
     return [canvas, ctx, setCtx];
