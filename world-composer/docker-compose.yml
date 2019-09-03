@@ -10,6 +10,7 @@ services:
     volumes:
       - ./:/app
       - ${HOME}/.Xauthority:/root/.Xauthority:rw
+      - /dev/shm:/dev/shm
     environment:
       - NODE_ENV=development
       - DISPLAY=${DISPLAY}

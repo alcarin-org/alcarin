@@ -1,4 +1,4 @@
-FROM node:10.15-stretch-slim
+FROM node:12.4-stretch-slim
 
 # these package are needed to compile "node-sass" library and generally using webpack
 RUN apt-get update && apt-get -y install \
@@ -6,5 +6,8 @@ RUN apt-get update && apt-get -y install \
     libnss3 \
     libgtk-3-0 \
     libxss1 \
-    libasound2 && \
+    libasound2 \
+    python \
+    g++ \
+    make && \
     rm -rf /var/lib/apt/lists/*
