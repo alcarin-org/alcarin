@@ -1,16 +1,16 @@
-import { Dispatch } from 'react';
-import SimulationState, {
-    SimulationContextStateType,
-    createSimulationContext,
-} from '../state';
-import { ActionType, AllActionTypes } from '../actions';
-import * as MACGrid from '../../data/atmosphere/MACGrid';
-import * as AtmosphereEngine from '../../data/engine/AtmosphereEngine';
-import * as RandomizeField from '../../data/atmosphere/RandomizeField';
-import * as FluidSources from '../../data/engine/FluidSourcesEngine';
-import * as Particles from '../../data/convectable/Particles';
+import InitialState, { createSimulationContext } from './state';
+import { Action as SimulationAction, ActionType } from './actions';
+import { Action as SettingsAction } from '../settings/actions';
 
-export type Dispatch = Dispatch<AllActionTypes>;
+import * as MACGrid from '../../../data/atmosphere/MACGrid';
+import * as AtmosphereEngine from '../../../data/engine/AtmosphereEngine';
+import * as RandomizeField from '../../../data/atmosphere/RandomizeField';
+import * as FluidSources from '../../../data/engine/FluidSourcesEngine';
+import * as Particles from '../../../data/convectable/Particles';
+
+import settingsReducer from '../settings';
+import sourcesReducer from './sources-reducer';
+import particlesReducer from './particles-reducer';
 
 const VelocityFieldUpdateDelaySec = 0.1;
 const ParticlesCleanupDelaySec = 0.2;
@@ -18,11 +18,20 @@ const ParticlesCleanupDelaySec = 0.2;
 const velocityFieldNeedUpdate = timePassChecker(VelocityFieldUpdateDelaySec);
 const particlesNeedCleanup = timePassChecker(ParticlesCleanupDelaySec);
 
-export default (
-    state: typeof SimulationState,
-    action: AllActionTypes
-): SimulationContextStateType => {
-    const { grid, particles, sources, artifacts } = state.simulation;
+type StateType = typeof InitialState;
+type Action = SimulationAction | SettingsAction;
+
+export default (baseState = InitialState, action: Action): StateType => {
+    const settings = settingsReducer(
+        baseState.settings,
+        action as SettingsAction
+    );
+    const state =
+        settings !== baseState.settings
+            ? { ...baseState, settings }
+            : baseState;
+
+    const { grid, particles, sources, artifacts } = state;
 
     switch (action.type) {
         case ActionType.UpdateSimulation:
@@ -52,7 +61,6 @@ export default (
             const cleanedParticles = partNeedCleanup
                 ? FluidSources.cleanupSinksOn(particles, sources)
                 : particles;
-
             const newParticles = FluidSources.applyFluidSourcesOn(
                 currentGrid,
                 cleanedParticles,
@@ -68,33 +76,25 @@ export default (
 
             return {
                 ...state,
-                simulation: {
-                    ...state.simulation,
-                    grid: currentGrid,
-                    particles: movedParticles,
-                    artifacts: {
-                        lastPressureVector,
-                    },
+
+                grid: currentGrid,
+                particles: movedParticles,
+                artifacts: {
+                    lastPressureVector,
                 },
             };
 
         case ActionType.ResetMap:
             return {
-                ...state,
-                simulation: createSimulationContext(),
+                ...createSimulationContext(),
+                settings: state.settings,
             };
 
         case ActionType.RandomizeMap:
-            MACGrid.fillGridVelocityBy(
-                state.simulation.grid,
-                getRandomFillMethod()
-            );
+            MACGrid.fillGridVelocityBy(state.grid, getRandomFillMethod());
             return {
                 ...state,
-                simulation: {
-                    ...state.simulation,
-                    grid: { ...state.simulation.grid },
-                },
+                grid: { ...state.grid },
             };
 
         case ActionType.ToggleSolid: {
@@ -103,17 +103,16 @@ export default (
                 action.payload.gridPos,
                 action.payload.solidNewState
             );
-
             return {
                 ...state,
-                simulation: {
-                    ...state.simulation,
-                    grid: newGrid,
-                },
+                grid: newGrid,
             };
         }
         default:
-            return state;
+            return particlesReducer(
+                sourcesReducer(state, action as any),
+                action as any
+            );
     }
 };
 

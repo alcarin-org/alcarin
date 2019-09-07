@@ -119,7 +119,6 @@ export function applyFluidSourcesOn(
                     sourceInstance,
                     deltaTime
                 );
-
                 if (newParticles) {
                     particles = Particles.concatParticles(
                         particles,

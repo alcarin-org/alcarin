@@ -1,15 +1,12 @@
-import { Dispatch } from 'react';
-import SimulationState, { SimulationContextStateType } from '../state';
-import { ActionType, AllActionTypes } from '../actions';
-import * as FluidSources from '../../data/engine/FluidSourcesEngine';
+import { ActionType, Action } from './actions';
+import InitialState from './state';
+import * as FluidSources from '../../../data/engine/FluidSourcesEngine';
 
-export type Dispatch = Dispatch<AllActionTypes>;
+type StateType = typeof InitialState;
 
-export default (
-    state: typeof SimulationState,
-    action: AllActionTypes
-): SimulationContextStateType => {
-    const { grid, sources } = state.simulation;
+export default (state = InitialState, action: Action): StateType => {
+    const { grid, sources } = state;
+
     switch (action.type) {
         case ActionType.RemoveSources: {
             const newSources = FluidSources.removeSourcesAt(
@@ -23,11 +20,8 @@ export default (
 
             return {
                 ...state,
-                simulation: {
-                    ...state.simulation,
-                    grid: newGrid,
-                    sources: newSources,
-                },
+                grid: newGrid,
+                sources: newSources,
             };
         }
         case ActionType.AddSources: {
@@ -42,11 +36,8 @@ export default (
 
             return {
                 ...state,
-                simulation: {
-                    ...state.simulation,
-                    grid: newGrid,
-                    sources: newSources,
-                },
+                grid: newGrid,
+                sources: newSources,
             };
         }
         default:

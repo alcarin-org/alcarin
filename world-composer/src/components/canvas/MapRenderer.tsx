@@ -1,7 +1,8 @@
 import React from 'react';
+import { connect } from 'react-redux';
 
-import { connectContext } from '../../context/SimulationContext';
-import { MapType } from '../../context/state';
+import { RootState } from '../../store/rootState';
+import { MapType } from '../../store/reducers/settings/state';
 import { PressureBackground } from './background/PressureBackground';
 import { VelocityBackground } from './background/VelocityBackground';
 import { SolidBackground } from './background/SolidBackground';
@@ -14,14 +15,11 @@ interface Props {
     mapType: MapType;
 }
 
-export const MapRenderer = connectContext(
-    MapRendererComponent,
-    ({ state }) => ({
-        gridSize: state.simulation.grid.size,
-        drawFieldSize: state.settings.drawFieldSize,
-        mapType: state.settings.mapType,
-    })
-);
+export const MapRenderer = connect((state: RootState) => ({
+    gridSize: state.simulation.grid.size,
+    drawFieldSize: state.simulation.settings.drawFieldSize,
+    mapType: state.simulation.settings.mapType,
+}))(MapRendererComponent);
 
 function MapRendererComponent({ mapType, gridSize, drawFieldSize }: Props) {
     const canvasSizePx = drawFieldSize * gridSize;

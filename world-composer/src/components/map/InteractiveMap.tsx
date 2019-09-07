@@ -1,32 +1,31 @@
 import './InteractiveMap.scss';
 
 import React from 'react';
+import { connect } from 'react-redux';
 
 import { round, Point } from '../../utils/Math';
 import { isBufferWall } from '../../data/atmosphere/MACGrid';
 import { FluidSource } from '../../data/engine/FluidSourcesEngine';
 import { MapRenderer } from '../canvas/MapRenderer';
-import {
-    connectContext,
-    SimulationContextType,
-} from '../../context/SimulationContext';
-import { MapMode } from '../../context/state';
+import { RootState } from '../../store/rootState';
+import actions from '../../store/reducers/simulation/actions';
+import { MapMode } from '../../store/reducers/settings/state';
 
-export const InteractiveMap = connectContext(
-    InteractiveMapComponent,
-    ({ state, actions }) => ({
-        interaction: state.settings.mapInteraction,
-        drawFieldSize: state.settings.drawFieldSize,
+export const InteractiveMap = connect(
+    (state: RootState) => ({
+        interaction: state.simulation.settings.mapInteraction,
+        drawFieldSize: state.simulation.settings.drawFieldSize,
         gridSize: state.simulation.grid.size,
-
+    }),
+    {
         toggleSolid: actions.toggleSolid,
         removeSourcesAt: actions.removeSourcesAt,
         registerSource: actions.registerSource,
-    })
-);
+    }
+)(InteractiveMapComponent);
 
 interface Props {
-    interaction: SimulationContextType['state']['settings']['mapInteraction'];
+    interaction: RootState['simulation']['settings']['mapInteraction'];
     drawFieldSize: number;
     gridSize: number;
 

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
 
 import { ImageDataCanvas } from './ImageDataCanvas';
 import { createImageData } from '../utils/CanvasUtils';
 import { Color } from '../../../utils/Draw';
-import { connectContext } from '../../../context/SimulationContext';
+import { RootState } from '../../../store/rootState';
 
 interface Props {
     solids: Int8Array;
@@ -16,13 +17,10 @@ interface Props {
 const SolidColor: Color = [100, 100, 100, 255];
 const TransparentColor: Color = [50, 50, 50, 0];
 
-export const SolidBackground = connectContext(
-    SolidBackgroundComponent,
-    ({ state }) => ({
-        solids: state.simulation.grid.solids,
-        gridSize: state.simulation.grid.size,
-    })
-);
+export const SolidBackground = connect((state: RootState) => ({
+    solids: state.simulation.grid.solids,
+    gridSize: state.simulation.grid.size,
+}))(SolidBackgroundComponent);
 
 function SolidBackgroundComponent({
     solids,

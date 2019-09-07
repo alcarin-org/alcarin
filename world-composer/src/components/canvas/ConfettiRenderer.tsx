@@ -1,7 +1,8 @@
 // tslint:disable no-bitwise
 import React, { useEffect, useRef } from 'react';
+import { connect } from 'react-redux';
 
-import { connectContext } from '../../context/SimulationContext';
+import { RootState } from '../../store/rootState';
 import { useCanvas } from './utils/CanvasUtils';
 import { ParticlesData } from '../../data/convectable/Particles';
 
@@ -13,13 +14,12 @@ interface Props {
     height: number;
 }
 
-export const ConfettiRenderer = connectContext(
-    ConfettiRendererComponent,
-    ({ state }) => ({
+export const ConfettiRenderer = connect(
+    (state: RootState) => ({
         gridSize: state.simulation.grid.size,
         particles: state.simulation.particles,
     })
-);
+)(ConfettiRendererComponent);
 
 function ConfettiRendererComponent({
     gridSize,

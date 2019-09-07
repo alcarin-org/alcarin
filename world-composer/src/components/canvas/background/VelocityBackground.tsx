@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
 
 import * as MACGrid from '../../../data/atmosphere/MACGrid';
 import { ImageDataCanvas } from './ImageDataCanvas';
 import { createImageData } from '../utils/CanvasUtils';
 import { Color } from '../../../utils/Draw';
-import { connectContext } from '../../../context/SimulationContext';
+import { RootState } from '../../../store/rootState';
 import { magnitude } from '../../../utils/Math';
 
 interface Props {
@@ -22,12 +23,9 @@ function velocityColor(velocityMagnitude: number): Color {
     return [255 * factor, 0, 255 * (1 - factor), 255];
 }
 
-export const VelocityBackground = connectContext(
-    VelocityBackgroundComponent,
-    ({ state }) => ({
-        grid: state.simulation.grid,
-    })
-);
+export const VelocityBackground = connect((state: RootState) => ({
+    grid: state.simulation.grid,
+}))(VelocityBackgroundComponent);
 
 export function VelocityBackgroundComponent({
     canvasWidth,

@@ -1,10 +1,11 @@
 import './Stats.scss';
 
 import React, { useEffect, useState } from 'react';
+import { connect } from 'react-redux';
 
 import * as MACGrid from '../../data/atmosphere/MACGrid';
 import { magnitude } from '../../utils/Math';
-import { connectContext } from '../../context/SimulationContext';
+import { RootState } from '../../store/rootState';
 import {
     statsEngineFactory,
     create,
@@ -20,11 +21,11 @@ interface Props {
 
 const updateStats = statsEngineFactory();
 
-export const Stats = connectContext(StatsComponent, ({ state }) => ({
+export const Stats = connect((state: RootState) => ({
     grid: state.simulation.grid,
     particlesCount: state.simulation.particles.count,
     pressure: state.simulation.artifacts.lastPressureVector,
-}));
+}))(StatsComponent);
 
 function StatsComponent({ grid, particlesCount, pressure }: Props) {
     const [statsData, setStatsData] = useState(create);
