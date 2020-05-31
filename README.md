@@ -1,4 +1,4 @@
-# Alcarin
+# Alcarin [![codebeat badge](https://codebeat.co/badges/e5438889-6a8f-47e7-802a-5985b80fb34e)](https://codebeat.co/projects/github-com-alcarin-org-alcarin-master)
 
 Alcarin game project mono-repo.
 
