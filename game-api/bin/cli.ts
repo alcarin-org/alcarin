@@ -2,14 +2,7 @@ import { start } from 'repl';
 
 import { Connection } from 'typeorm';
 
-import {
-  createDatabaseConnection,
-  SharedMailboxRepo,
-  SharedMailboxUserRepo,
-  UserRepo,
-} from '../src/db';
-import { SharedMailbox } from '../src/db/entities/shared-mailbox';
-import { SharedMailboxUser } from '../src/db/entities/shared-mailbox-user';
+import { createDatabaseConnection, UserRepo } from '../src/db';
 import { User } from '../src/db/entities/user';
 
 createDatabaseConnection().then((connection: Connection) => {
@@ -18,10 +11,8 @@ createDatabaseConnection().then((connection: Connection) => {
   Object.assign(context, {
     connection,
     manager: connection.manager,
-    repos: { UserRepo, SharedMailboxRepo, SharedMailboxUserRepo },
+    repos: { UserRepo },
     User,
-    SharedMailbox,
-    SharedMailboxUser,
   });
   console.info('Db connection initialized');
 });

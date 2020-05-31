@@ -7,7 +7,6 @@ import { Connection, getConnection } from 'typeorm';
 
 import { createDatabaseConnection } from './db';
 import { MainScheduler, redis as queueRedis } from './queue';
-import { clearCachedGmailApis } from './shared/gmail';
 import { redis } from './queue/redis';
 import { envVars } from './shared/envVars';
 
@@ -32,7 +31,6 @@ afterEach(async () => {
   if (connection) {
     await cleanupTables(connection);
   }
-  clearCachedGmailApis();
   sinon.restore();
 });
 
