@@ -1,0 +1,33 @@
+version: '3'
+services:
+  api: &node_app
+    image: node:12.14.1-stretch
+    command: npm start
+    working_dir: /app/api
+    depends_on:
+      - db
+      - redis
+    env_file:
+      - ./.env
+    ports:
+      - '${PORT}:${PORT}'
+    volumes:
+      - .:/app
+
+  queue:
+    <<: *node_app
+    command: npm run queue
+    ports:
+      - '${PORT}'
+
+  db:
+    image: postgres:12.1-alpine
+    environment:
+      POSTGRES_USER: '${DB_USERNAME}'
+      POSTGRES_PASSWORD: '${DB_PASSWORD}'
+      POSTGRES_DB: '${DB_DATABASE}'
+    ports:
+      - '5432:5432'
+
+  redis:
+    image: redis:5.0.6-alpine
