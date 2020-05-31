@@ -1,8 +1,9 @@
 import React, { useEffect, useRef } from 'react';
+import { connect } from 'react-redux';
 
 import { useCanvas } from './utils/CanvasUtils';
 import { Point, multiply, clamp, magnitude, normalize } from '../../utils/Math';
-import { connectContext } from '../../context/SimulationContext';
+import { RootState } from '../../store/rootState';
 import {
     MACGridData,
     index,
@@ -18,12 +19,9 @@ interface Props {
 
 const VelocityDrawFactor = 1.3;
 
-export const VelocityFieldRenderer = connectContext(
-    VelocityFieldRendererComponent,
-    ({ state }) => ({
-        grid: state.simulation.grid,
-    })
-);
+export const VelocityFieldRenderer = connect((state: RootState) => ({
+    grid: state.simulation.grid,
+}))(VelocityFieldRendererComponent);
 
 function VelocityFieldRendererComponent({ grid, width, height }: Props) {
     const domCanvasRef = useRef<HTMLCanvasElement>(null);

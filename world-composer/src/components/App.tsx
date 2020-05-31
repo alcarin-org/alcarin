@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
+import { Provider } from 'react-redux';
 
-import { SimulationContextProvider } from '../context/SimulationContext';
 import { Page } from './Page';
 import GlobalTimer from '../utils/Timer';
+import { store } from '../store';
 
 import { ipcRenderer } from '../electron-bridge';
 
@@ -11,8 +12,8 @@ export function App() {
     useEffect(() => GlobalTimer.start(), []);
 
     return (
-        <SimulationContextProvider>
+        <Provider store={store}>
             <Page />
-        </SimulationContextProvider>
+        </Provider>
     );
 }

@@ -1,12 +1,13 @@
 import './Page.scss';
 
 import React, { useState, useCallback, useEffect } from 'react';
+import { connect } from 'react-redux';
 
-import { connectContext } from '../context/SimulationContext';
 import { InteractiveMap } from './map/InteractiveMap';
 import { ControlPanel } from './control-panel/ControlPanel';
 import { MainToolbar } from './MainToolbar';
 import GlobalTimer from '../utils/Timer';
+import actions from '../store/reducers/simulation/actions';
 
 interface Props {
     resetMap: () => void;
@@ -17,12 +18,15 @@ interface Props {
 
 const KEY_SPACE = 32;
 
-export const Page = connectContext(PageComponent, ({ state, actions }) => ({
-    resetMap: actions.resetMap,
-    randomizeVelocityField: actions.randomizeVelocityField,
-    spawnParticles: actions.spawnParticles,
-    updateSimulation: actions.updateSimulation,
-}));
+export const Page = connect(
+    null,
+    {
+        resetMap: actions.resetMap,
+        randomizeVelocityField: actions.randomizeVelocityField,
+        spawnParticles: actions.spawnParticles,
+        updateSimulation: actions.updateSimulation,
+    }
+)(PageComponent);
 
 function PageComponent({
     resetMap,
@@ -40,17 +44,20 @@ function PageComponent({
         });
     }, []);
 
-    useEffect(() => {
-        function onKeyDown(ev: KeyboardEvent) {
-            if (ev.ctrlKey && ev.keyCode === KEY_SPACE) {
-                onTogglePlay();
-                ev.stopPropagation();
-                ev.preventDefault();
+    useEffect(
+        () => {
+            function onKeyDown(ev: KeyboardEvent) {
+                if (ev.ctrlKey && ev.keyCode === KEY_SPACE) {
+                    onTogglePlay();
+                    ev.stopPropagation();
+                    ev.preventDefault();
+                }
             }
-        }
-        window.addEventListener('keydown', onKeyDown, true);
-        return () => window.removeEventListener('keydown', onKeyDown, true);
-    }, [onTogglePlay]);
+            window.addEventListener('keydown', onKeyDown, true);
+            return () => window.removeEventListener('keydown', onKeyDown, true);
+        },
+        [onTogglePlay]
+    );
 
     useEffect(() => GlobalTimer.onTick(updateSimulation), [updateSimulation]);
 

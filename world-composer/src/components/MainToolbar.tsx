@@ -1,8 +1,10 @@
 import React from 'react';
+import { connect } from 'react-redux';
 
 import { Toolbar, ToolbarButton, ToolbarSeparator } from './common/Toolbar';
-import { MapType } from '../context/state';
-import { connectContext } from '../context/SimulationContext';
+import { MapType } from '../store/reducers/settings/state';
+import actions from '../store/reducers/settings/actions';
+import { RootState } from '../store/rootState';
 
 interface Props {
     onToggleControlPanel: (visible: boolean) => void;
@@ -20,15 +22,16 @@ interface Props {
     mapType: MapType;
 }
 
-export const MainToolbar = connectContext(
-    MainToolbarComponent,
-    ({ state, actions }) => ({
+export const MainToolbar = connect(
+    (state: RootState) => ({
+        mapType: state.simulation.settings.mapType,
+    }),
+    {
         setMapType: actions.setMapType,
-        mapType: state.settings.mapType,
         increaseMapView: actions.increaseMapView,
         decreaseMapView: actions.decreaseMapView,
-    })
-);
+    }
+)(MainToolbarComponent);
 
 function MainToolbarComponent({
     onToggleControlPanel,

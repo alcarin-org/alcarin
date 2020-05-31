@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
+import { connect } from 'react-redux';
 
 import { Stats } from './Stats';
 import { GeneralSettings } from './GeneralSettings';
-import { MapMode } from '../../context/state';
-import { connectContext } from '../../context/SimulationContext';
+import { MapMode } from '../../store/reducers/settings/state';
+import actions from '../../store/reducers/settings/actions';
 import { FluidSource } from '../../data/engine/FluidSourcesEngine';
 import { FluidSourcePanel, DefaultFluidSource } from './FluidSourcePanel';
 import { FluidSinkPanel, DefaultFluidSink } from './FluidSinkPanel';
@@ -62,12 +63,12 @@ interface Props {
     setMapMode: (mode: MapMode, data?: any) => void;
 }
 
-export const ControlPanel = connectContext(
-    ControlPanelComponent,
-    ({ actions }) => ({
+export const ControlPanel = connect(
+    null,
+    {
         setMapMode: actions.setMapMode,
-    })
-);
+    }
+)(ControlPanelComponent);
 
 function ControlPanelComponent({ setMapMode }: Props) {
     const [currentTab, setCurrentTab] = useState(TabsDefinition[0]);

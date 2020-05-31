@@ -1,8 +1,10 @@
 import './Stats.scss';
 
 import React, { ChangeEvent } from 'react';
+import { connect } from 'react-redux';
 
-import { connectContext } from '../../context/SimulationContext';
+import { RootState } from '../../store/rootState';
+import actions from '../../store/reducers/settings/actions';
 
 interface Props {
     gridSize: number;
@@ -12,16 +14,17 @@ interface Props {
     calculationDetailsFactor: number;
 }
 
-export const GeneralSettings = connectContext(
-    GeneralSettingsComponent,
-    ({ state, actions }) => ({
+export const GeneralSettings = connect(
+    (state: RootState) => ({
         gridSize: state.simulation.grid.size,
-        timeFactor: state.settings.timeFactor,
+        timeFactor: state.simulation.settings.timeFactor,
+        calculationDetailsFactor: state.simulation.settings.calcDetailsFactor,
+    }),
+    {
         setTimeFactor: actions.setTimeFactor,
-        calculationDetailsFactor: state.settings.calcDetailsFactor,
         setCalcDetailsFactor: actions.setCalcDetailsFactor,
-    })
-);
+    }
+)(GeneralSettingsComponent);
 
 function GeneralSettingsComponent({
     gridSize,
