@@ -1,0 +1,27 @@
+.triple-layout {
+  display: flex;
+  flex-flow: row nowrap;
+  height: 100vh;
+}
+
+.triple-layout__main {
+
+  padding: 8px;
+  display: flex;
+  justify-content: center;
+
+  flex: 1;
+}
+
+.triple-layout__main-content {
+  display: flex;
+  flex-flow: column nowrap;
+
+  width: 640px;
+}
+
+.triple-layout__action,
+.triple-layout__info {
+  width: 320px;
+  padding: 8px;
+}
