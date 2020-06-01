@@ -1,0 +1,29 @@
+{
+  "scripts": {
+    "start": "snowpack dev",
+    "build": "snowpack build",
+    "check-all": "npm run check-types && npm run lint && npm test",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint . --ext js --ext ts",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@snowpack/app-scripts-react": "^1.0.6",
+    "@testing-library/jest-dom": "^5.5.0",
+    "@testing-library/react": "^10.0.3",
+    "@types/react": "^16.9.35",
+    "@types/react-dom": "^16.9.8",
+    "@typescript-eslint/eslint-plugin": "^2.15.0",
+    "@typescript-eslint/parser": "^2.15.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.9.0",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-prettier": "^3.1.2",
+    "jest": "^25.4.0",
+    "prettier": "^2.0.0",
+    "react": "^16.13.0",
+    "react-dom": "^16.13.0",
+    "snowpack": "^2.0.0",
+    "typescript": "^3.8.0"
+  }
+}

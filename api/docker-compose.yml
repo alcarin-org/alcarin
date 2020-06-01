@@ -3,7 +3,7 @@ services:
   api: &node_app
     image: node:12.14.1-stretch
     command: npm start
-    working_dir: /app/game-api
+    working_dir: /app/api
     depends_on:
       - db
       - redis
