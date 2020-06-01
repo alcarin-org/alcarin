@@ -8,26 +8,35 @@ services:
       - db
       - redis
     env_file:
-      - ./.env
+      - ./api/.env
     ports:
-      - '${PORT}:${PORT}'
+      - '8090:8090'
     volumes:
-      - ..:/app
+      - .:/app
 
   queue:
     <<: *node_app
     command: npm run queue
     ports:
-      - '${PORT}'
+      - '8090'
 
   db:
     image: postgres:12.1-alpine
-    environment:
-      POSTGRES_USER: '${DB_USERNAME}'
-      POSTGRES_PASSWORD: '${DB_PASSWORD}'
-      POSTGRES_DB: '${DB_DATABASE}'
+    env_file:
+      - ./api/.env
     ports:
       - '5432:5432'
 
   redis:
     image: redis:5.0.6-alpine
+
+  web:
+    image: node:12.17-stretch
+    command: npm start
+    working_dir: /app/web
+    depends_on:
+      - api
+    ports:
+      - '8080:8080'
+    volumes:
+      - .:/app
