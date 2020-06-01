@@ -1,8 +1,13 @@
 import supertest from 'supertest';
+import { Express } from 'express';
 
 import { setupExpressApp } from '../server/setup-express-app';
 
-const app = setupExpressApp();
+let app: Express;
+
+before(async () => {
+  app = await setupExpressApp();
+});
 
 function testApi(email?: string) {
   const agent = supertest.agent(app);

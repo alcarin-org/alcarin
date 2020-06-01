@@ -6,14 +6,20 @@ info:
 servers:
   - url: http://localhost:8080
   - url: http://dev.apollo.codequest.com
-components:
 paths:
   /test/test:
     summary: Test endpoint
     get:
+      tags:
+        - test
       responses:
         200:
           description:
             All is fine
-      tags:
-        - test
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string

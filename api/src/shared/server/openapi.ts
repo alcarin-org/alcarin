@@ -1,28 +1,26 @@
-import fs from 'fs';
-
 import { ErrorRequestHandler } from 'express';
-import { OpenApiValidator, ValidationError } from 'express-openapi-validate';
-import jsYaml from 'js-yaml';
+import { OpenApiValidator } from 'express-openapi-validator';
+import status from 'http-status-codes';
 
-const openApiDocument = jsYaml.safeLoad(
-  fs.readFileSync('./openapi.yml', 'utf-8')
-);
+import { isTest } from '../../shared/envVars';
 
-const validator = new OpenApiValidator(openApiDocument);
-
-export const validateReq = validator.validate.bind(validator);
-export const validateRes = validator.validateResponse.bind(validator);
+export const openApiValidator = new OpenApiValidator({
+  apiSpec: './openapi.yml',
+  validateRequests: true,
+  validateResponses: isTest(),
+});
 
 export function handleValidationError(): ErrorRequestHandler {
   return function validationErrorHandler(err, req, res, next) {
-    if (err instanceof ValidationError) {
-      res.status(err.statusCode || 500).json({
-        error: {
-          name: err.name,
-          message: err.message,
-          data: err.data,
-        },
-      });
+    if (err.path) {
+      const errRes = {
+        message: err.message,
+        errors: err.errors,
+      };
+      if (isTest()) {
+        console.log('BadRequest', errRes);
+      }
+      res.status(status.BAD_REQUEST).json(errRes);
     } else {
       next(err);
     }

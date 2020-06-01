@@ -8,11 +8,11 @@ import { boomErrorsHandler } from '../../middleware/boom-errors-handler.middlewa
 
 import { setupRoutes } from './setup-routes';
 import { jsonApi } from './json-api';
-import { handleValidationError } from './openapi';
+import { handleValidationError, openApiValidator } from './openapi';
 
 export { setupExpressApp };
 
-function setupExpressApp() {
+async function setupExpressApp() {
   const app = express();
 
   app.use(logger('dev'));
@@ -26,6 +26,8 @@ function setupExpressApp() {
   //     origin: envVars.WIZARD_APP_URL,
   //   })
   // );
+  await openApiValidator.install(app);
+
   app.use('/', setupRoutes());
   app.use(handleValidationError());
   app.use(queueUiRouter);

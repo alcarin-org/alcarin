@@ -1,7 +1,7 @@
 version: '3'
 services:
   api: &node_app
-    image: node:12.14.1-stretch
+    image: node:12.17-stretch
     command: npm start
     working_dir: /app/api
     depends_on:

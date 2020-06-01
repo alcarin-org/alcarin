@@ -11,7 +11,7 @@ async function main() {
 
     await createDatabaseConnection();
 
-    const app = setupExpressApp();
+    const app = await setupExpressApp();
 
     app.listen(envVars.PORT, () => {
       logger.info('Express server started on port: ' + envVars.PORT);
