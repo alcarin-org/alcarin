@@ -1,55 +1,12 @@
 import * as React from 'react';
 
-import {
-  TripleLayout,
-  MainSection,
-  MainSectionHeader,
-  InfoSection,
-  ActionSection,
-} from './TripleLayout';
-import logo from './logo.svg';
+import { PublicDashboard } from './public-dashboard/PublicDashboard';
 import 'public/App.css';
 
 function App() {
   return (
     <div className="App">
-      <TripleLayout>
-        <ActionSection>Do some actions!</ActionSection>
-        <MainSectionHeader>Simple header</MainSectionHeader>
-        <MainSection>
-          <img src={logo} className="App-logo" alt="logo" />
-
-          <h1 className="title">Bulma</h1>
-          <p className="subtitle">
-            Modern CSS framework based on{' '}
-            <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Flexible_Box_Layout/Basic_Concepts_of_Flexbox">
-              Flexbox
-            </a>
-          </p>
-
-          <div className="field">
-            <div className="control">
-              <input className="input" type="text" placeholder="Input" />
-            </div>
-          </div>
-
-          <div className="field">
-            <p className="control">
-              <span className="select">
-                <select>
-                  <option>Select dropdown</option>
-                </select>
-              </span>
-            </p>
-          </div>
-
-          <div className="buttons">
-            <a className="button is-primary">Primary</a>
-            <a className="button is-link">Link</a>
-          </div>
-        </MainSection>
-        <InfoSection>Additional Info</InfoSection>
-      </TripleLayout>
+      <PublicDashboard />
     </div>
   );
 }
