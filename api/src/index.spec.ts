@@ -8,15 +8,16 @@ import { Connection, getConnection } from 'typeorm';
 import { createDatabaseConnection } from './db';
 import { MainScheduler, redis as queueRedis } from './queue';
 import { redis } from './queue/redis';
-import { envVars } from './shared/envVars';
 
 chai.use(sinonChai);
 chai.should();
 
+const TestDatabase = 'testdb';
+
 before(async () => {
   await createTestDatabase();
   await createDatabaseConnection({
-    database: envVars.TEST_DATABASE,
+    database: TestDatabase,
     migrationsRun: true,
   });
 });
@@ -66,9 +67,9 @@ async function createTestDatabase() {
   });
 
   await localConnection.query(
-    `DROP DATABASE IF EXISTS "${envVars.TEST_DATABASE}"`
+    `DROP DATABASE IF EXISTS "${TestDatabase}"`
   );
-  await localConnection.query(`CREATE DATABASE "${envVars.TEST_DATABASE}"`);
+  await localConnection.query(`CREATE DATABASE "${TestDatabase}"`);
   await localConnection.close();
 }
 

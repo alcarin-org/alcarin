@@ -4,6 +4,7 @@ import passport from 'passport';
 // import cors from 'cors';
 
 import { preloadEntityStorage } from '../../middleware/preload-entity.middleware';
+import { loadPassportStrategies } from '../../modules/auth/passport-jwt.middleware';
 import { queueUiRouter } from '../../queue/ui';
 import { boomErrorsHandler } from '../../middleware/boom-errors-handler.middleware';
 
@@ -23,6 +24,8 @@ async function setupExpressApp() {
   app.use(preloadEntityStorage());
   app.use(jsonApi());
   app.use(passport.initialize());
+
+  loadPassportStrategies();
   // app.use(
   //   cors({
   //     origin: envVars.WIZARD_APP_URL,

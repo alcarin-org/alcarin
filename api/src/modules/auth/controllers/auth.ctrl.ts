@@ -1,26 +1,40 @@
 import { AppRequestHandler } from 'express';
+import boom from '@hapi/boom';
 import status from 'http-status-codes';
-import bcrypt from 'bcrypt';
 import jsonwebtoken from 'jsonwebtoken';
+import { QueryFailedError } from 'typeorm';
 
 import { logger } from '../../../shared/logger';
 import { envVars } from '../../../shared/envVars';
+import { registerUser } from '../auth.context';
+
+import bcrypt from 'bcrypt';
 import { UserRepo } from '../../../db';
 
-interface SignUpReq {
+interface AuthReq {
   body: {
     email: string;
     password: string;
   };
 }
 
-export const logIn: AppRequestHandler = async (req, res) => {
-  if (!req.user) {
-    res.status(501).send({ error: 'No user provided' });
+const InvalidAuthMessage = 'Invalid email or password';
+
+export const logIn: AppRequestHandler<AuthReq> = async (req, res) => {
+  const { email, password } = req.body;
+  const user = await UserRepo.get(email);
+  if (!user) {
+    throw boom.unauthorized(InvalidAuthMessage);
+  }
+
+  const passwordsMatch = await bcrypt.compare(password, user.passwordHash);
+
+  if (!passwordsMatch) {
+    throw boom.unauthorized(InvalidAuthMessage);
   }
 
   const payload = {
-    email: req.user.email,
+    ['client_id']: user.email,
   };
 
   const token = jsonwebtoken.sign(payload, envVars.AUTH_KEY, {
@@ -30,19 +44,26 @@ export const logIn: AppRequestHandler = async (req, res) => {
   });
 
   return res.status(status.OK).send({
-    ['access_token']: token,
-    ['token_type']: 'Bearer',
-    ['expires_at']: Date.now() / 1000 + envVars.AUTH_EXPIRATION_SEC,
+    accessToken: token,
+    tokenType: 'Bearer',
+    expiresAt: Math.trunc(Date.now() / 1000 + envVars.AUTH_EXPIRATION_SEC),
   });
 };
 
-export const signUp: AppRequestHandler<SignUpReq> = async (req, res) => {
+export const signUp: AppRequestHandler<AuthReq> = async (req, res) => {
   const { email, password } = req.body;
 
-  const hashCost: number = envVars.BCRYPT_ROUNDS;
-
-  const passwordHash = await bcrypt.hash(password, hashCost);
-  await UserRepo.register(email, passwordHash);
+  try {
+    await registerUser(email, password);
+  } catch (err) {
+    if (err instanceof QueryFailedError) {
+      // we quitely ignore this to not letting know potential attacker that given
+      // email address already exist in our database
+      res.status(status.CREATED).send();
+    } else {
+      throw err;
+    }
+  }
 
   logger.info(`New user account created: "${email}"`);
 

@@ -1,8 +1,9 @@
 import status from 'http-status-codes';
-import testApi from '@spec/api';
+
+import testApi from '../../../shared/spec/api';
 
 describe('Test controller', () => {
-  it('should return 200 if shared mailbox does not exists, but do not queue message', async () => {
+  it('should return 200', async () => {
     const res = await testApi()
       .get(`/test/test`)
       .send()

@@ -16,6 +16,6 @@ export class UserRepository {
       passwordHash,
     });
 
-    return this.manager.save(user);
+    return this.manager.insert(User, user);
   }
 }

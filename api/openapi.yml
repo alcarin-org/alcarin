@@ -1,11 +1,10 @@
 openapi: 3.0.1
 info:
   title: MailTeam Gmail Addon API
-  description: Part of the MailTeam system, providing server support for MailTeam Gmail Addon
+  description: 'Part of the MailTeam system, providing server support for MailTeam Gmail Addon'
   version: 1.0.0
 servers:
-  - url: http://localhost:8080
-  - url: http://dev.apollo.codequest.com
+  - url: 'http://localhost:8080'
 paths:
   /test/test:
     summary: Test endpoint
@@ -13,9 +12,8 @@ paths:
       tags:
         - test
       responses:
-        200:
-          description:
-            All is fine
+        '200':
+          description: All is fine
           content:
             application/json:
               schema:
@@ -23,3 +21,64 @@ paths:
                 properties:
                   message:
                     type: string
+  /users:
+    post:
+      summary: ''
+      operationId: create-user
+      responses:
+        '201':
+          description: Created
+      description: Create new user with provided email and password
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorizationData'
+        description: ''
+  /session:
+    post:
+      summary: ''
+      operationId: login
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  accessToken:
+                    type: string
+                    description: JWT to authorize following requests
+                  tokenType:
+                    type: string
+                  expiresAt:
+                    type: number
+                    description: Unix timestamp (in seconds) when the token will expire
+                required:
+                  - accessToken
+                  - tokenType
+                  - expiresAt
+      description: Log in to the system and create new session token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorizationData'
+components:
+  schemas:
+    AuthorizationData:
+      type: object
+      title: AuthorizationData
+      additionalProperties: false
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+      required:
+        - email
+        - password
