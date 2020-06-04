@@ -59,8 +59,6 @@ export const envVars = {
   PORT: Number(process.env.PORT) || 8080,
   URL_BASE: process.env.URL_BASE as string,
   LOG_LEVEL: process.env.LOG_LEVEL as string,
-  FIRST_SYNC_DISABLED: process.env.FIRST_SYNC_DISABLED === 'true',
-  WIZARD_APP_URL: process.env.WIZARD_APP_URL as string,
 
   DB_HOST: process.env.DB_HOST as string,
   DB_PORT: Number(process.env.DB_PORT) || 5432,
@@ -68,18 +66,6 @@ export const envVars = {
   DB_PASSWORD: process.env.DB_PASSWORD || '',
   DB_LOGGING: process.env.DB_LOGGING === 'true',
   DB_DATABASE: process.env.DB_DATABASE as string,
-  TEST_DATABASE: process.env.TEST_DATABASE || 'testdb',
-
-  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID as string,
-  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET as string,
-  APPS_SCRIPT_GOOGLE_CLOUD_CLIENT_ID: process.env
-    .APPS_SCRIPT_GOOGLE_CLOUD_CLIENT_ID as string,
-
-  PUB_SUB_TOPIC: process.env.PUB_SUB_TOPIC as string,
-  PUB_SUB_SUBSCRIPTION: process.env.PUB_SUB_SUBSCRIPTION as string,
-  PUB_SUB_SERVICE_ACCOUNT_EMAIL: process.env
-    .PUB_SUB_SERVICE_ACCOUNT_EMAIL as string,
-  PUB_SUB_SERVICE_ACCOUNT_ID: process.env.PUB_SUB_SERVICE_ACCOUNT_ID as string,
 
   REDIS_PORT: Number(process.env.REDIS_PORT) || 6379,
   REDIS_HOST: process.env.REDIS_HOST as string,
@@ -88,6 +74,11 @@ export const envVars = {
 
   QUEUE_UI_USER: process.env.QUEUE_UI_USER || 'admin',
   QUEUE_UI_PASSWORD: process.env.QUEUE_UI_PASSWORD || 'admin',
+
+  AUTH_KEY: process.env.AUTH_KEY || '',
+  // add proper validation
+  BCRYPT_ROUNDS: parseInt(process.env.BCRYPT_ROUNDS || '12'),
+  AUTH_EXPIRATION_SEC: parseInt(process.env.AUTH_EXPIRATION_SEC || '3600'),
 };
 
 // export function validateEnvVars() {

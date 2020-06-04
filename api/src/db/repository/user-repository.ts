@@ -9,4 +9,13 @@ export class UserRepository {
   async get(email: string) {
     return this.manager.findOne(User, { email });
   }
+
+  async register(email: string, passwordHash: string) {
+    const user = this.manager.create(User, {
+      email,
+      passwordHash,
+    });
+
+    return this.manager.save(user);
+  }
 }

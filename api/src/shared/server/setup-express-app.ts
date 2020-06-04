@@ -1,5 +1,6 @@
 import express from 'express';
 import logger from 'morgan';
+import passport from 'passport';
 // import cors from 'cors';
 
 import { preloadEntityStorage } from '../../middleware/preload-entity.middleware';
@@ -21,6 +22,7 @@ async function setupExpressApp() {
   app.use(express.urlencoded({ extended: true }));
   app.use(preloadEntityStorage());
   app.use(jsonApi());
+  app.use(passport.initialize());
   // app.use(
   //   cors({
   //     origin: envVars.WIZARD_APP_URL,
