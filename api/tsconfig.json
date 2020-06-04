@@ -14,12 +14,8 @@
     "target": "es6",
     "lib": ["es2019"],
     "moduleResolution": "node",
-    "types": ["node", "mocha", "chai", "sinon-chai"],
-    "typeRoots": ["src/types", "node_modules/@types"],
-    "strictPropertyInitialization": false,
-    "paths": {
-      "@spec/*": ["src/shared/spec/*"]
-    }
+    "typeRoots": ["./src/types", "./node_modules/@types"],
+    "strictPropertyInitialization": false
   },
-  "include": ["../common/**/*.ts", "src/**/*.ts", "bin/**/*.ts"]
+  "include": ["src/**/*.ts", "bin/**/*.ts"]
 }

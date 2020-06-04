@@ -1,6 +1,6 @@
 import * as core from 'express-serve-static-core';
 
-import { User } from '../db/entities/user';
+import { User } from '../../db/entities/user';
 
 declare type ObjectType<T> = { new (): T } | Function;
 declare interface EntityMap {
