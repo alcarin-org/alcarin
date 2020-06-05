@@ -3,12 +3,11 @@ import boom from '@hapi/boom';
 import status from 'http-status-codes';
 import jsonwebtoken from 'jsonwebtoken';
 import { QueryFailedError } from 'typeorm';
+import bcrypt from 'bcrypt';
 
 import { logger } from '../../../shared/logger';
 import { envVars } from '../../../shared/envVars';
 import { registerUser } from '../auth.context';
-
-import bcrypt from 'bcrypt';
 import { UserRepo } from '../../../db';
 
 interface AuthReq {
