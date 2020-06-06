@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import { PublicDashboard } from './public-dashboard/PublicDashboard';
+import { PublicDashboard } from './publicDashboard/PublicDashboard';
+
 import 'public/App.css';
 
 function App() {

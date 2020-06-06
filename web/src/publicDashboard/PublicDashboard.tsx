@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { useSelector } from 'react-redux';
 
 import {
   TripleLayout,
@@ -7,17 +8,25 @@ import {
   InfoSection,
   ActionSection,
 } from '../components/TripleLayout';
+import { RootState, useAppDispatch } from '../store';
 
-import 'public/public-dashboard/PublicDashboard.css';
-
+import { setTest } from './publicDashboardSlice';
 import { LoginForm } from './LoginForm';
 import { SignUpForm } from './SignUpForm';
 
+import 'public/public-dashboard/PublicDashboard.css';
+
 export function PublicDashboard() {
+  const value = useSelector<RootState>((store) => store.publicDashboard.test);
+  const dispatch = useAppDispatch();
+
   return (
     <div className="public-dashboard">
       <TripleLayout>
-        <ActionSection>Do some actions!</ActionSection>
+        <ActionSection>
+          Do some actions! - {value}
+          <button onClick={() => dispatch(setTest(5))}>Click</button>
+        </ActionSection>
         <MainSectionHeader>Simple header</MainSectionHeader>
         <MainSection>
           <div className="card public-dashboard__card">
