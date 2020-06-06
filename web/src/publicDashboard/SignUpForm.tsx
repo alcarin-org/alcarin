@@ -2,7 +2,7 @@ import * as React from 'react';
 
 export function SignUpForm() {
   return (
-    <form id="login-form">
+    <form id="signup-form">
       <div className="field">
         <label className="label">Email</label>
         <div className="control">

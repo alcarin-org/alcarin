@@ -4,5 +4,5 @@
     "run:sass": "sass src:public --no-source-map",
     "run:sass::watch": "$1 --watch"
   },
-  "plugins": []
+  "plugins": ["@snowpack/plugin-dotenv"]
 }
