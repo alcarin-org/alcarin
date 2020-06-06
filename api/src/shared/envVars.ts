@@ -12,6 +12,9 @@ const envVarsSchema = Joi.object({
   URL_BASE: Joi.string()
     .uri()
     .required(),
+  WEB_BASE_URL: Joi.string()
+    .uri()
+    .required(),
   LOG_LEVEL: Joi.string()
     .valid(
       'debug',
@@ -66,6 +69,7 @@ export const envVars = {
   NODE_ENV: process.env.NODE_ENV || '',
   PORT: parseEnvNumber('PORT', 8080),
   URL_BASE: process.env.URL_BASE || '',
+  WEB_BASE_URL: process.env.WEB_BASE_URL || '',
   LOG_LEVEL: process.env.LOG_LEVEL || '',
 
   DB_HOST: process.env.DB_HOST || '',
