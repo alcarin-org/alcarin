@@ -9,10 +9,6 @@ import rootReducer from './reducer';
 
 export const store = configureStore({
   reducer: rootReducer,
-  middleware: [
-    createImmutableStateInvariantMiddleware(),
-    createSerializableStateInvariantMiddleware(),
-  ],
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

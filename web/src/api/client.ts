@@ -38,5 +38,8 @@ async function call<TResponseBody>({ method, path, query, body }: CallArgs) {
     },
   });
   const res = await fetch(req);
-  return { status: res.status, body: (await res.json()) as TResponseBody };
+  return {
+    status: res.status,
+    body: res.bodyUsed && ((await res.json()) as TResponseBody),
+  };
 }

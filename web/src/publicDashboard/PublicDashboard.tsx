@@ -10,7 +10,7 @@ import {
 } from '../components/TripleLayout';
 import { RootState, useAppDispatch } from '../store';
 
-import { setTest } from './publicDashboardSlice';
+import { signUp } from './publicDashboardSlice';
 import { LoginForm } from './LoginForm';
 import { SignUpForm } from './SignUpForm';
 
@@ -25,7 +25,15 @@ export function PublicDashboard() {
       <TripleLayout>
         <ActionSection>
           Do some actions! - {value}
-          <button onClick={() => dispatch(setTest(5))}>Click</button>
+          <button
+            onClick={() =>
+              dispatch(
+                signUp({ email: 'test@test.test', password: 'apdsasadssdass' })
+              )
+            }
+          >
+            Click
+          </button>
         </ActionSection>
         <MainSectionHeader>Simple header</MainSectionHeader>
         <MainSection>
