@@ -14,21 +14,34 @@ const validationSchema = Yup.object({
   password: Yup.string().min(6).required(),
 });
 
-export function LoginForm() {
+type OnSubmitType = (formData: typeof initialValues) => Promise<void>;
+
+export function LoginForm({ onSubmit }: { onSubmit: OnSubmitType }) {
   return (
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchema}
-      onSubmit={(values, { setSubmitting }) => console.log('submitted', values)}
+      onSubmit={onSubmit}
     >
-      <Form id="login-form">
-        <BulmaInput label="Email" name="email" placeholder="Adres email" />
-        <BulmaInput label="Hasło" name="password" placeholder="Hasło" />
+      {({ isSubmitting }) => (
+        <Form id="login-form">
+          <BulmaInput label="Email" name="email" placeholder="Adres email" />
+          <BulmaInput
+            label="Hasło"
+            name="password"
+            type="password"
+            placeholder="Hasło"
+          />
 
-        <button className="button is-link" type="submit">
-          Zaloguj
-        </button>
-      </Form>
+          <button
+            className="button is-link"
+            type="submit"
+            disabled={isSubmitting}
+          >
+            Gotowe
+          </button>
+        </Form>
+      )}
     </Formik>
   );
 }

@@ -20,42 +20,50 @@ const validationSchema = Yup.object({
   birthday: Yup.date().required(),
 });
 
-export function SignUpForm() {
+type OnSubmitType = (formData: typeof initialValues) => Promise<void>;
+
+export function SignUpForm({ onSubmit }: { onSubmit: OnSubmitType }) {
   return (
     <Formik
       initialValues={initialValues}
       validationSchema={validationSchema}
-      onSubmit={(values, { setSubmitting }) => console.log('submitted', values)}
+      onSubmit={onSubmit}
     >
-      <Form id="signup-form">
-        <BulmaInput name="email" label="Email" placeholder="Adres email" />
+      {({ isSubmitting }) => (
+        <Form id="signup-form">
+          <BulmaInput name="email" label="Email" placeholder="Adres email" />
 
-        <BulmaInput
-          name="password"
-          label="Hasło"
-          type="password"
-          placeholder="Hasło"
-        />
+          <BulmaInput
+            name="password"
+            label="Hasło"
+            type="password"
+            placeholder="Hasło"
+          />
 
-        <BulmaInput
-          name="repeatedPassword"
-          label="Powtórz hasło"
-          type="password"
-          placeholder="Hasło"
-        />
+          <BulmaInput
+            name="repeatedPassword"
+            label="Powtórz hasło"
+            type="password"
+            placeholder="Hasło"
+          />
 
-        <BulmaInput
-          name="birthday"
-          label="Data urodzenia"
-          type="date"
-          placeholder="Data"
-          min="1920-01-01"
-        />
+          <BulmaInput
+            name="birthday"
+            label="Data urodzenia"
+            type="date"
+            placeholder="Data"
+            min="1920-01-01"
+          />
 
-        <button className="button is-link" type="submit">
-          Gotowe
-        </button>
-      </Form>
+          <button
+            className="button is-link"
+            type="submit"
+            disabled={isSubmitting}
+          >
+            Gotowe
+          </button>
+        </Form>
+      )}
     </Formik>
   );
 }

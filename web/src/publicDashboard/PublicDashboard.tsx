@@ -42,7 +42,11 @@ export function PublicDashboard() {
               <span className="card-header-title">Zaloguj się</span>
             </div>
             <div className="card-content">
-              <LoginForm />
+              <LoginForm
+                onSubmit={(data) => {
+                  return new Promise((resolve) => setTimeout(resolve, 1000));
+                }}
+              />
             </div>
           </div>
 
@@ -51,7 +55,11 @@ export function PublicDashboard() {
               <span className="card-header-title">Załóż nowe konto</span>
             </div>
             <div className="card-content">
-              <SignUpForm />
+              <SignUpForm
+                onSubmit={(data) => {
+                  return new Promise((resolve) => setTimeout(resolve, 1000));
+                }}
+              />
             </div>
           </div>
         </MainSection>
