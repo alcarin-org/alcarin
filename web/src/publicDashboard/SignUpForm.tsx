@@ -1,48 +1,61 @@
 import * as React from 'react';
+import { Formik, Form } from 'formik';
+import * as Yup from 'yup';
+
+import { BulmaInput } from '../components/BulmaInput';
+
+const initialValues = {
+  email: '',
+  password: '',
+  repeatedPassword: '',
+  birthday: '',
+};
+
+const validationSchema = Yup.object({
+  email: Yup.string().email().required(),
+  password: Yup.string().min(6).required(),
+  repeatedPassword: Yup.string()
+    .oneOf([Yup.ref('password')], 'Passwords do not match')
+    .required(),
+  birthday: Yup.date().required(),
+});
 
 export function SignUpForm() {
   return (
-    <form id="signup-form">
-      <div className="field">
-        <label className="label">Email</label>
-        <div className="control">
-          <input className="input" type="text" placeholder="Adres email" />
-        </div>
-      </div>
+    <Formik
+      initialValues={initialValues}
+      validationSchema={validationSchema}
+      onSubmit={(values, { setSubmitting }) => console.log('submitted', values)}
+    >
+      <Form id="signup-form">
+        <BulmaInput name="email" label="Email" placeholder="Adres email" />
 
-      <div className="field">
-        <label className="label">Hasło</label>
-        <div className="control">
-          <input className="input" type="password" placeholder="Hasło" />
-        </div>
-      </div>
+        <BulmaInput
+          name="password"
+          label="Hasło"
+          type="password"
+          placeholder="Hasło"
+        />
 
-      <div className="field">
-        <label className="label">Powtórz hasło</label>
-        <div className="control">
-          <input className="input" type="password" placeholder="Hasło" />
-        </div>
-      </div>
+        <BulmaInput
+          name="repeatedPassword"
+          label="Powtórz hasło"
+          type="password"
+          placeholder="Hasło"
+        />
 
-      <div className="field">
-        <label className="label">Data urodzenia</label>
-        <div className="control">
-          <input
-            className="input"
-            type="date"
-            placeholder="Data"
-            min="1920-01-01"
-          />
-        </div>
-      </div>
+        <BulmaInput
+          name="birthday"
+          label="Data urodzenia"
+          type="date"
+          placeholder="Data"
+          min="1920-01-01"
+        />
 
-      <div className="field">
-        <div className="control">
-          <button className="button is-link" type="submit">
-            Gotowe
-          </button>
-        </div>
-      </div>
-    </form>
+        <button className="button is-link" type="submit">
+          Gotowe
+        </button>
+      </Form>
+    </Formik>
   );
 }
