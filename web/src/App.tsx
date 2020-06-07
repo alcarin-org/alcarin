@@ -1,13 +1,18 @@
 import * as React from 'react';
+import { Switch, Route } from 'react-router-dom';
 
 import { PublicDashboard } from './publicDashboard/PublicDashboard';
-
-import 'public/App.css';
+import { PrivateRoute } from './shared/router';
 
 function App() {
   return (
     <div className="App">
-      <PublicDashboard />
+      <Switch>
+        <Route exact path="/">
+          <PublicDashboard />
+        </Route>
+        <PrivateRoute path="/dashboard">A secured route!</PrivateRoute>
+      </Switch>
     </div>
   );
 }
