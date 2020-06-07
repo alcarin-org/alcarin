@@ -1,14 +1,11 @@
 import { AppRequestHandler } from 'express';
 import boom from '@hapi/boom';
 import status from 'http-status-codes';
-import jsonwebtoken from 'jsonwebtoken';
 import { QueryFailedError } from 'typeorm';
-import bcrypt from 'bcrypt';
 
 import { logger } from '../../../shared/logger';
 import { envVars } from '../../../shared/envVars';
-import { registerUser } from '../auth.context';
-import { UserRepo } from '../../../db';
+import { registerUser, logInUser } from '../auth.context';
 
 interface AuthReq {
   body: {
@@ -17,36 +14,20 @@ interface AuthReq {
   };
 }
 
-const InvalidAuthMessage = 'Invalid email or password';
-
 export const logIn: AppRequestHandler<AuthReq> = async (req, res) => {
   const { email, password } = req.body;
-  const user = await UserRepo.get(email);
-  if (!user) {
-    throw boom.unauthorized(InvalidAuthMessage);
+  try {
+    const token = await logInUser(email, password);
+    logger.info(`User "${email}" logged in`);
+
+    return res.status(status.OK).send({
+      accessToken: token,
+      tokenType: 'Bearer',
+      expiresAt: Math.trunc(Date.now() / 1000 + envVars.AUTH_EXPIRATION_SEC),
+    });
+  } catch (err) {
+    throw boom.unauthorized(err.message);
   }
-
-  const passwordsMatch = await bcrypt.compare(password, user.passwordHash);
-
-  if (!passwordsMatch) {
-    throw boom.unauthorized(InvalidAuthMessage);
-  }
-
-  const payload = {
-    ['client_id']: user.email,
-  };
-
-  const token = jsonwebtoken.sign(payload, envVars.AUTH_KEY, {
-    issuer: envVars.URL_BASE,
-    audience: envVars.URL_BASE,
-    expiresIn: envVars.AUTH_EXPIRATION_SEC,
-  });
-
-  return res.status(status.OK).send({
-    accessToken: token,
-    tokenType: 'Bearer',
-    expiresAt: Math.trunc(Date.now() / 1000 + envVars.AUTH_EXPIRATION_SEC),
-  });
 };
 
 export const signUp: AppRequestHandler<AuthReq> = async (req, res) => {
