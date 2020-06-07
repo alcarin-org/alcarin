@@ -6,9 +6,10 @@ type LayoutSection = typeof MainSection;
 
 interface TripleLayoutProps {
   children: React.ReactElement[];
+  className?: string;
 }
 
-export function TripleLayout({ children }: TripleLayoutProps) {
+export function TripleLayout({ children, className }: TripleLayoutProps) {
   const mainSection = children.find((child) => child.type === MainSection);
   const actionSection = children.find((child) => child.type === ActionSection);
   const infoSection = children.find((child) => child.type === InfoSection);
@@ -17,7 +18,7 @@ export function TripleLayout({ children }: TripleLayoutProps) {
   );
 
   return (
-    <div className="triple-layout">
+    <div className={`triple-layout ${className || ''}`}>
       {actionSection && (
         <section className="triple-layout__action">{actionSection}</section>
       )}
