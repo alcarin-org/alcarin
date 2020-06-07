@@ -26,8 +26,11 @@ paths:
       summary: ''
       operationId: create-user
       responses:
-        '201':
-          description: Created
+        '204':
+          description:
+            Account created or account already exists. The response for both
+            cases are indistinguishable by desing to prevent email probing by
+            potential attackers
       description: Create new user with provided email and password
       requestBody:
         content:

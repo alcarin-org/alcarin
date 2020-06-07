@@ -9,32 +9,22 @@ import {
   ActionSection,
 } from '../components/TripleLayout';
 import { RootState, useAppDispatch } from '../store';
+import { registerUser } from '../api/auth';
 
-import { signUp } from './publicDashboardSlice';
+import { logIn } from './sessionSlice';
 import { LoginForm } from './LoginForm';
 import { SignUpForm } from './SignUpForm';
 
 import 'public/public-dashboard/PublicDashboard.css';
 
 export function PublicDashboard() {
-  const value = useSelector<RootState>((store) => store.publicDashboard.test);
+  // const value = useSelector<RootState>((store) => store.publicDashboard.test);
   const dispatch = useAppDispatch();
 
   return (
     <div className="public-dashboard">
       <TripleLayout>
-        <ActionSection>
-          Do some actions! - {value}
-          <button
-            onClick={() =>
-              dispatch(
-                signUp({ email: 'test@test.test', password: 'apdsasadssdass' })
-              )
-            }
-          >
-            Click
-          </button>
-        </ActionSection>
+        <ActionSection>Do some actions!</ActionSection>
         <MainSectionHeader>Simple header</MainSectionHeader>
         <MainSection>
           <div className="card public-dashboard__card">
@@ -43,8 +33,8 @@ export function PublicDashboard() {
             </div>
             <div className="card-content">
               <LoginForm
-                onSubmit={(data) => {
-                  return new Promise((resolve) => setTimeout(resolve, 1000));
+                onSubmit={async (formData) => {
+                  await dispatch(logIn(formData));
                 }}
               />
             </div>
@@ -56,8 +46,8 @@ export function PublicDashboard() {
             </div>
             <div className="card-content">
               <SignUpForm
-                onSubmit={(data) => {
-                  return new Promise((resolve) => setTimeout(resolve, 1000));
+                onSubmit={async (formData) => {
+                  await registerUser(formData);
                 }}
               />
             </div>

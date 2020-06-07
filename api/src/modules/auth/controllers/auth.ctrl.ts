@@ -39,7 +39,7 @@ export const signUp: AppRequestHandler<AuthReq> = async (req, res) => {
     if (err instanceof QueryFailedError) {
       // we quitely ignore this to not letting know potential attacker that given
       // email address already exist in our database
-      res.status(status.CREATED).send();
+      res.status(status.NO_CONTENT).send();
     } else {
       throw err;
     }
@@ -47,5 +47,5 @@ export const signUp: AppRequestHandler<AuthReq> = async (req, res) => {
 
   logger.info(`New user account created: "${email}"`);
 
-  return res.status(status.CREATED).send();
+  return res.status(status.NO_CONTENT).send();
 };

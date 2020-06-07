@@ -33,6 +33,8 @@ services:
   web:
     image: node:12.17-stretch
     command: npm start
+    stdin_open: true
+    tty: true
     working_dir: /app/web
     depends_on:
       - api

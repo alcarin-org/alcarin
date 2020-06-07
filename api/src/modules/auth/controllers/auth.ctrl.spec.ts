@@ -10,14 +10,14 @@ describe('Auth controller', () => {
   const testPassword = 'test123';
 
   describe('sign up', () => {
-    it('should return 201 and register the user', async () => {
+    it('should return 204 and register the user', async () => {
       await testApi()
         .post('/users')
         .send({
           email: testEmail,
           password: testPassword,
         })
-        .expect(status.CREATED);
+        .expect(status.NO_CONTENT);
     });
 
     it('should queitely refuse registration for already registered email address', async () => {
@@ -27,7 +27,7 @@ describe('Auth controller', () => {
           email: testEmail,
           password: testPassword,
         })
-        .expect(status.CREATED);
+        .expect(status.NO_CONTENT);
 
       await testApi()
         .post('/users')
@@ -35,7 +35,7 @@ describe('Auth controller', () => {
           email: testEmail,
           password: testPassword,
         })
-        .expect(status.CREATED);
+        .expect(status.NO_CONTENT);
 
       const users = await connection.manager.find(User);
       users.length.should.equal(1);

@@ -2,6 +2,10 @@
 // @snowpack/app-scripts-react
 const BaseUrl: string = (import.meta as any).env.SNOWPACK_PUBLIC_API_URL;
 
+enum HttpStatus {
+  NoContent = 204,
+}
+
 export function get<TResponseBody>(
   path: string,
   body: {},
@@ -38,8 +42,15 @@ async function call<TResponseBody>({ method, path, query, body }: CallArgs) {
     },
   });
   const res = await fetch(req);
-  return {
-    status: res.status,
-    body: res.bodyUsed && ((await res.json()) as TResponseBody),
-  };
+  if (res.status >= 400) {
+    throw new Error(
+      `Api error: "${res.status}", ${
+        res.body ? JSON.stringify(res.body) : 'Unknown'
+      }`
+    );
+  }
+
+  return (res.status === HttpStatus.NoContent
+    ? null
+    : await res.json()) as TResponseBody;
 }

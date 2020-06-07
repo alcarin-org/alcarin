@@ -1,7 +1,7 @@
 import { combineReducers } from 'redux';
 
-import publicDashboardReducer from '../publicDashboard/publicDashboardSlice';
+import sessionReducer from '../publicDashboard/sessionSlice';
 
 export default combineReducers({
-  publicDashboard: publicDashboardReducer,
+  session: sessionReducer,
 });

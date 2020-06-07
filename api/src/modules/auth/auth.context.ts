@@ -10,8 +10,7 @@ export async function registerUser(email: string, password: string) {
   const hashCost: number = envVars.BCRYPT_ROUNDS;
 
   const passwordHash = await bcrypt.hash(password, hashCost);
-  await UserRepo.register(email, passwordHash);
-  return createAuthToken(email);
+  return UserRepo.register(email, passwordHash);
 }
 
 export async function logInUser(email: string, password: string) {
