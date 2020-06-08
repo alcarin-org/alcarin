@@ -1,4 +1,4 @@
-import './TripleLayout.css';
+import 'public/static/components/TripleLayout.css';
 
 import * as React from 'react';
 

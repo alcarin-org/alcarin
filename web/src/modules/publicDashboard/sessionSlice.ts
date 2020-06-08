@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-import { logInUser } from '../api/auth';
+import { logInUser } from '../../api/auth';
 
 interface AuthPayload {
   email: string;

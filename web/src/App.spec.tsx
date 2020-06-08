@@ -3,7 +3,7 @@ import { render } from '@testing-library/react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { Provider } from 'react-redux';
-import { createStore } from 'redux';
+// import { createStore } from 'redux';
 
 import App from './App';
 import { store } from './store';
@@ -14,7 +14,6 @@ test('renders learn react link', () => {
       <Provider store={store}>
         <App />
       </Provider>
-      }
     </Router>
   );
   const linkElement = getByText(/Do some actions!/i);

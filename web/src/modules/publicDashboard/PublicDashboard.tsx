@@ -8,16 +8,16 @@ import {
   MainSectionHeader,
   InfoSection,
   ActionSection,
-} from '../components/TripleLayout';
-import { useAppDispatch } from '../store';
-import { registerUser } from '../api/auth';
-import { ConfirmModal } from '../components/ConfirmModal';
+} from '../../components/TripleLayout';
+import { useAppDispatch } from '../../store';
+import { registerUser } from '../../api/auth';
+import { ConfirmModal } from '../../components/ConfirmModal';
 
 import { logIn } from './sessionSlice';
 import { LoginForm } from './LoginForm';
 import { SignUpForm } from './SignUpForm';
 
-// import 'public/publicDashboard/PublicDashboard.css';
+import 'public/static/modules/publicDashboard/PublicDashboard.css';
 
 export function PublicDashboard() {
   const dispatch = useAppDispatch();
