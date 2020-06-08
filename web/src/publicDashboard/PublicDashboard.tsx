@@ -17,7 +17,7 @@ import { logIn } from './sessionSlice';
 import { LoginForm } from './LoginForm';
 import { SignUpForm } from './SignUpForm';
 
-import 'public/public-dashboard/PublicDashboard.css';
+// import 'public/publicDashboard/PublicDashboard.css';
 
 export function PublicDashboard() {
   const dispatch = useAppDispatch();

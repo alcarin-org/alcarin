@@ -1,8 +1,4 @@
-import {
-  configureStore,
-  createImmutableStateInvariantMiddleware,
-  createSerializableStateInvariantMiddleware,
-} from '@reduxjs/toolkit';
+import { configureStore } from '@reduxjs/toolkit';
 import { useDispatch } from 'react-redux';
 
 import rootReducer from './reducer';
