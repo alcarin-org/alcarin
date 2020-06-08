@@ -11,7 +11,7 @@ export function PrivateRoute({ children, ...rest }: RouteProps) {
     <Route
       {...rest}
       render={({ location }) =>
-        !!session.authToken ? (
+        !!session.accessToken ? (
           children
         ) : (
           <Redirect
