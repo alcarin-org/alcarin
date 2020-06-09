@@ -1,4 +1,4 @@
-import 'public/static/modules/publicDashboard/PublicDashboard.css';
+import './PublicDashboard.css';
 
 import * as React from 'react';
 import { useState } from 'react';

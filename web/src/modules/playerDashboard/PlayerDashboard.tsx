@@ -1,4 +1,4 @@
-import 'public/static/modules/playerDashboard/PlayerDashboard.css';
+import './PlayerDashboard.css';
 
 import * as React from 'react';
 
@@ -6,7 +6,6 @@ import { PrivateRoute } from '../../shared/router';
 import {
   TripleLayout,
   MainSection,
-  MainSectionHeader,
   InfoSection,
   ActionSection,
 } from '../../components/TripleLayout';
