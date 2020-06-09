@@ -1,3 +1,5 @@
+import 'public/static/modules/publicDashboard/PublicDashboard.css';
+
 import * as React from 'react';
 import { useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -16,8 +18,6 @@ import { ConfirmModal } from '../../components/ConfirmModal';
 import { logIn } from './sessionSlice';
 import { LoginForm } from './LoginForm';
 import { SignUpForm } from './SignUpForm';
-
-import 'public/static/modules/publicDashboard/PublicDashboard.css';
 
 export function PublicDashboard() {
   const dispatch = useAppDispatch();

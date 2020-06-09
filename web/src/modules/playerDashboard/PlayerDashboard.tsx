@@ -1,3 +1,5 @@
+import 'public/static/modules/playerDashboard/PlayerDashboard.css';
+
 import * as React from 'react';
 
 import {
@@ -10,12 +12,15 @@ import {
 import { ActionMenu, ActionMenuProps } from '../../components/ActionMenu';
 
 const Menu: ActionMenuProps['items'] = {
-  ['General']: [{ name: 'Test', href: '' }],
+  ['General']: [
+    { name: 'Home', path: '/dashboard' },
+    { name: 'Create new character', path: '/dashboard/create-char' },
+  ],
 };
 
 export function PlayerDashboard() {
   return (
-    <TripleLayout className="public-dashboard">
+    <TripleLayout className="player-dashboard">
       <ActionSection>
         <ActionMenu items={Menu} />
       </ActionSection>
