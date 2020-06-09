@@ -16,7 +16,7 @@ export function ActionMenu({ items }: ActionMenuProps) {
   return (
     <aside className="menu action-menu">
       {Object.keys(items).map((category) => (
-        <>
+        <div key={category}>
           <p className="menu-label">{category}</p>
           <ul className="menu-list">
             {items[category].map((item) => (
@@ -30,7 +30,7 @@ export function ActionMenu({ items }: ActionMenuProps) {
               </li>
             ))}
           </ul>
-        </>
+        </div>
       ))}
     </aside>
   );

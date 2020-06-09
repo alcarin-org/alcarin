@@ -2,6 +2,7 @@ import 'public/static/modules/playerDashboard/PlayerDashboard.css';
 
 import * as React from 'react';
 
+import { PrivateRoute } from '../../shared/router';
 import {
   TripleLayout,
   MainSection,
@@ -10,6 +11,8 @@ import {
   ActionSection,
 } from '../../components/TripleLayout';
 import { ActionMenu, ActionMenuProps } from '../../components/ActionMenu';
+
+import { CreateNewCharacter } from './CreateNewCharacter';
 
 const Menu: ActionMenuProps['items'] = {
   ['General']: [
@@ -24,8 +27,14 @@ export function PlayerDashboard() {
       <ActionSection>
         <ActionMenu items={Menu} />
       </ActionSection>
-      <MainSectionHeader>Simple header</MainSectionHeader>
-      <MainSection></MainSection>
+      <MainSection>
+        <PrivateRoute path="/dashboard" exact>
+          Chars list here
+        </PrivateRoute>
+        <PrivateRoute path="/dashboard/create-char">
+          <CreateNewCharacter />
+        </PrivateRoute>
+      </MainSection>
       <InfoSection>Additional Info</InfoSection>
     </TripleLayout>
   );
