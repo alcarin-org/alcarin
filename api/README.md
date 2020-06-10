@@ -13,6 +13,13 @@ your environment.
 3. Run `docker-compose up -d`. It can take some time the first time you run the app
 5. Visit `http://localhost:8090/healthz`. You should get empty response with `200` status code
 
+## Tech stack
+ - [TypeScript](https://www.typescriptlang.org/)
+ - [Express](https://expressjs.com/)
+ - [TypeORM](https://github.com/typeorm/typeorm)
+ - [PostgreSQL](https://www.postgresql.org/)
+ - [Redis](https://redis.io/)
+
 ## Useful commands
 
 ```bash
@@ -85,17 +92,9 @@ You should configure your environment to show you linting errors in development 
 ## Documentation
 
 We use [OpenAPI](./openapi.yml) to document our API. All endpoints should be described there.
-Once API has started, swagger ui should be available on the `/api-docs` endpoint.
 
 All requests are validated by the OpenAPI definition, so you can be pretty sure that the documentation is actual.
 All responses are validated by the OpenAPI definition when you run tests.
-
-You can also find some specific docs in the `docs` directory.
-
-## JSON API specification
-
-We use [JSON API](https://jsonapi.org/) to structure our api responses. Be sure
-to have at least basic understanding before api manipulation.
 
 ## CLI
 
@@ -122,11 +121,3 @@ await manager.findOne(User);
 // '_' is result of last command
 console.log(_.email);
 ```
-
-## Deploying
-
-For deployin there is aws server with rds database prepared.
-You need to have access to the server. If you have it, use
-`./bin/deploy` script and it's all you need.
-
-API will be publish on https://dev.apollo.codequest.com url.

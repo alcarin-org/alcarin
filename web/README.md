@@ -9,6 +9,19 @@ Responsive webpage interface for Alcarin project.
 3. Run `docker-compose up web`. It can take some time the first time you run the app
 5. Visit `http://localhost:8080`
 
+## Tech stack
+ - [TypeScript](https://www.typescriptlang.org/)
+ - [Snowpack](https://www.snowpack.dev/)
+ - [React](https://reactjs.org/)
+ - [Redux](https://react-redux.js.org/) with [Redux Toolkit](https://redux-toolkit.js.org/)
+ - [Bulma](https://bulma.io/)
+
+## Linting
+
+The project use [Prettier](https://prettier.io/) and [ESLint](https://eslint.org/) for linting.
+To do general check of your code run `npm run check-all`.
+You should configure your environment to show you linting errors in development time.
+
 ## Available Scripts
 
 If you have problems with running the scripts directly, run them inside `web` container,
