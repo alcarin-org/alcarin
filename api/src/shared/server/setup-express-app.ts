@@ -7,11 +7,11 @@ import { preloadEntityStorage } from '../../middleware/preload-entity.middleware
 import { loadPassportStrategies } from '../../modules/auth/passport-jwt.middleware';
 import { queueUiRouter } from '../../queue/ui';
 import { boomErrorsHandler } from '../../middleware/boom-errors-handler.middleware';
+import { envVars } from '../envVars';
 
+import { handleValidationError, openApiValidator } from './openapi';
 import { setupRoutes } from './setup-routes';
 import { jsonApi } from './json-api';
-import { handleValidationError, openApiValidator } from './openapi';
-import { envVars } from '../envVars';
 
 export { setupExpressApp };
 

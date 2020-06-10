@@ -8,6 +8,7 @@ export const openApiValidator = new OpenApiValidator({
   apiSpec: './openapi.yml',
   validateRequests: true,
   validateResponses: isTest(),
+  ignorePaths: /.*\/queue\/.*$/,
 });
 
 export function handleValidationError(): ErrorRequestHandler {
