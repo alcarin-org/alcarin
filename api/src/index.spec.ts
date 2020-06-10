@@ -60,7 +60,9 @@ async function cleanupTables(connection: Connection) {
 
 async function createTestDatabase() {
   const localConnection = await createDatabaseConnection({
-    database: '',
+    // we use default database, as we can not drop database that
+    // have open connections
+    database: 'postgres',
     migrationsRun: false,
   });
 
