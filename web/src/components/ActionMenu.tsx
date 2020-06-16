@@ -20,18 +20,34 @@ export function ActionMenu({ items }: ActionMenuProps) {
           <p className="menu-label">{category}</p>
           <ul className="menu-list">
             {items[category].map((item) => (
-              <li key={item.name + ':' + item.path}>
-                <Link
-                  className={location.pathname === item.path ? 'is-active' : ''}
-                  to={item.path}
-                >
-                  {item.name}
-                </Link>
-              </li>
+              <ActionMenuItem
+                key={item.name + ':' + item.path}
+                item={item}
+                currPath={location.pathname}
+              />
             ))}
           </ul>
         </div>
       ))}
     </aside>
+  );
+}
+
+function ActionMenuItem({
+  item,
+  currPath,
+}: {
+  item: ActionItem;
+  currPath: string;
+}) {
+  return (
+    <li>
+      <Link
+        className={currPath === item.path ? 'is-active' : ''}
+        to={item.path}
+      >
+        {item.name}
+      </Link>
+    </li>
   );
 }

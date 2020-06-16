@@ -1,3 +1,4 @@
+// races should be probably moved to the API later
 export enum Race {
   Human = 'human',
 }
