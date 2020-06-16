@@ -1,14 +1,17 @@
 import express from 'express';
 import logger from 'morgan';
-// import cors from 'cors';
+import passport from 'passport';
+import cors from 'cors';
 
 import { preloadEntityStorage } from '../../middleware/preload-entity.middleware';
+import { loadPassportStrategies } from '../../modules/auth/passport-jwt.middleware';
 import { queueUiRouter } from '../../queue/ui';
 import { boomErrorsHandler } from '../../middleware/boom-errors-handler.middleware';
 
 import { setupRoutes } from './setup-routes';
 import { jsonApi } from './json-api';
 import { handleValidationError, openApiValidator } from './openapi';
+import { envVars } from '../envVars';
 
 export { setupExpressApp };
 
@@ -21,11 +24,14 @@ async function setupExpressApp() {
   app.use(express.urlencoded({ extended: true }));
   app.use(preloadEntityStorage());
   app.use(jsonApi());
-  // app.use(
-  //   cors({
-  //     origin: envVars.WIZARD_APP_URL,
-  //   })
-  // );
+  app.use(passport.initialize());
+
+  loadPassportStrategies();
+  app.use(
+    cors({
+      origin: envVars.WEB_BASE_URL,
+    })
+  );
   await openApiValidator.install(app);
 
   app.use('/', setupRoutes());

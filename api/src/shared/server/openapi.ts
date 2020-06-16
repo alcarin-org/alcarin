@@ -14,11 +14,11 @@ export function handleValidationError(): ErrorRequestHandler {
   return function validationErrorHandler(err, req, res, next) {
     if (err.path) {
       const errRes = {
-        message: err.message,
+        message: 'OpenAPI: ' + err.message,
         errors: err.errors,
       };
       if (isTest()) {
-        console.log('BadRequest', errRes);
+        console.log('OpenAPI: BadRequest', errRes);
       }
       res.status(status.BAD_REQUEST).json(errRes);
     } else {

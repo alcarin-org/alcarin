@@ -16,7 +16,6 @@ chai.should();
 before(async () => {
   await createTestDatabase();
   await createDatabaseConnection({
-    database: envVars.TEST_DATABASE,
     migrationsRun: true,
   });
 });
@@ -66,9 +65,9 @@ async function createTestDatabase() {
   });
 
   await localConnection.query(
-    `DROP DATABASE IF EXISTS "${envVars.TEST_DATABASE}"`
+    `DROP DATABASE IF EXISTS "${envVars.DB_DATABASE}"`
   );
-  await localConnection.query(`CREATE DATABASE "${envVars.TEST_DATABASE}"`);
+  await localConnection.query(`CREATE DATABASE "${envVars.DB_DATABASE}"`);
   await localConnection.close();
 }
 

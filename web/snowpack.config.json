@@ -1,5 +1,8 @@
 {
   "extends": "@snowpack/app-scripts-react",
-  "scripts": {},
-  "plugins": []
+  "scripts": {
+    "run:sass": "sass src:public --no-source-map",
+    "run:sass::watch": "$1 --watch"
+  },
+  "plugins": ["@snowpack/plugin-dotenv"]
 }

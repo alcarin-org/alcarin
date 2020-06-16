@@ -1,6 +1,6 @@
 import * as core from 'express-serve-static-core';
 
-import { User } from '../db/entities/user';
+import { User } from '../../db/entities/user';
 
 declare type ObjectType<T> = { new (): T } | Function;
 declare interface EntityMap {
@@ -14,10 +14,8 @@ export type DeNeverify<Type, Key extends keyof Type> = Type[Key] extends never
 
 declare module 'express-serve-static-core' {
   export interface Request<P extends core.Params = core.ParamsDictionary> {
+    user: User;
     preloaded: EntityMap;
-    addonAuth: {
-      user: User;
-    };
   }
 }
 
@@ -29,10 +27,8 @@ declare module 'express' {
     DeNeverify<Config, 'body'> &
     DeNeverify<Config, 'query'> &
     DeNeverify<Config, 'params'> & {
+      user: User;
       preloaded: EntityMap;
-      addonAuth: {
-        user: User;
-      };
     };
 
   export type AppRequestConfig<B = {}, Q = {}, P = {}, H = {}> = {

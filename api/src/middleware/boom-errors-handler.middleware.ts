@@ -21,6 +21,7 @@ export function boomErrorsHandler(
   );
 
   logger.error(err);
+
   res.status(output.statusCode);
 
   return isProduction()
