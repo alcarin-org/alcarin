@@ -1,21 +1,25 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
-import { logInUser } from '../api/auth';
+import { logInUser } from '../../api/auth';
 
 interface AuthPayload {
   email: string;
   password: string;
 }
 
+const AuthTokenKey = 'auth:access-token';
+
 const initialState = {
-  authToken: null as string | null,
+  accessToken: localStorage.getItem(AuthTokenKey),
   email: null as string | null,
 };
 
 export const logIn = createAsyncThunk(
   'logIn',
   async ({ email, password }: { email: string; password: string }) => {
-    return logInUser({ email, password });
+    const payload = await logInUser({ email, password });
+    localStorage.setItem(AuthTokenKey, payload.accessToken);
+    return payload;
   }
 );
 
@@ -26,11 +30,11 @@ const sessionSlice = createSlice({
   extraReducers: (builder) =>
     builder
       .addCase(logIn.fulfilled, (state, action) => {
-        state.authToken = action.payload.accessToken;
+        state.accessToken = action.payload.accessToken;
         state.email = action.meta.arg.email;
       })
       .addCase(logIn.rejected, (state) => {
-        state.authToken = null;
+        state.accessToken = null;
         state.email = null;
       }),
 });

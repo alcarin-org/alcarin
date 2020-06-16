@@ -1,6 +1,8 @@
+import './PublicDashboard.css';
+
 import * as React from 'react';
 import { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
 
 import {
   TripleLayout,
@@ -8,20 +10,18 @@ import {
   MainSectionHeader,
   InfoSection,
   ActionSection,
-} from '../components/TripleLayout';
-import { RootState, useAppDispatch } from '../store';
-import { registerUser } from '../api/auth';
-import { ConfirmModal } from '../components/ConfirmModal';
+} from '../../components/TripleLayout';
+import { useAppDispatch } from '../../store';
+import { registerUser } from '../../api/auth';
+import { ConfirmModal } from '../../components/ConfirmModal';
 
 import { logIn } from './sessionSlice';
 import { LoginForm } from './LoginForm';
 import { SignUpForm } from './SignUpForm';
 
-import 'public/public-dashboard/PublicDashboard.css';
-
 export function PublicDashboard() {
-  // const value = useSelector<RootState>((store) => store.publicDashboard.test);
   const dispatch = useAppDispatch();
+  const history = useHistory();
   const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
 
   return (
@@ -37,6 +37,7 @@ export function PublicDashboard() {
             <LoginForm
               onSubmit={async (formData) => {
                 await dispatch(logIn(formData));
+                history.push('/dashboard');
               }}
             />
           </div>
@@ -58,7 +59,9 @@ export function PublicDashboard() {
 
         <ConfirmModal
           isOpen={isSignUpModalOpen}
-          onRequestClose={() => setIsSignUpModalOpen(false)}
+          onRequestClose={() => {
+            setIsSignUpModalOpen(false);
+          }}
         >
           Konto stworzone, zaloguj się by kontynuować.
         </ConfirmModal>

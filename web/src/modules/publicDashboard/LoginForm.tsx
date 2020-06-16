@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 
-import { BulmaInput } from '../components/BulmaInput';
+import { BulmaInput } from '../../components/BulmaInput';
 
 const initialValues = {
   email: '',

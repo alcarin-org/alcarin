@@ -16,6 +16,7 @@ interface AuthReq {
 
 export const logIn: AppRequestHandler<AuthReq> = async (req, res) => {
   const { email, password } = req.body;
+
   try {
     const token = await logInUser(email, password);
     logger.info(`User "${email}" logged in`);

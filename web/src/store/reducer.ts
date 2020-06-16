@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux';
 
-import sessionReducer from '../publicDashboard/sessionSlice';
+import sessionReducer from '../modules/publicDashboard/sessionSlice';
 
 export default combineReducers({
   session: sessionReducer,

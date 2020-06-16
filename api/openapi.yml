@@ -21,6 +21,14 @@ paths:
                 properties:
                   message:
                     type: string
+  /healthz:
+    summary: Endpoint that check system health status
+    get:
+      tags:
+        - system
+      responses:
+        '200':
+          description: All is fine
   /users:
     post:
       summary: ''
