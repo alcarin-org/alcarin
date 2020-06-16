@@ -9,11 +9,11 @@ import {
   InfoSection,
   ActionSection,
 } from '../../components/TripleLayout';
-import { ActionMenu, ActionMenuProps } from '../../components/ActionMenu';
+import { ActionMenu, ActionItems } from '../../components/ActionMenu';
 
 import { CreateNewCharacter } from './CreateNewCharacter';
 
-const Menu: ActionMenuProps['items'] = {
+const Menu: ActionItems = {
   ['General']: [
     { name: 'Home', path: '/dashboard' },
     { name: 'Create new character', path: '/dashboard/create-char' },

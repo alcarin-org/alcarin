@@ -6,8 +6,10 @@ interface ActionItem {
   path: string;
 }
 
+export type ActionItems = Record<string, ActionItem[]>;
+
 export interface ActionMenuProps {
-  items: Record<string, ActionItem[]>;
+  items: ActionItems;
 }
 
 export function ActionMenu({ items }: ActionMenuProps) {
