@@ -3,7 +3,7 @@ import { decode } from 'jsonwebtoken';
 
 import testApi from '../../../shared/spec/api';
 import { registerUser } from '../../../shared/spec/db';
-import { envVars } from '../../../shared/envVars';
+import { envVars } from '../../../shared/env-vars';
 import { connection } from '../../../db';
 import { User } from '../../../db/entities/user';
 

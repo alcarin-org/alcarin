@@ -1,7 +1,7 @@
 import jsonwebtoken from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
-import { envVars } from '../../shared/envVars';
+import { envVars } from '../../shared/env-vars';
 import { UserRepo } from '../../db';
 
 const InvalidAuthMessage = 'Invalid email or password';

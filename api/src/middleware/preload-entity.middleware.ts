@@ -4,7 +4,7 @@ import async from 'express-async-handler';
 import { EntityManager, ObjectType } from 'typeorm';
 
 import { connection } from '../db/index';
-import { isProduction } from '../shared/envVars';
+import { isProduction } from '../shared/env-vars';
 
 const errorMessage = isProduction()
   ? () => ''

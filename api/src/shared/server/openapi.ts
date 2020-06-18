@@ -2,7 +2,7 @@ import { ErrorRequestHandler } from 'express';
 import { OpenApiValidator } from 'express-openapi-validator';
 import status from 'http-status-codes';
 
-import { isTest } from '../../shared/envVars';
+import { isTest } from '../../shared/env-vars';
 
 export const openApiValidator = new OpenApiValidator({
   apiSpec: './openapi.yml',

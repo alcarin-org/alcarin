@@ -2,7 +2,7 @@ import { Boom, boomify } from '@hapi/boom';
 import { NextFunction, AppRequest, Response } from 'express';
 
 import { logger } from '../shared/logger';
-import { isProduction } from '../shared/envVars';
+import { isProduction } from '../shared/env-vars';
 
 type Headers = Record<string, string>;
 

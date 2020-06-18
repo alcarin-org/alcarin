@@ -3,7 +3,7 @@ import 'reflect-metadata';
 import { createDatabaseConnection } from './db';
 import { logger } from './shared/logger';
 import { setupExpressApp } from './shared/server/setup-express-app';
-import { validateEnvVars, envVars } from './shared/envVars';
+import { validateEnvVars, envVars } from './shared/env-vars';
 
 async function main() {
   try {

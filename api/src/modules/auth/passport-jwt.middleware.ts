@@ -8,7 +8,7 @@ import {
 } from 'passport-jwt';
 
 import { UserRepo } from '../../db';
-import { envVars } from '../../shared/envVars';
+import { envVars } from '../../shared/env-vars';
 
 interface JsonWebTokenPayload {
   client_id: string;
