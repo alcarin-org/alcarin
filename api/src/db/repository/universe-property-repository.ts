@@ -7,15 +7,21 @@ export class UniversePropertyRepository {
   constructor(private manager: EntityManager) {}
 
   async get(key: string) {
-    return this.manager.findOne(UniverseProperty, { key });
+    const entity = await this.manager.findOne(UniverseProperty, { key });
+    return entity && entity.value;
   }
 
   async getMany(keys: string[]) {
-    return this.manager.find(UniverseProperty, {
+    const entities = await this.manager.find(UniverseProperty, {
       where: {
         key: In(keys),
       },
     });
+    const sortedProperties = entities.sort(
+      (a, b) => keys.indexOf(a.key) - keys.indexOf(b.key)
+    );
+
+    return sortedProperties.map(entity => entity.value);
   }
 
   async set(key: string, value: string) {
@@ -27,7 +33,7 @@ export class UniversePropertyRepository {
     return this.manager.save(entry);
   }
 
-  async setAll(properties: { key: string; value: string }[]) {
+  async setMany(properties: { key: string; value: string }[]) {
     const entries = properties.map(({ key, value }) =>
       this.manager.create(UniverseProperty, {
         key,
