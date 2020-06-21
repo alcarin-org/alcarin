@@ -14,7 +14,7 @@ export async function registerUser(email: string, password: string) {
 }
 
 export async function logInUser(email: string, password: string) {
-  const user = await UserRepo.get(email);
+  const user = await UserRepo.findOne(email);
   if (!user) {
     throw new Error(InvalidAuthMessage);
   }

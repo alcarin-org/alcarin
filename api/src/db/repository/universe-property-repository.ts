@@ -1,11 +1,9 @@
-import { EntityManager, EntityRepository, In } from 'typeorm';
+import { Repository, EntityRepository, In } from 'typeorm';
 
 import { UniverseProperty } from '../entities/universe-property';
 
-@EntityRepository()
-export class UniversePropertyRepository {
-  constructor(private manager: EntityManager) {}
-
+@EntityRepository(UniverseProperty)
+export class UniversePropertyRepository extends Repository<UniverseProperty> {
   async get(key: string) {
     const entity = await this.manager.findOne(UniverseProperty, { key });
     return entity && entity.value;
