@@ -38,7 +38,7 @@ export const signUp: AppRequestHandler<AuthReq> = async (req, res) => {
     await registerUser(email, password);
   } catch (err) {
     if (err instanceof QueryFailedError) {
-      // we quitely ignore this to not letting know potential attacker that given
+      // we quietly ignore this to not letting know potential attacker that given
       // email address already exist in our database
       res.status(status.NO_CONTENT).send();
     } else {

@@ -1,6 +1,6 @@
-# Apollo API
+# Alcarin API
 
-Apollo API serve as backend for Apollo Chrome extension.
+Alcarin API serve as backend for Alcarin game.
 
 ## Installation
 
@@ -98,7 +98,7 @@ All responses are validated by the OpenAPI definition when you run tests.
 
 ## CLI
 
-You can run TypeScript cli console in context of the Apollo API by running this command:
+You can run TypeScript cli console in context of the Alcarin API by running this command:
 
 ```
 npm run cli

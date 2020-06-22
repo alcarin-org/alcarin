@@ -20,7 +20,7 @@ describe('Auth controller', () => {
         .expect(status.NO_CONTENT);
     });
 
-    it('should queitely refuse registration for already registered email address', async () => {
+    it('should quietly refuse registration for already registered email address', async () => {
       await testApi()
         .post('/users')
         .send({

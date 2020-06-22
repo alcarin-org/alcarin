@@ -26,7 +26,7 @@ export function loadPassportStrategies() {
     new JwtStrategy(
       jwtStratetyConfig,
       callbackify(async (jwtPayload: JsonWebTokenPayload) => {
-        const user = await UserRepo.get(jwtPayload.client_id);
+        const user = await UserRepo.getById(jwtPayload.client_id);
         return user || false;
       })
     )

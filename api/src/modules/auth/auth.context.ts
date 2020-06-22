@@ -25,12 +25,12 @@ export async function logInUser(email: string, password: string) {
     throw new Error(InvalidAuthMessage);
   }
 
-  return createAuthToken(email);
+  return createAuthToken(user.id);
 }
 
-function createAuthToken(email: string) {
+function createAuthToken(id: string) {
   const payload = {
-    ['client_id']: email,
+    ['client_id']: id,
   };
 
   return jsonwebtoken.sign(payload, envVars.AUTH_KEY, {
