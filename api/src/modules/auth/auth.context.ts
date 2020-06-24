@@ -1,7 +1,7 @@
 import jsonwebtoken from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 
-import { envVars } from '../../shared/envVars';
+import { envVars } from '../../shared/env-vars';
 import { UserRepo } from '../../db';
 
 const InvalidAuthMessage = 'Invalid email or password';
@@ -14,7 +14,7 @@ export async function registerUser(email: string, password: string) {
 }
 
 export async function logInUser(email: string, password: string) {
-  const user = await UserRepo.get(email);
+  const user = await UserRepo.findByEmail(email);
   if (!user) {
     throw new Error(InvalidAuthMessage);
   }

@@ -1,6 +1,6 @@
 import { createLogger, format, transports, addColors } from 'winston';
 
-import { envVars } from './envVars';
+import { envVars } from './env-vars';
 
 export const CustomLoggerLevels = {
   debug: 0,
