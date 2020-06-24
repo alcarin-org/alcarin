@@ -1,5 +1,4 @@
 import { EntityManager, EntityRepository } from 'typeorm';
-import { v4 as uuid } from 'uuid';
 
 import { User } from '../entities/user';
 
@@ -16,9 +15,7 @@ export class UserRepository {
   }
 
   async register(email: string, passwordHash: string) {
-    const id = uuid();
     const user = this.manager.create(User, {
-      id,
       email,
       passwordHash,
     });

@@ -1,8 +1,8 @@
-import { Entity, PrimaryColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity({ name: 'users' })
 export class User {
-  @PrimaryColumn({ length: 320, unique: true })
+  @PrimaryGeneratedColumn('uuid')
   public id: string;
 
   @Column({ length: 320, unique: true })
