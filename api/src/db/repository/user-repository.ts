@@ -12,4 +12,8 @@ export class UserRepository extends Repository<User> {
 
     return this.manager.insert(User, user);
   }
+
+  async findByEmail(email: string) {
+    return this.manager.findOne(User, { email });
+  }
 }

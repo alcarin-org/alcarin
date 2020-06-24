@@ -1,9 +1,11 @@
-import { Entity, PrimaryColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity({ name: 'users' })
 export class User {
-  // TODO: migrate to uuid or something, as email CAN change potentially
-  @PrimaryColumn({ length: 320 })
+  @PrimaryGeneratedColumn('uuid')
+  public id: string;
+
+  @Column({ length: 320, unique: true })
   public email: string;
 
   @Column()

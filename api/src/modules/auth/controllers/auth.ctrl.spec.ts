@@ -22,7 +22,7 @@ describe('Auth controller', () => {
         .expect(status.NO_CONTENT);
     });
 
-    it('should queitely refuse registration for already registered email address', async () => {
+    it('should quietly refuse registration for already registered email address', async () => {
       await testApi()
         .post('/users')
         .send({
@@ -57,7 +57,11 @@ describe('Auth controller', () => {
 
       res.body.tokenType.should.equal('Bearer');
       const decodedToken = decode(res.body.accessToken) as Record<string, any>;
-      decodedToken['client_id'].should.equal(testEmail);
+
+      const users = await connection.manager.find(User, { email: testEmail });
+      users.length.should.equal(1);
+
+      decodedToken['client_id'].should.equal(users[0].id);
       decodedToken.aud.should.equal(envVars.URL_BASE);
     });
 
