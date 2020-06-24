@@ -1,7 +1,7 @@
 import BullArena from 'bull-arena';
 import { RequestHandler, Router } from 'express';
 
-import { envVars } from '../shared/envVars';
+import { envVars } from '../shared/env-vars';
 
 import { getRedisConfig } from './redis';
 import { MainQueueName } from './main-queue';

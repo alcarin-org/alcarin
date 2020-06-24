@@ -8,7 +8,7 @@ import {
 } from 'passport-jwt';
 
 import { UserRepo } from '../../db';
-import { envVars } from '../../shared/envVars';
+import { envVars } from '../../shared/env-vars';
 
 interface JsonWebTokenPayload {
   client_id: string;
@@ -26,7 +26,7 @@ export function loadPassportStrategies() {
     new JwtStrategy(
       jwtStratetyConfig,
       callbackify(async (jwtPayload: JsonWebTokenPayload) => {
-        const user = await UserRepo.get(jwtPayload.client_id);
+        const user = await UserRepo.findOne(jwtPayload.client_id);
         return user || false;
       })
     )

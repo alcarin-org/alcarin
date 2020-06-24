@@ -8,7 +8,7 @@ import { Connection, getConnection } from 'typeorm';
 import { createDatabaseConnection } from './db';
 import { MainScheduler, redis as queueRedis } from './queue';
 import { redis } from './queue/redis';
-import { envVars } from './shared/envVars';
+import { envVars } from './shared/env-vars';
 
 chai.use(sinonChai);
 chai.should();

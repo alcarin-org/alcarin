@@ -4,7 +4,7 @@ import status from 'http-status-codes';
 import { QueryFailedError } from 'typeorm';
 
 import { logger } from '../../../shared/logger';
-import { envVars } from '../../../shared/envVars';
+import { envVars } from '../../../shared/env-vars';
 import { registerUser, logInUser } from '../auth.context';
 
 interface AuthReq {

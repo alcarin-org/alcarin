@@ -1,6 +1,6 @@
 import IORedis from 'ioredis';
 
-import { envVars, isTest } from '../shared/envVars';
+import { envVars, isTest } from '../shared/env-vars';
 
 export const redis = new IORedis(getRedisConfig());
 
