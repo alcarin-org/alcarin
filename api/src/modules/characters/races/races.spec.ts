@@ -1,10 +1,13 @@
 import assert from 'assert';
 
+import { elf } from './elf';
+import { human } from './human';
+
 import {
   all as allRaces,
   CannotCreateRaceFromUnknownKey,
   createRaceFormKey,
-} from './races';
+} from './index';
 
 describe('race test', () => {
   it('there should be possible to create all races from it keys', () => {
@@ -22,5 +25,21 @@ describe('race test', () => {
     const error = new CannotCreateRaceFromUnknownKey(unExistingRaceKey);
     const test = () => createRaceFormKey(unExistingRaceKey);
     assert.throws(test, error);
+  });
+
+  it('it has elf race', () => {
+    const test = () => {
+      const results = createRaceFormKey(elf.key);
+      results.should.equal(elf);
+    };
+    assert.doesNotThrow(test, CannotCreateRaceFromUnknownKey);
+  });
+
+  it('it has human race', () => {
+    const test = () => {
+      const results = createRaceFormKey(human.key);
+      results.should.equal(human);
+    };
+    assert.doesNotThrow(test, CannotCreateRaceFromUnknownKey);
   });
 });
