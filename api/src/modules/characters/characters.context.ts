@@ -1,12 +1,26 @@
 import { CharactersRepo } from '../../db';
-import { Race } from "./race";
+import { User, Character } from '../../db/entities';
 
+import { createRaceFromKey, RaceType } from './races';
 
-export async function createNewCharacter(
-  owner: string,
+export type FullCharacter = Pick<Character, 'name' | 'owner' | 'id'> & {
+  race: RaceType;
+};
+
+function decorateCharacterWithRace(character: Character) {
+  const characterWithRace: FullCharacter = {
+    ...character,
+    race: createRaceFromKey(character.race),
+  };
+  return characterWithRace;
+}
+
+export async function createNewCharacterForUser(
+  owner: User,
   name: string,
-  race: Race
+  raceKey: string
 ) {
-  const character = await CharactersRepo.create(owner, name, race.key);
-  return character;
+  const race = createRaceFromKey(raceKey);
+  const character = await CharactersRepo.born(owner, name, race.key);
+  return decorateCharacterWithRace(character);
 }

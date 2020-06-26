@@ -15,7 +15,7 @@ export class CannotCreateRaceFromUnknownKey extends Error {
 
 export type RaceErrors = CannotCreateRaceFromUnknownKey;
 
-export function createRaceFormKey(key: string) {
+export function createRaceFromKey(key: string) {
   const race = all.find(race => race.key === key);
   if (undefined === race) {
     throw new CannotCreateRaceFromUnknownKey(key);

@@ -77,6 +77,21 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/AuthorizationData'
+  /characters/create:
+    post:
+      summary: ''
+      operationId: create-character
+      responses:
+        '200':
+          description:
+            Character created
+      description: Create new user with name and race
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CharacterBase'
+        description: ''
 components:
   schemas:
     AuthorizationData:
@@ -90,6 +105,18 @@ components:
         password:
           type: string
           minLength: 6
+      required:
+        - email
+        - password
+    CharacterBase:
+      type: object
+      title: CharacterBase
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        race:
+          type: string
       required:
         - email
         - password
