@@ -1,4 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+
+import { Character } from './character';
 
 @Entity({ name: 'users' })
 export class User {
@@ -10,4 +12,10 @@ export class User {
 
   @Column()
   public passwordHash: string;
+
+  @OneToMany(
+    () => Character,
+    character => character.owner
+  )
+  characters: Character[];
 }

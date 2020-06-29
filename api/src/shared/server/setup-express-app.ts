@@ -4,7 +4,7 @@ import passport from 'passport';
 import cors from 'cors';
 
 import { preloadEntityStorage } from '../../middleware/preload-entity.middleware';
-import { loadPassportStrategies } from '../../modules/auth/passport-jwt.middleware';
+import { loadPassportStrategies } from '../../modules/auth/passport-jwt-setup';
 import { queueUiRouter } from '../../queue/ui';
 import { boomErrorsHandler } from '../../middleware/boom-errors-handler.middleware';
 import { envVars } from '../env-vars';

@@ -2,8 +2,8 @@ import { start } from 'repl';
 
 import { Connection } from 'typeorm';
 
-import { createDatabaseConnection, UserRepo } from '../src/db';
-import { User } from '../src/db/entities/user';
+import { createDatabaseConnection, Repos } from '../src/db';
+import * as Entities from '../src/db/entities';
 
 createDatabaseConnection().then((connection: Connection) => {
   const context = start('$ ').context;
@@ -11,8 +11,8 @@ createDatabaseConnection().then((connection: Connection) => {
   Object.assign(context, {
     connection,
     manager: connection.manager,
-    repos: { UserRepo },
-    User,
+    repos: { ...Repos },
+    ...Entities,
   });
   console.info('Db connection initialized');
 });
