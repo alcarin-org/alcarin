@@ -1,7 +1,6 @@
 import { EntityRepository, Repository } from 'typeorm';
 
-import { Character } from '../entities/character';
-import { User } from '../entities';
+import { User, Character } from '../entities';
 
 @EntityRepository(Character)
 export class CharacterRepository extends Repository<Character> {
