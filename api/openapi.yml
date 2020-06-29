@@ -1,7 +1,7 @@
 openapi: 3.0.1
 info:
   title: Alcarin API
-  description: 'Alcarin api'
+  description: Alcarin api
   version: 1.0.0
 servers:
   - url: 'http://localhost:8080'
@@ -35,10 +35,7 @@ paths:
       operationId: create-user
       responses:
         '204':
-          description:
-            Account created or account already exists. The response for both
-            cases are indistinguishable by desing to prevent email probing by
-            potential attackers
+          description: Account created or account already exists. The response for both cases are indistinguishable by desing to prevent email probing by potential attackers
       description: Create new user with provided email and password
       requestBody:
         content:
@@ -77,21 +74,83 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/AuthorizationData'
-  /characters/create:
+  /users/current/characters:
     post:
-      summary: ''
+      summary: Create character
       operationId: create-character
       responses:
-        '200':
-          description:
-            Character created
-      description: Create new user with name and race
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharacterModel'
+              examples: {}
+        '401':
+          description: Unauthorized
+          content:
+            text/plain:
+              schema: {}
+      description: Endpoint for creation character for user.
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CharacterBase'
+              $ref: '#/components/schemas/CharacterCreationPayload'
         description: ''
+      parameters: []
+      security:
+        - Authorization: []
+    get:
+      summary: List of characters for user
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CharacterModel'
+        '401':
+          description: Unauthorized
+          content:
+            text/html:
+              schema:
+                type: string
+      operationId: get-user-characters
+      description: Get list of user's characters
+      security:
+        - Authorization: []
+  '/users/current/characters/{characterId}':
+    get:
+      summary: One user character
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CharacterModel'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: string
+      operationId: 'get-users-current-characters-:characterId'
+      description: Getting data model for character
+      security:
+        - Authorization: []
+    parameters:
+      - schema:
+          type: string
+        name: characterId
+        in: path
+        description: Character ID
+        required: true
 components:
   schemas:
     AuthorizationData:
@@ -108,15 +167,42 @@ components:
       required:
         - email
         - password
-    CharacterBase:
+    CharacterModel:
       type: object
-      title: CharacterBase
+      title: CharacterModel
       additionalProperties: false
+      description: Model of race data
+      properties:
+        name:
+          type: string
+        id:
+          type: string
+        race:
+          $ref: '#/components/schemas/RaceModel'
+    RaceModel:
+      type: object
+      title: RaceModel
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+        key:
+          type: string
+      description: Model of race data
+    CharacterCreationPayload:
+      title: CharacterCreationPayload
+      type: object
       properties:
         name:
           type: string
         race:
           type: string
       required:
-        - email
-        - password
+        - name
+        - race
+      description: Paylod for character creation
+  securitySchemes:
+    Authorization:
+      type: http
+      scheme: bearer
+      description: Token for current user

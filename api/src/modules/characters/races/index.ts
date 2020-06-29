@@ -1,3 +1,5 @@
+import { DomainError } from '../../../shared/DomainError';
+
 import { Race } from './race';
 import { elf as elfRace } from './elf';
 import { human as HumanRace } from './human';
@@ -7,7 +9,7 @@ export const elf = elfRace;
 export const human = HumanRace;
 export const all: Array<Race> = [elfRace, HumanRace];
 
-export class CannotCreateRaceFromUnknownKey extends Error {
+export class CannotCreateRaceFromUnknownKey extends DomainError {
   constructor(key: string) {
     super(`Cannot create race from key ${key}`);
   }

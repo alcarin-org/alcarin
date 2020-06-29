@@ -5,7 +5,7 @@ import testApi from '../../../shared/spec/api';
 import { registerUser } from '../../../shared/spec/db';
 import { envVars } from '../../../shared/env-vars';
 import { connection } from '../../../db';
-import { User } from '../../../db/entities/user';
+import { User } from '../../../db/entities';
 
 describe('Auth controller', () => {
   const testEmail = 'test@test.com';
@@ -55,7 +55,7 @@ describe('Auth controller', () => {
         })
         .expect(status.OK);
 
-      res.body.tokenType.should.equal('Bearer');
+      res.body.tokenType.should.equal('bearer');
       const decodedToken = decode(res.body.accessToken) as Record<string, any>;
 
       const users = await connection.manager.find(User, { email: testEmail });

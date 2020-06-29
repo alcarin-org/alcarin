@@ -1,12 +1,23 @@
 import { Router } from 'express';
 
 import { asyncRequestHandler } from '../../shared/async-request-handler';
+import { jwtAuthenticate } from '../../middleware/passport-jwt-authenticate.middleware';
 
-import { createNewCharacter } from './controllers/character.ctrl';
+import {
+  createNewCharacter,
+  findCharactersForUsers,
+  findOneCharacter,
+} from './controllers/character.ctrl';
 
+export const characterSubRouter = Router();
 export const characterRouter = Router();
 
-characterRouter.post(
-  'characters/create',
-  asyncRequestHandler(createNewCharacter)
+characterSubRouter.post('/', asyncRequestHandler(createNewCharacter));
+characterSubRouter.get('/', asyncRequestHandler(findCharactersForUsers));
+characterSubRouter.get('/:characterId', asyncRequestHandler(findOneCharacter));
+
+characterRouter.use(
+  '/users/current/characters',
+  jwtAuthenticate,
+  characterSubRouter
 );

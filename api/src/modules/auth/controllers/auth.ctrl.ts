@@ -14,7 +14,7 @@ interface AuthReq {
   };
 }
 
-export const TOKEN_TYPE = 'Bearer';
+export const TokenType = 'bearer';
 
 export const logIn: AppRequestHandler<AuthReq> = async (req, res) => {
   const { email, password } = req.body;
@@ -25,7 +25,7 @@ export const logIn: AppRequestHandler<AuthReq> = async (req, res) => {
 
     return res.status(status.OK).send({
       accessToken: token,
-      tokenType: TOKEN_TYPE,
+      tokenType: TokenType,
       expiresAt: Math.trunc(Date.now() / 1000 + envVars.AUTH_EXPIRATION_SEC),
     });
   } catch (err) {

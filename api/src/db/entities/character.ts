@@ -7,7 +7,7 @@ export class Character {
   @PrimaryGeneratedColumn('uuid')
   public id: string;
 
-  @Column({ length: 320, unique: true })
+  @Column({ length: 320 })
   public name: string;
 
   @Column()
