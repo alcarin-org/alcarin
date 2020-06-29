@@ -1,6 +1,6 @@
 import { CharactersRepo } from '../../db';
 import { User, Character } from '../../db/entities';
-import { DomainError } from '../../shared/DomainError';
+import { DomainError } from '../../shared/domain-error';
 
 import { RaceErrors } from './races';
 import { createRaceFromKey, RaceType } from './races';

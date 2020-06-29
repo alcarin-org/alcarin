@@ -1,4 +1,4 @@
-import { DomainError } from '../../../shared/DomainError';
+import { DomainError } from '../../../shared/domain-error';
 
 import { Race } from './race';
 import { elf as elfRace } from './elf';

@@ -1,4 +1,4 @@
-import { DomainError } from './DomainError';
+import { DomainError } from './domain-error';
 
 export function isDomainError<T extends DomainError>() {
   return (error: Error | T): error is T => {
