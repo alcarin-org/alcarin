@@ -47,4 +47,3 @@ export async function findCharacters(owner: User) {
   const characters = await CharactersRepo.find({ owner: owner });
   return characters.map(createCharacterModel);
 }
-
