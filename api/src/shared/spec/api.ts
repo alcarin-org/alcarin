@@ -2,7 +2,7 @@ import supertest from 'supertest';
 import { Express } from 'express';
 
 import { setupExpressApp } from '../server/setup-express-app';
-import { TokenType } from '../../modules/auth/controllers/auth.ctrl';
+import { TokenType } from '../../controllers/auth.ctrl';
 
 let app: Express;
 

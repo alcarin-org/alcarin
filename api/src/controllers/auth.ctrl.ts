@@ -1,0 +1,69 @@
+import { AppRequestHandler } from 'express';
+import boom from '@hapi/boom';
+import status from 'http-status-codes';
+import { QueryFailedError } from 'typeorm';
+
+import { logger } from '../shared/logger';
+import { envVars } from '../shared/env-vars';
+import UserAuthorizationService from '../services/user-authorization-service';
+import { EntityUserRepository } from '../plugins/entity-users/user.repository';
+import { BCryptEncrypter } from '../plugins/password-encycrypters/bcrypt-encrypter';
+import { JwtTokenizerService } from '../plugins/passport/jwt-tokenizer-service';
+
+const service = UserAuthorizationService(new EntityUserRepository());
+const passwordEncyryptionService = new BCryptEncrypter();
+const tokenizerService = new JwtTokenizerService();
+interface AuthReq {
+  body: {
+    email: string;
+    password: string;
+  };
+}
+
+export const TokenType = 'bearer';
+
+export const logIn: AppRequestHandler<AuthReq> = async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const token = await service.logInWithPassword(
+      email,
+      password,
+      passwordEncyryptionService,
+      tokenizerService
+    );
+    logger.info(`User "${email}" logged in`);
+
+    return res.status(status.OK).send({
+      accessToken: token,
+      tokenType: TokenType,
+      expiresAt: Math.trunc(Date.now() / 1000 + envVars.AUTH_EXPIRATION_SEC),
+    });
+  } catch (err) {
+    throw boom.unauthorized(err.message);
+  }
+};
+
+export const signUp: AppRequestHandler<AuthReq> = async (req, res) => {
+  const { email, password } = req.body;
+
+  await service.registerUserWithPasswordAuthorization(
+    email,
+    password,
+    passwordEncyryptionService
+  );
+  try {
+  } catch (err) {
+    if (err instanceof QueryFailedError) {
+      // we quietly ignore this to not letting know potential attacker that given
+      // email address already exist in our database
+      res.status(status.NO_CONTENT).send();
+    } else {
+      throw err;
+    }
+  }
+
+  logger.info(`New user account created: "${email}"`);
+
+  return res.status(status.NO_CONTENT).send();
+};

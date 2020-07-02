@@ -1,8 +1,6 @@
 import { Router } from 'express';
 
-import { testRouter } from '../../modules/test/test.routes';
-import { authRouter } from '../../modules/auth/auth.routes';
-import { characterRouter } from '../../modules/characters/character.routes';
+import { characterRouter, authRouter, testRouter } from '../../routes';
 
 export function setupRoutes() {
   const mainRouter = Router();
