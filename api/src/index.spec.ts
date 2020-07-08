@@ -5,10 +5,10 @@ import sinonChai from 'sinon-chai';
 import sinon from 'sinon';
 import { Connection, getConnection } from 'typeorm';
 
-import { createDatabaseConnection } from './db';
-import { MainScheduler, redis as queueRedis } from './queue';
-import { redis } from './queue/redis';
-import { envVars } from './shared/env-vars';
+import { createDatabaseConnection } from 'src/server/db';
+import { MainScheduler, redis as queueRedis } from 'src/server/queue';
+import { redis } from 'src/server/queue/redis';
+import { envVars } from 'src/server/core/env-vars';
 
 chai.use(sinonChai);
 chai.should();

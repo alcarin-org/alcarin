@@ -31,9 +31,11 @@
     "pg": "^7.17.1",
     "reflect-metadata": "^0.1.13",
     "typeorm": "^0.2.22",
+    "uuid": "^8.2.0",
     "winston": "^3.2.1"
   },
   "devDependencies": {
+    "@types/uuid": "^8.0.0",
     "@types/bcrypt": "^3.0.0",
     "@types/bull-arena": "^2.6.0",
     "@types/chai": "^4.2.7",
