@@ -2,6 +2,7 @@ import {
   CharacterRaceBehaviourProvider,
   RaceKeyProvider,
 } from 'src/domain/game/tools/character-race-provider.tool';
+
 import { elfBehaviour } from './elf-race';
 import { humanBehaviour } from './human-race';
 

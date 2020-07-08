@@ -1,6 +1,5 @@
 import status from 'http-status-codes';
 import { decode } from 'jsonwebtoken';
-
 import testApi from 'src/spec/api';
 import { registerAccount } from 'src/spec/db';
 import { envVars } from 'src/server/core/env-vars';
@@ -58,7 +57,9 @@ describe('Auth controller', () => {
       res.body.tokenType.should.equal('bearer');
       const decodedToken = decode(res.body.accessToken) as Record<string, any>;
 
-      const accounts = await connection.manager.find(Account, { email: testEmail });
+      const accounts = await connection.manager.find(Account, {
+        email: testEmail,
+      });
       accounts.length.should.equal(1);
 
       decodedToken['client_id'].should.equal(accounts[0].id);

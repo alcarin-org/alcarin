@@ -1,6 +1,5 @@
 import supertest from 'supertest';
 import { Express } from 'express';
-
 import { setupExpressApp } from 'src/server/core/setup-express-app';
 import { TokenType } from 'src/server/rest/controllers/auth.ctrl';
 

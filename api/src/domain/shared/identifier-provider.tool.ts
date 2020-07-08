@@ -1,3 +1,3 @@
 export interface IdentifierProviderService {
-    genIdentifier(): string;
+  genIdentifier(): string;
 }

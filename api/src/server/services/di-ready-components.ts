@@ -5,7 +5,7 @@ import { createJwtTokenizer } from 'src/server/plugins/access/tokenizer/jwt-toke
 import { identifierProvider } from 'src/server/plugins/shared/uuid-identifier-provider/identifier-provider';
 import {
   AvailableRace,
-  raceKeyProvider
+  raceKeyProvider,
 } from 'src/server/plugins/game/races/available-race-provider';
 
 export { identifierProvider, AvailableRace };

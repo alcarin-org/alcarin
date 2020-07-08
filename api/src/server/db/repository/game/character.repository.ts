@@ -1,5 +1,4 @@
 import { getRepository } from 'typeorm';
-import { Character as CharacterEntity } from '../../entities/game/character';
 import { Character } from 'src/domain/game/character/character';
 import {
   CharacterRepository,
@@ -7,6 +6,8 @@ import {
 } from 'src/domain/game/character/character.repository';
 import { RaceKeyProvider } from 'src/domain/game/tools/character-race-provider.tool';
 import { IdentifierProviderService } from 'src/domain/shared/identifier-provider.tool';
+
+import { Character as CharacterEntity } from '../../entities/game/character';
 
 export const createEntityCharacterRepository = <TRaceKey extends string>(
   raceKeyProvider: RaceKeyProvider<TRaceKey>,

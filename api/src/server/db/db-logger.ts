@@ -1,5 +1,4 @@
 import { Logger } from 'typeorm';
-
 import { logger } from 'src/server/core/helpers/logger';
 
 export class DbLogger implements Logger {

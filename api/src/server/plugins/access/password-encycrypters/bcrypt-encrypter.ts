@@ -1,5 +1,4 @@
 import bcrypt from 'bcrypt';
-
 import { PasswordEncryptor } from 'src/domain/access/tools/password-encryptor.tool';
 import { envVars } from 'src/server/core/env-vars';
 

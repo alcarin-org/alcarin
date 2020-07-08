@@ -1,8 +1,5 @@
 export type GenericCollectionBehaviour<ElementType> = {
-  addItem: (
-    collection: ElementType[],
-    character: ElementType
-  ) => ElementType[];
+  addItem: (collection: ElementType[], character: ElementType) => ElementType[];
   removeItem: (
     collection: ElementType[],
     character: ElementType
@@ -19,15 +16,12 @@ export const createGenericCollectionBehaviour = <
     return collection;
   };
 
-  const removeItem = (
-    collection: ElementType[],
-    character: ElementType
-  ) => {
+  const removeItem = (collection: ElementType[], character: ElementType) => {
     return collection.filter(_character => _character !== character);
   };
 
   return {
     addItem,
-    removeItem
+    removeItem,
   };
 };

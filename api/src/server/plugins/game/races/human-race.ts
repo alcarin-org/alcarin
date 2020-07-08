@@ -3,7 +3,9 @@ import {
   CharacterRace,
 } from 'src/domain/game/character/character-race';
 
-export const humanBehaviour = <TRaceKey>(): CharacterRaceBehaviour<TRaceKey> => {
+export const humanBehaviour = <
+  TRaceKey
+>(): CharacterRaceBehaviour<TRaceKey> => {
   const introduceYourself = (race: CharacterRace<TRaceKey>): string => {
     return `I'm proud ${raceName(race)}!`;
   };

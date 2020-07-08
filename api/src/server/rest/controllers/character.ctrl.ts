@@ -1,7 +1,6 @@
 import { AppRequestHandler } from 'express';
 import boom from '@hapi/boom';
 import status from 'http-status-codes';
-
 import { logger } from 'src/server/core/helpers/logger';
 import {
   createCharacter,

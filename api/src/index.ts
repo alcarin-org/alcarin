@@ -1,9 +1,9 @@
 import 'reflect-metadata';
 
-import { createDatabaseConnection } from './db';
-import { logger } from './shared/logger';
-import { setupExpressApp } from './shared/server/setup-express-app';
-import { validateEnvVars, envVars } from './shared/env-vars';
+import { createDatabaseConnection } from 'src/server/db';
+import { logger } from 'src/server/core/helpers/logger';
+import { setupExpressApp } from 'src/server/core/setup-express-app';
+import { validateEnvVars, envVars } from 'src/server/core/env-vars';
 
 async function main() {
   try {

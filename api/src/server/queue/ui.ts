@@ -1,6 +1,5 @@
 import BullArena from 'bull-arena';
 import { RequestHandler, Router } from 'express';
-
 import { envVars } from 'src/server/core/env-vars';
 
 import { getRedisConfig } from './redis';

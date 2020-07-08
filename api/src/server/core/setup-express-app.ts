@@ -5,8 +5,8 @@ import cors from 'cors';
 
 import { queueUiRouter } from '../queue/ui';
 import { boomErrorsHandler } from '../rest/middleware/boom-errors-handler.middleware';
-import { envVars } from './env-vars';
 
+import { envVars } from './env-vars';
 import { handleValidationError, openApiValidator } from './openapi';
 import { setupRoutes } from './setup-routes';
 import { jsonApi } from './json-api';

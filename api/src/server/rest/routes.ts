@@ -1,11 +1,11 @@
 import { Router } from 'express';
-
 import { asyncRequestHandler } from 'src/server/core/helpers/async-request-handler';
+
 import { jwtAuthenticate } from './plugins/passport/jwt-passport-authentication';
 import { logIn, signUp } from './controllers/auth.ctrl';
 import {
   createNewCharacter,
-  findCharactersForUsers
+  findCharactersForUsers,
 } from './controllers/character.ctrl';
 import { test } from './controllers/test.ctrl';
 

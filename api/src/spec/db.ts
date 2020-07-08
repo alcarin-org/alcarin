@@ -1,4 +1,4 @@
-import {register, login} from 'src/server/services/account-access.service';
+import { register, login } from 'src/server/services/account-access.service';
 
 export async function registerAccount(email: string, password = 'pass123') {
   return register(email, password);
