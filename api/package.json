@@ -10,7 +10,16 @@
     "check-types": "tsc --noEmit",
     "lint": "eslint . --ext js --ext ts",
     "check-all": "npm run check-types && npm run lint && npm test",
-    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js"
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
+    "postinstall": "link-module-alias",
+    "preinstall": "command -v link-module-alias && link-module-alias clean || true"
+  },
+  "_moduleAliases": {
+    "~root": ".",
+    "src": "src",
+    "@domain": "src/domain",
+    "@server": "src/server",
+    "@spec": "src/spec"
   },
   "dependencies": {
     "@hapi/boom": "^9.0.0",
@@ -35,7 +44,6 @@
     "winston": "^3.2.1"
   },
   "devDependencies": {
-    "@types/uuid": "^8.0.0",
     "@types/bcrypt": "^3.0.0",
     "@types/bull-arena": "^2.6.0",
     "@types/chai": "^4.2.7",
@@ -53,6 +61,7 @@
     "@types/sinon": "^7.5.1",
     "@types/sinon-chai": "^3.2.3",
     "@types/supertest": "^2.0.8",
+    "@types/uuid": "^8.0.0",
     "@typescript-eslint/eslint-plugin": "^2.15.0",
     "@typescript-eslint/parser": "^2.15.0",
     "chai": "^4.2.0",
@@ -61,6 +70,7 @@
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-prettier": "^3.1.2",
     "fs-extra": "^8.1.0",
+    "link-module-alias": "^1.2.0",
     "mocha": "^7.2.0",
     "prettier": "1.19.1",
     "sinon": "^8.1.1",

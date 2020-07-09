@@ -13,7 +13,7 @@ describe('Auth controller', () => {
   describe('sign up', () => {
     it('should return 204 and register the account', async () => {
       await testApi()
-        .post('/accounts')
+        .post('/users')
         .send({
           email: testEmail,
           password: testPassword,
@@ -23,7 +23,7 @@ describe('Auth controller', () => {
 
     it('should quietly refuse registration for already registered email address', async () => {
       await testApi()
-        .post('/accounts')
+        .post('/users')
         .send({
           email: testEmail,
           password: testPassword,
@@ -31,7 +31,7 @@ describe('Auth controller', () => {
         .expect(status.NO_CONTENT);
 
       await testApi()
-        .post('/accounts')
+        .post('/users')
         .send({
           email: testEmail,
           password: testPassword,
@@ -53,16 +53,16 @@ describe('Auth controller', () => {
           password: testPassword,
         })
         .expect(status.OK);
-
-      res.body.tokenType.should.equal('bearer');
+      res.body.tokenType.should.equal('Bearer');
       const decodedToken = decode(res.body.accessToken) as Record<string, any>;
 
       const accounts = await connection.manager.find(Account, {
         email: testEmail,
       });
+
       accounts.length.should.equal(1);
 
-      decodedToken['client_id'].should.equal(accounts[0].id);
+      decodedToken['accountId'].should.equal(accounts[0].id);
       decodedToken.aud.should.equal(envVars.URL_BASE);
     });
 

@@ -1,4 +1,4 @@
-import { getRepository } from 'typeorm';
+import { getRepository, In } from 'typeorm';
 import { Character } from 'src/domain/game/character/character';
 import {
   CharacterRepository,
@@ -11,11 +11,11 @@ import { Character as CharacterEntity } from '../../entities/game/character';
 
 export const createEntityCharacterRepository = <TRaceKey extends string>(
   raceKeyProvider: RaceKeyProvider<TRaceKey>,
-  IdentifierProviderService: IdentifierProviderService
+  identifierProviderService: IdentifierProviderService
 ): CharacterRepository<TRaceKey> => {
   const charRepository = getRepository(CharacterEntity);
   const createCharacter = createNewCharacter<TRaceKey>(
-    IdentifierProviderService
+    identifierProviderService
   );
   const entityToModel = mapEntityToModel<TRaceKey>(raceKeyProvider);
 
@@ -24,7 +24,10 @@ export const createEntityCharacterRepository = <TRaceKey extends string>(
   }
 
   async function save(character: Character<TRaceKey>) {
-    await charRepository.save(mapModelToEntity(character));
+    const entityCharacter = await charRepository.save(
+      mapModelToEntity(character)
+    );
+    return entityToModel(entityCharacter);
   }
 
   async function createAndSave(payload: CreationCharacterPayload<TRaceKey>) {
@@ -38,7 +41,9 @@ export const createEntityCharacterRepository = <TRaceKey extends string>(
     return entityToModel(characterEntity);
   }
   async function getMultipleByIds(characters: string[]) {
-    const entities = await charRepository.find({ where: { id: characters } });
+    const entities = await charRepository.find({
+      where: { id: In(characters) },
+    });
     return entities.map(entityToModel);
   }
 

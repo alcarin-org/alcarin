@@ -11,7 +11,7 @@ your environment.
   * fill `AUTH_KEY=` according to the instruction in the file
 2. Install deps `docker-compose run --rm api npm i`
 3. Run `docker-compose up -d`. It can take some time the first time you run the app
-5. Visit `http://localhost:8090/healthz`. You should get empty response with `200` status code
+4. Visit `http://localhost:8090/healthz`. You should get empty response with `200` status code
 
 ## Tech stack
  - [TypeScript](https://www.typescriptlang.org/)
@@ -37,7 +37,7 @@ docker-compose logs -f db
 
 Scripts need to be run inside `api` container:
 ```bash
-docker-compose run --rm web {cmd}
+docker-compose run --rm api {cmd}
 ```
 
 ### npm test
@@ -46,6 +46,7 @@ Launches the test runner in the interactive watch mode.
 See the section about running tests for more information.
 
 ### npm run lint
+
 Lint the codebase.
 
 ### npm run check-types

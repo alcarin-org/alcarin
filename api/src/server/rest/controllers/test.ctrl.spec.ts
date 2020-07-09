@@ -1,6 +1,5 @@
 import status from 'http-status-codes';
-
-import testApi from '../shared/spec/api';
+import testApi from 'src/spec/api';
 
 describe('Test controller', () => {
   it('should return 200', async () => {

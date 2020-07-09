@@ -10,7 +10,7 @@ export const createGenericCollectionBehaviour = <
   ElementType
 >(): GenericCollectionBehaviour<ElementType> => {
   const addItem = (collection: ElementType[], character: ElementType) => {
-    if (collection.find(_character => _character === character)) {
+    if (!collection.find(_character => _character === character)) {
       return [...collection, character];
     }
     return collection;

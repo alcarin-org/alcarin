@@ -21,4 +21,5 @@ export async function createCharacterForAccount<TRaceKey>(
   let account = await accountRepository.getById(accountId);
   account = addCharacter(account, character.id);
   await accountRepository.saveAccount(account);
+  return character;
 }

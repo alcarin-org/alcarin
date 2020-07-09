@@ -178,7 +178,7 @@ components:
         id:
           type: string
         race:
-          $ref: '#/components/schemas/RaceModel'
+          type: string
     RaceModel:
       type: object
       title: RaceModel

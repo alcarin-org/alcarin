@@ -36,3 +36,5 @@ function isTokenPayload(
 ): payload is TokenPayloadType {
   return (<TokenPayloadType>payload).accountId !== undefined;
 }
+
+export const jwtTokenizer = createJwtTokenizer();

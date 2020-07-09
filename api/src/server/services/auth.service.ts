@@ -5,10 +5,9 @@ import {
 
 import { jwtTokenizer } from './di-ready-components';
 
-const verifyTokenDI: verifyTokenDI = {
-  tokenizer: jwtTokenizer,
-};
-
 export function verifyToken(token: string) {
-  return verifyTokenService(verifyTokenDI, token);
+  const di: verifyTokenDI = {
+    tokenizer: jwtTokenizer,
+  };
+  return verifyTokenService(di, token);
 }

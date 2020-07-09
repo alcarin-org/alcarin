@@ -10,7 +10,7 @@ export type CharacterRepository<TRaceKey> = {
   create: (
     payload: CreationCharacterPayload<TRaceKey>
   ) => Promise<Character<TRaceKey>>;
-  save: (character: Character<TRaceKey>) => Promise<void>;
+  save: (character: Character<TRaceKey>) => Promise<Character<TRaceKey>>;
   createAndSave: (
     payload: CreationCharacterPayload<TRaceKey>
   ) => Promise<Character<TRaceKey>>;

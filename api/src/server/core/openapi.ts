@@ -1,3 +1,5 @@
+import path from 'path';
+
 import { ErrorRequestHandler } from 'express';
 import { OpenApiValidator } from 'express-openapi-validator';
 import status from 'http-status-codes';
@@ -5,7 +7,7 @@ import status from 'http-status-codes';
 import { isTest } from './env-vars';
 
 export const openApiValidator = new OpenApiValidator({
-  apiSpec: '../../../openapi.yml',
+  apiSpec: path.join(__dirname, '../../../', 'openapi.yml'),
   validateRequests: true,
   validateResponses: isTest(),
   ignorePaths: /.*\/queue\/.*$/,

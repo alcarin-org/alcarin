@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { asyncRequestHandler } from 'src/server/core/helpers/async-request-handler';
 
-import { jwtAuthenticate } from './plugins/passport/jwt-passport-authentication';
+import { verifyTokenMiddleware } from './middleware/verify-token.middleware';
 import { logIn, signUp } from './controllers/auth.ctrl';
 import {
   createNewCharacter,
@@ -19,13 +19,13 @@ export const characterRouter = Router();
 
 characterRouter.post(
   '/users/current/characters',
-  jwtAuthenticate,
+  verifyTokenMiddleware,
   asyncRequestHandler(createNewCharacter)
 );
 
 characterRouter.get(
   '/users/current/characters',
-  jwtAuthenticate,
+  verifyTokenMiddleware,
   asyncRequestHandler(findCharactersForUsers)
 );
 

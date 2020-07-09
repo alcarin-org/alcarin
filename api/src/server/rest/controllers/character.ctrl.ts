@@ -7,6 +7,7 @@ import {
   getCharacters,
 } from 'src/server/services/account-access.service';
 import { AvailableRace } from 'src/server/plugins/game/races/available-race-provider';
+import { Character } from 'src/domain/game/character/character';
 
 interface CreateNewCharacterReq {
   body: {
@@ -26,13 +27,13 @@ export const createNewCharacter: AppRequestHandler<CreateNewCharacterReq> = asyn
   res
 ) => {
   const { name, race } = req.body;
-  const user = req.user;
+  const accountId = req.accountId;
 
   try {
-    const character = await createCharacter(user, name, race);
+    const character = await createCharacter(accountId, name, race);
     logger.info(`Character "${name} with race ${race}" created`);
 
-    return res.status(status.CREATED).send(character);
+    return res.status(status.CREATED).send(mapCharacterToResponse(character));
   } catch (err) {
     throw boom.badRequest(err.message);
   }
@@ -44,8 +45,16 @@ export const findCharactersForUsers: AppRequestHandler = async (req, res) => {
   try {
     const characters = await getCharacters(accountId);
 
-    return res.status(status.OK).send(characters);
+    return res.status(status.OK).send(characters.map(mapCharacterToResponse));
   } catch (err) {
     throw boom.badRequest(err.message);
   }
 };
+
+function mapCharacterToResponse(character: Character<AvailableRace>) {
+  return {
+    name: character.name,
+    id: character.id,
+    race: character.raceKey,
+  };
+}

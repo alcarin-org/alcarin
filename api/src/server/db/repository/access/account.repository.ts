@@ -17,18 +17,25 @@ export const createAccountRepository = (
   }
 
   async function getByEmail(email: string) {
-    const account = await accountRepository.findOneOrFail({ email });
+    const account = await accountRepository.findOneOrFail(
+      { email },
+      { relations: ['characters'] }
+    );
     return mapFromEntityToAccount(account);
   }
 
   async function getById(id: string) {
-    const account = await accountRepository.findOneOrFail({ id });
+    const account = await accountRepository.findOneOrFail(
+      { id },
+      { relations: ['characters'] }
+    );
     return mapFromEntityToAccount(account);
   }
 
   async function saveAccount(account: Account) {
     const entity = mapFromAccountToEntity(account);
-    await accountRepository.save(entity);
+    const newEntity = await accountRepository.save(entity);
+    return mapFromEntityToAccount(newEntity);
   }
 
   return {

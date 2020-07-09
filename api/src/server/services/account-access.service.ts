@@ -23,15 +23,15 @@ import {
   AvailableRace,
 } from './di-ready-components';
 
-const createCharacterDi: createCharacterForAccountDI<AvailableRace> = {
-  accountRepository,
-  characterRepository,
-};
 export async function createCharacter(
   accountId: string,
   name: string,
   raceKey: AvailableRace
 ) {
+  const createCharacterDi: createCharacterForAccountDI<AvailableRace> = {
+    accountRepository,
+    characterRepository,
+  };
   return createCharacterForAccount<AvailableRace>(
     createCharacterDi,
     accountId,
@@ -40,27 +40,27 @@ export async function createCharacter(
   );
 }
 
-const getCharactersDi: getAccountCharactersDI<AvailableRace> = {
-  accountRepository,
-  characterRepository,
-};
 export async function getCharacters(accountId: string) {
-  return getAccountCharacters<AvailableRace>(createCharacterDi, accountId);
+  const getCharactersDi: getAccountCharactersDI<AvailableRace> = {
+    accountRepository,
+    characterRepository,
+  };
+  return getAccountCharacters<AvailableRace>(getCharactersDi, accountId);
 }
 
-const loginDi: loginWithPasswordDI = {
-  tokenizer: jwtTokenizer,
-  encryptor: bCryptEncrypter,
-  accountRepository,
-};
 export async function login(email: string, password: string) {
+  const loginDi: loginWithPasswordDI = {
+    tokenizer: jwtTokenizer,
+    encryptor: bCryptEncrypter,
+    accountRepository,
+  };
   return loginWithPassword(loginDi, email, password);
 }
 
-const registerDi: registerAccountWithPasswordDI = {
-  encryptor: bCryptEncrypter,
-  accountRepository,
-};
 export async function register(email: string, password: string) {
+  const registerDi: registerAccountWithPasswordDI = {
+    encryptor: bCryptEncrypter,
+    accountRepository,
+  };
   return registerAccountWithPassword(registerDi, email, password);
 }

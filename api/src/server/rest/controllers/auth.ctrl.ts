@@ -6,14 +6,16 @@ import { logger } from 'src/server/core/helpers/logger';
 import { envVars } from 'src/server/core/env-vars';
 import { login, register } from 'src/server/services/account-access.service';
 
+import { TokenType } from '../middleware/verify-token.middleware';
+
+export { TokenType };
+
 interface AuthReq {
   body: {
     email: string;
     password: string;
   };
 }
-
-export const TokenType = 'bearer';
 
 export const logIn: AppRequestHandler<AuthReq> = async (req, res) => {
   const { email, password } = req.body;
@@ -35,12 +37,14 @@ export const logIn: AppRequestHandler<AuthReq> = async (req, res) => {
 export const signUp: AppRequestHandler<AuthReq> = async (req, res) => {
   const { email, password } = req.body;
 
-  await register(email, password);
   try {
+    await register(email, password);
   } catch (err) {
     if (err instanceof QueryFailedError) {
       // we quietly ignore this to not letting know potential attacker that given
       // email address already exist in our database
+      logger.info(`cannot create user`);
+
       res.status(status.NO_CONTENT).send();
     } else {
       throw err;
