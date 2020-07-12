@@ -1,12 +1,12 @@
 import assert from 'assert';
 
 import status from 'http-status-codes';
-import testApi from 'src/spec/api';
-import { createTestAccountAndLogin } from 'src/spec/db';
+import testApi from '@/spec/api';
+import { createTestAccountAndLogin } from '@/spec/db';
 import {
   createPostTestForGuardAgainstUnlogin,
   createGetTestForGuardAgainstUnlogin,
-} from 'src/spec/security';
+} from '@/spec/security';
 
 type createCharReqType = {
   name: string;

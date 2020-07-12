@@ -1,7 +1,6 @@
 import { Connection, createConnection, ConnectionOptions } from 'typeorm';
-import { UniversePropertyRepository } from 'src/server/db/repository/game/universe-property-repository';
-
-import ormconfig from '~root/ormconfig';
+import { UniversePropertyRepository } from '@/server/db/repository/game/universe-property-repository';
+import ormconfig from '@/../ormconfig';
 
 type ReposType = {
   UniversePropertyRepo: UniversePropertyRepository;

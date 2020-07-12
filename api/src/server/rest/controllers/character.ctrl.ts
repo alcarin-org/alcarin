@@ -1,13 +1,13 @@
 import { AppRequestHandler } from 'express';
 import boom from '@hapi/boom';
 import status from 'http-status-codes';
-import { logger } from 'src/server/core/helpers/logger';
+import { logger } from '@/server/core/helpers/logger';
 import {
   createCharacter,
   getCharacters,
-} from 'src/server/services/account-access.service';
-import { AvailableRace } from 'src/server/plugins/game/races/available-race-provider';
-import { Character } from 'src/domain/game/character/character';
+} from '@/server/services/account-access.service';
+import { AvailableRace } from '@/server/plugins/game/races/available-race-provider';
+import { Character } from '@/domain/game/character/character';
 
 interface CreateNewCharacterReq {
   body: {

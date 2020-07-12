@@ -20,6 +20,10 @@ your environment.
  - [PostgreSQL](https://www.postgresql.org/)
  - [Redis](https://redis.io/)
 
+In module imports we using `@/*` prefix to point to our `./src` directory.
+Example you can use: `import * from '@/server/core/openapi';` independent where current
+file is in directory tree.
+
 ## Useful commands
 
 ```bash

@@ -1,11 +1,11 @@
 import { getRepository, In } from 'typeorm';
-import { Character } from 'src/domain/game/character/character';
+import { Character } from '@/domain/game/character/character';
 import {
   CharacterRepository,
   CreationCharacterPayload,
-} from 'src/domain/game/character/character.repository';
-import { RaceKeyProvider } from 'src/domain/game/tools/character-race-provider.tool';
-import { IdentifierProviderService } from 'src/domain/shared/identifier-provider.tool';
+} from '@/domain/game/character/character.repository';
+import { RaceKeyProvider } from '@/domain/game/tools/character-race-provider.tool';
+import { IdentifierProviderService } from '@/domain/shared/identifier-provider.tool';
 
 import { Character as CharacterEntity } from '../../entities/game/character';
 

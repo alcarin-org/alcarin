@@ -1,5 +1,5 @@
 import { Worker } from 'bullmq';
-import { logger } from 'src/server/core/helpers/logger';
+import { logger } from '@/server/core/helpers/logger';
 
 import { createDatabaseConnection } from '../db';
 

@@ -1,5 +1,5 @@
 import { v4 as uuid } from 'uuid';
-import { IdentifierProviderService } from 'src/domain/shared/identifier-provider.tool';
+import { IdentifierProviderService } from '@/domain/shared/identifier-provider.tool';
 
 export class IdentifierProvider implements IdentifierProviderService {
   genIdentifier(): string {

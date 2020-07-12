@@ -1,7 +1,7 @@
 import {
   CharacterRaceBehaviour,
   CharacterRace,
-} from 'src/domain/game/character/character-race';
+} from '@/domain/game/character/character-race';
 
 export const elfBehaviour = <TRaceKey>(): CharacterRaceBehaviour<TRaceKey> => {
   const introduceYourself = (race: CharacterRace<TRaceKey>): string => {

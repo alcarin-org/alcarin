@@ -1,4 +1,4 @@
-import { CharacterRaceBehaviour } from 'src/domain/game/character/character-race';
+import { CharacterRaceBehaviour } from '@/domain/game/character/character-race';
 
 export type RaceKeyProvider<TRaceKey> = (raceKey: string) => TRaceKey;
 

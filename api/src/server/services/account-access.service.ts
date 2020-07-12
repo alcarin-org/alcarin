@@ -1,19 +1,19 @@
 import {
   createCharacterForAccount,
   createCharacterForAccountDI,
-} from 'src/domain/services/create-character-for-account.logic';
+} from '@/domain/services/create-character-for-account.logic';
 import {
   getAccountCharacters,
   getAccountCharactersDI,
-} from 'src/domain/services/get-characters-for-account.logic';
+} from '@/domain/services/get-characters-for-account.logic';
 import {
   loginWithPassword,
   loginWithPasswordDI,
-} from 'src/domain/access/account/services/login-with-password.logic';
+} from '@/domain/access/account/services/login-with-password.logic';
 import {
   registerAccountWithPassword,
   registerAccountWithPasswordDI,
-} from 'src/domain/access/services/register-account-with-password.logic';
+} from '@/domain/access/services/register-account-with-password.logic';
 
 import {
   bCryptEncrypter,

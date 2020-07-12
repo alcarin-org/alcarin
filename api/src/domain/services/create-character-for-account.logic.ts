@@ -1,9 +1,9 @@
-import { AccountRepository } from 'src/domain/access/account/account.repository';
+import { AccountRepository } from '@/domain/access/account/account.repository';
 import {
   createCharacter,
   createCharacterDI,
-} from 'src/domain/game/services/create-character.logic';
-import { addCharacter } from 'src/domain/access/account/account';
+} from '@/domain/game/services/create-character.logic';
+import { addCharacter } from '@/domain/access/account/account';
 
 export type createCharacterForAccountDI<TRaceKey> = {
   accountRepository: AccountRepository;

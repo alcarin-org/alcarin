@@ -3,7 +3,7 @@ import {
   characterRouter,
   authRouter,
   testRouter,
-} from 'src/server/rest/routes';
+} from '@/server/rest/routes';
 
 export function setupRoutes() {
   const mainRouter = Router();

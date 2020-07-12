@@ -1,4 +1,4 @@
-import { logger } from 'src/server/core/helpers/logger';
+import { logger } from '@/server/core/helpers/logger';
 
 import { JobType } from './jobs';
 import { setupMainQueue } from './main-queue';

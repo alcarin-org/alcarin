@@ -2,8 +2,8 @@ import boom from '@hapi/boom';
 import { RequestHandler } from 'express';
 import async from 'express-async-handler';
 import { EntityManager, ObjectType } from 'typeorm';
-import { connection } from 'src/server/db/index';
-import { isProduction } from 'src/server/core/env-vars';
+import { connection } from '@/server/db/index';
+import { isProduction } from '@/server/core/env-vars';
 
 const errorMessage = isProduction()
   ? () => ''

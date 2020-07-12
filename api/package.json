@@ -2,24 +2,15 @@
   "name": "alcarin-api",
   "version": "0.0.1",
   "scripts": {
-    "start": "ts-node-dev --no-notify --watch openapi.yml --respawn --transpileOnly -- ./src/index.ts",
+    "start": "ts-node-dev -r tsconfig-paths/register --no-notify --watch openapi.yml --respawn --transpileOnly -- ./src/index.ts",
     "queue": "ts-node-dev --no-notify --respawn --transpileOnly -- ./src/queue/run.ts",
     "cli": "node -r ts-node/register --experimental-repl-await bin/cli.ts",
-    "test": "env $(cat .env.test | xargs) mocha --require ts-node/register --timeout 10000 --paths 'src/index.spec.ts' 'src/**/*.spec.ts'",
+    "test": "env $(cat .env.test | xargs) mocha -r tsconfig-paths/register -r ts-node/register --timeout 10000 --paths 'src/index.spec.ts' 'src/**/*.spec.ts'",
     "test:watch": "npm test -- --watch --watch-files 'src/**/*.ts,./openapi.yml'",
     "check-types": "tsc --noEmit",
     "lint": "eslint . --ext js --ext ts",
     "check-all": "npm run check-types && npm run lint && npm test",
-    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
-    "postinstall": "link-module-alias",
-    "preinstall": "command -v link-module-alias && link-module-alias clean || true"
-  },
-  "_moduleAliases": {
-    "~root": ".",
-    "src": "src",
-    "@domain": "src/domain",
-    "@server": "src/server",
-    "@spec": "src/spec"
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js"
   },
   "dependencies": {
     "@hapi/boom": "^9.0.0",
@@ -70,7 +61,6 @@
     "eslint-plugin-import": "^2.20.2",
     "eslint-plugin-prettier": "^3.1.2",
     "fs-extra": "^8.1.0",
-    "link-module-alias": "^1.2.0",
     "mocha": "^7.2.0",
     "prettier": "1.19.1",
     "sinon": "^8.1.1",

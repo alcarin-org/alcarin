@@ -1,7 +1,7 @@
 import { getRepository } from 'typeorm';
-import { AccountRepository } from 'src/domain/access/account/account.repository';
-import { Account } from 'src/domain/access/account/account';
-import { IdentifierProviderService } from 'src/domain/shared/identifier-provider.tool';
+import { AccountRepository } from '@/domain/access/account/account.repository';
+import { Account } from '@/domain/access/account/account';
+import { IdentifierProviderService } from '@/domain/shared/identifier-provider.tool';
 
 import { Account as AccountEntity } from '../../entities/access/account';
 import { AccountCharacter as AccountCharacterEntity } from '../../entities/access/account-character';

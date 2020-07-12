@@ -1,9 +1,9 @@
 import { sign, verify } from 'jsonwebtoken';
-import { envVars } from 'src/server/core/env-vars';
+import { envVars } from '@/server/core/env-vars';
 import {
   Tokenizer,
   TokenPayloadType,
-} from 'src/domain/access/tools/tokenizer.tool';
+} from '@/domain/access/tools/tokenizer.tool';
 
 export function createJwtTokenizer(): Tokenizer {
   const payloadOptions = {

@@ -1,5 +1,5 @@
-import { PasswordEncryptor } from 'src/domain/access/tools/password-encryptor.tool';
-import { createGenericCollectionBehaviour } from 'src/domain/shared/generic-collection';
+import { PasswordEncryptor } from '@/domain/access/tools/password-encryptor.tool';
+import { createGenericCollectionBehaviour } from '@/domain/shared/generic-collection';
 
 export type Account = {
   id: string;

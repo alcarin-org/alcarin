@@ -1,5 +1,5 @@
-import { AccountRepository } from 'src/domain/access/account/account.repository';
-import { PasswordEncryptor } from 'src/domain/access/tools/password-encryptor.tool';
+import { AccountRepository } from '@/domain/access/account/account.repository';
+import { PasswordEncryptor } from '@/domain/access/tools/password-encryptor.tool';
 
 export type registerAccountWithPasswordDI = {
   accountRepository: AccountRepository;

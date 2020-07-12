@@ -1,7 +1,7 @@
 import {
   verifyTokenDI,
   verifyToken as verifyTokenService,
-} from 'src/domain/services/verify-token-payload.logic';
+} from '@/domain/services/verify-token-payload.logic';
 
 import { jwtTokenizer } from './di-ready-components';
 

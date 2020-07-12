@@ -4,11 +4,11 @@ import chai from 'chai';
 import sinonChai from 'sinon-chai';
 import sinon from 'sinon';
 import { Connection, getConnection } from 'typeorm';
-import { createDatabaseConnection } from 'src/server/db';
-import { MainScheduler, redis as queueRedis } from 'src/server/queue';
-import { redis } from 'src/server/queue/redis';
-import { envVars } from 'src/server/core/env-vars';
-import { initializeDIAfterDBLoad } from '@server/services/di-ready-components';
+import { createDatabaseConnection } from '@/server/db';
+import { MainScheduler, redis as queueRedis } from '@/server/queue';
+import { redis } from '@/server/queue/redis';
+import { envVars } from '@/server/core/env-vars';
+import { initializeDIAfterDBLoad } from '@/server/services/di-ready-components';
 
 chai.use(sinonChai);
 chai.should();

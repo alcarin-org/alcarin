@@ -1,7 +1,7 @@
 import {
   CharacterRaceBehaviour,
   CharacterRace,
-} from 'src/domain/game/character/character-race';
+} from '@/domain/game/character/character-race';
 
 export const humanBehaviour = <
   TRaceKey

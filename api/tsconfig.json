@@ -15,7 +15,10 @@
     "lib": ["es2019"],
     "moduleResolution": "node",
     "typeRoots": ["src/server/core/types", "./node_modules/@types"],
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+    "paths": {
+        "@/*": ["src/*"]
+    }
   },
   "include": ["src/**/*.ts", "bin/**/*.ts"]
 }

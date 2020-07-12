@@ -1,6 +1,6 @@
 import IORedis from 'ioredis';
 import { Queue, QueueScheduler } from 'bullmq';
-import { isProduction } from 'src/server/core/env-vars';
+import { isProduction } from '@/server/core/env-vars';
 
 import { getRedisConfig } from './redis';
 

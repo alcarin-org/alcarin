@@ -1,4 +1,4 @@
-import { Tokenizer } from 'src/domain/access/tools/tokenizer.tool';
+import { Tokenizer } from '@/domain/access/tools/tokenizer.tool';
 
 export type verifyTokenDI = {
   tokenizer: Tokenizer;

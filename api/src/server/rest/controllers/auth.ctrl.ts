@@ -2,9 +2,9 @@ import { AppRequestHandler } from 'express';
 import boom from '@hapi/boom';
 import status from 'http-status-codes';
 import { QueryFailedError } from 'typeorm';
-import { logger } from 'src/server/core/helpers/logger';
-import { envVars } from 'src/server/core/env-vars';
-import { login, register } from 'src/server/services/account-access.service';
+import { logger } from '@/server/core/helpers/logger';
+import { envVars } from '@/server/core/env-vars';
+import { login, register } from '@/server/services/account-access.service';
 
 import { TokenType } from '../middleware/verify-token.middleware';
 

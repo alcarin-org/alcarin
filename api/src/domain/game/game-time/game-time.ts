@@ -1,4 +1,4 @@
-import { UniversePropertyRepo } from 'src/server/db';
+import { UniversePropertyRepo } from '@/server/db';
 
 const GameTimeKey = 'universal.last-saved-game-time';
 const IRLTimeKey = 'universal.last-saved-irl-time';

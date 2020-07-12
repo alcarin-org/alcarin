@@ -1,7 +1,7 @@
-import { AccountRepository } from 'src/domain/access/account/account.repository';
-import { canLogin } from 'src/domain/access/account/account';
-import { Tokenizer } from 'src/domain/access/tools/tokenizer.tool';
-import { PasswordEncryptor } from 'src/domain/access/tools/password-encryptor.tool';
+import { AccountRepository } from '@/domain/access/account/account.repository';
+import { canLogin } from '@/domain/access/account/account';
+import { Tokenizer } from '@/domain/access/tools/tokenizer.tool';
+import { PasswordEncryptor } from '@/domain/access/tools/password-encryptor.tool';
 
 export type loginWithPasswordDI = {
   tokenizer: Tokenizer;

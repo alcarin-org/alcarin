@@ -1,10 +1,10 @@
 import status from 'http-status-codes';
 import { decode } from 'jsonwebtoken';
-import testApi from 'src/spec/api';
-import { registerAccount } from 'src/spec/db';
-import { envVars } from 'src/server/core/env-vars';
-import { connection } from 'src/server/db';
-import { Account } from 'src/server/db/entities/access/account';
+import testApi from '@/spec/api';
+import { registerAccount } from '@/spec/db';
+import { envVars } from '@/server/core/env-vars';
+import { connection } from '@/server/db';
+import { Account } from '@/server/db/entities/access/account';
 
 describe('Auth controller', () => {
   const testEmail = 'test@test.com';
