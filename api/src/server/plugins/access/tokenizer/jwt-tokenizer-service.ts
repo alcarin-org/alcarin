@@ -22,7 +22,7 @@ export function createJwtTokenizer(): Tokenizer {
       return { accountId: payload.accountId };
     }
 
-    throw 'invalid token';
+    throw new Error('invalid token');
   }
 
   return {

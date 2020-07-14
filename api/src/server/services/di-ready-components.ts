@@ -11,6 +11,7 @@ import { AccountRepository } from '@/domain/access/account/account.repository';
 import { CharacterRepository } from '@/domain/game/character/character.repository';
 
 export { identifierProvider, AvailableRace, bCryptEncrypter, jwtTokenizer };
+
 export let accountRepository: AccountRepository;
 export let characterRepository: CharacterRepository<AvailableRace>;
 

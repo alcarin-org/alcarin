@@ -3,7 +3,6 @@ import {
   createCharacter,
   createCharacterDI,
 } from '@/domain/game/services/create-character.logic';
-import { addCharacter } from '@/domain/access/account/account';
 
 export type createCharacterForAccountDI<TRaceKey> = {
   accountRepository: AccountRepository;
@@ -18,8 +17,16 @@ export async function createCharacterForAccount<TRaceKey>(
   const { accountRepository } = di;
   const character = await createCharacter(di, name, race);
 
-  let account = await accountRepository.getById(accountId);
-  account = addCharacter(account, character.id);
-  await accountRepository.saveAccount(account);
+  const account = await accountRepository.getById(accountId);
+
+  await accountRepository.saveAccount({
+    ...account,
+    // MARCHW: do we really need to check if the list will be unique?
+    // IMO not. the api should throw an error in such case instead of quitely ignore it.
+    // and the error should go from database unique constrain that
+    // should be at accountId+characterId columns
+    characters: [...new Set([...account.characters, character.id])],
+  });
+
   return character;
 }

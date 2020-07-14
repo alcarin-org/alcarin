@@ -1,6 +1,6 @@
 import 'reflect-metadata';
 
-import { initializeDIAfterDBLoad } from '@/server/services/di-ready-components';
+import { initializeDIAfterDBLoad } from '@/server/services/di-ready-components.ts';
 import { validateEnvVars, envVars } from '@/server/core/env-vars';
 import { setupExpressApp } from '@/server/core/setup-express-app';
 import { logger } from '@/server/core/helpers/logger';
