@@ -1,4 +1,4 @@
-import { verifyToken } from '@/server/services/auth.service';
+import { verifyToken } from '@/server/services/account-access.service';
 import { NextFunction, AppRequest, Response } from 'express';
 export const TokenType = 'Bearer';
 

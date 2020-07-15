@@ -10,6 +10,8 @@ import { loginWithPassword, loginWithPasswordDI } from '@/domain/access';
 import {
   registerAccountWithPassword,
   registerAccountWithPasswordDI,
+  verifyToken as verifyTokenService,
+  VerifyTokenDI,
 } from '@/domain/access';
 
 import {
@@ -60,4 +62,11 @@ export async function register(email: string, password: string) {
     accountRepository,
   };
   return registerAccountWithPassword(registerDi, email, password);
+}
+
+export async function verifyToken(token: string) {
+  const di: VerifyTokenDI = {
+    tokenizer: jwtTokenizer,
+  };
+  return verifyTokenService(di, token);
 }
