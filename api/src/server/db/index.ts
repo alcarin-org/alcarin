@@ -1,6 +1,10 @@
 import { Connection, createConnection, ConnectionOptions } from 'typeorm';
-import { UniversePropertyRepository } from '@/server/db/repository/game/universe-property-repository';
 import ormconfig from '@/../ormconfig';
+
+import { UniversePropertyRepository } from './repository/game/universe-property-repository';
+import { RepositoryFactory } from './repository-factory';
+
+export { RepositoryFactory };
 
 type ReposType = {
   UniversePropertyRepo: UniversePropertyRepository;
@@ -17,6 +21,8 @@ export async function createDatabaseConnection(
     ...ormconfig,
     ...options,
   } as ConnectionOptions);
+
+  RepositoryFactory.setDefaultConnection(connection);
 
   UniversePropertyRepo = connection.getCustomRepository(
     UniversePropertyRepository

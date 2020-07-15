@@ -1,6 +1,5 @@
 import 'reflect-metadata';
 
-import { initializeDIAfterDBLoad } from '@/server/services/di-ready-components.ts';
 import { validateEnvVars, envVars } from '@/server/core/env-vars';
 import { setupExpressApp } from '@/server/core/setup-express-app';
 import { logger } from '@/server/core/helpers/logger';
@@ -13,8 +12,6 @@ async function main() {
     await createDatabaseConnection();
 
     const app = await setupExpressApp();
-
-    initializeDIAfterDBLoad();
 
     app.listen(envVars.PORT, () => {
       logger.info('Express server started on port: ' + envVars.PORT);

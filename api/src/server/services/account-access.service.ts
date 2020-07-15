@@ -9,13 +9,17 @@ import { bCryptEncrypter } from '@/server/plugins/access/password-encycrypters/b
 import { jwtTokenizer } from '@/server/plugins/access/tokenizer/jwt-tokenizer-service';
 import { AvailableRace } from '@/server/plugins/game/races/available-race-provider';
 
-import { accountRepository, characterRepository } from './di-ready-components';
+import { RepositoryFactory } from '../db';
 
 export async function createCharacter(
   accountId: string,
   name: string,
-  raceKey: AvailableRace
+  raceKey: AvailableRace,
+  repoFactory = RepositoryFactory.Default
 ) {
+  const accountRepository = repoFactory.getAccountRepository();
+  const characterRepository = repoFactory.getCharacterRepository();
+
   return createCharacterForAccount(
     { accountRepository, characterRepository },
     accountId,
@@ -24,14 +28,26 @@ export async function createCharacter(
   );
 }
 
-export async function getCharacters(accountId: string) {
+export async function getCharacters(
+  accountId: string,
+  repoFactory = RepositoryFactory.Default
+) {
+  const accountRepository = repoFactory.getAccountRepository();
+  const characterRepository = repoFactory.getCharacterRepository();
+
   return getAccountCharacters<AvailableRace>(
     { accountRepository, characterRepository },
     accountId
   );
 }
 
-export async function login(email: string, password: string) {
+export async function login(
+  email: string,
+  password: string,
+  repoFactory = RepositoryFactory.Default
+) {
+  const accountRepository = repoFactory.getAccountRepository();
+
   const loginDi: loginWithPasswordDI = {
     tokenizer: jwtTokenizer,
     encryptor: bCryptEncrypter,
@@ -40,7 +56,13 @@ export async function login(email: string, password: string) {
   return loginWithPassword(loginDi, email, password);
 }
 
-export async function register(email: string, password: string) {
+export async function register(
+  email: string,
+  password: string,
+  repoFactory = RepositoryFactory.Default
+) {
+  const accountRepository = repoFactory.getAccountRepository();
+
   return registerAccountWithPassword(
     { encryptor: bCryptEncrypter, accountRepository },
     email,

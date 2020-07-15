@@ -8,7 +8,6 @@ import { createDatabaseConnection } from '@/server/db';
 import { MainScheduler, redis as queueRedis } from '@/server/queue';
 import { redis } from '@/server/queue/redis';
 import { envVars } from '@/server/core/env-vars';
-import { initializeDIAfterDBLoad } from '@/server/services/di-ready-components';
 
 chai.use(sinonChai);
 chai.should();
@@ -18,7 +17,6 @@ before(async () => {
   await createDatabaseConnection({
     migrationsRun: true,
   });
-  initializeDIAfterDBLoad();
 });
 
 beforeEach(async () => {
