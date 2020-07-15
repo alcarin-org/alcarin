@@ -4,7 +4,9 @@ export type Account = {
   id: string;
   email: string;
   passwordHash: string;
-  characters: string[];
+  characters: {
+    id: string;
+  }[];
 };
 
 export function canLogin(

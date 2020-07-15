@@ -6,14 +6,11 @@ import {
   getAccountCharacters,
   getAccountCharactersDI,
 } from '@/domain/services/get-characters-for-account.logic';
-import {
-  loginWithPassword,
-  loginWithPasswordDI,
-} from '@/domain/access/account/services/login-with-password.logic';
+import { loginWithPassword, loginWithPasswordDI } from '@/domain/access';
 import {
   registerAccountWithPassword,
   registerAccountWithPasswordDI,
-} from '@/domain/access/services/register-account-with-password.logic';
+} from '@/domain/access';
 
 import {
   bCryptEncrypter,

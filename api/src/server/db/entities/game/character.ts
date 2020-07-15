@@ -1,4 +1,6 @@
-import { Entity, PrimaryColumn, Column } from 'typeorm';
+import { Entity, PrimaryColumn, Column, ManyToOne } from 'typeorm';
+
+import { Account } from '../account';
 
 @Entity({ name: 'game_characters' })
 export class Character {
@@ -13,4 +15,10 @@ export class Character {
 
   @Column({ length: 320 })
   public name: string;
+
+  @ManyToOne(
+    () => Account,
+    account => account.characters
+  )
+  account: Account;
 }
