@@ -2,7 +2,7 @@ import boom from '@hapi/boom';
 import { RequestHandler } from 'express';
 import async from 'express-async-handler';
 import { EntityManager, ObjectType } from 'typeorm';
-import { connection } from '@/server/db/index';
+import { getDefaultConnection } from '@/server/db/index';
 import { isProduction } from '@/server/core/env-vars';
 
 const errorMessage = isProduction()
@@ -15,10 +15,15 @@ export function preloadEntity<Entity>(
   paramName: string | string[]
 ): RequestHandler {
   return async(async function preloadEntityMiddleware(req, res, next) {
+    const defaultConnection = getDefaultConnection();
+    if (!defaultConnection) {
+      throw new Error('Default connection not ready yet');
+    }
+
     const paramNames = Array.isArray(paramName) ? paramName : [paramName];
     const paramsValues = paramNames.map(name => req.params[name]);
 
-    const repo = connection.manager.getCustomRepository(repoClass);
+    const repo = defaultConnection.manager.getCustomRepository(repoClass);
     if (repo.get.length !== paramNames.length) {
       throw new Error(
         `Implementation error, repository '${repoClass.name}' "get" function ` +

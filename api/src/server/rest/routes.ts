@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { asyncRequestHandler } from '@/server/core/helpers/async-request-handler';
 
+import { asyncRequestHandler } from './async-request-handler';
 import { verifyTokenMiddleware } from './middleware/verify-token.middleware';
 import { logIn, signUp } from './controllers/auth.ctrl';
 import {

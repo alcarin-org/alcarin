@@ -1,6 +1,6 @@
 import { Repository, EntityRepository, In } from 'typeorm';
 
-import { UniverseProperty } from '../../entities/game/universe-property';
+import { UniverseProperty } from '../../entities/universe-property';
 
 @EntityRepository(UniverseProperty)
 export class UniversePropertyRepository extends Repository<UniverseProperty> {

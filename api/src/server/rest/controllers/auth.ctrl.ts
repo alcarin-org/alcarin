@@ -6,10 +6,6 @@ import { logger } from '@/server/core/helpers/logger';
 import { envVars } from '@/server/core/env-vars';
 import { login, register } from '@/server/services/account-access.service';
 
-import { TokenType } from '../middleware/verify-token.middleware';
-
-export { TokenType };
-
 interface AuthReq {
   body: {
     email: string;
@@ -26,7 +22,7 @@ export const logIn: AppRequestHandler<AuthReq> = async (req, res) => {
 
     return res.status(status.OK).send({
       accessToken: token,
-      tokenType: TokenType,
+      tokenType: 'Bearer',
       expiresAt: Math.trunc(Date.now() / 1000 + envVars.AUTH_EXPIRATION_SEC),
     });
   } catch (err) {

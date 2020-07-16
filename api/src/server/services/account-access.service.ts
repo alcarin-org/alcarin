@@ -1,6 +1,6 @@
 import { createCharacterForAccount } from '@/domain/services/create-character-for-account.logic';
 import { getAccountCharacters } from '@/domain/services/get-characters-for-account.logic';
-import { loginWithPassword, loginWithPasswordDI } from '@/domain/access';
+import { loginWithPassword } from '@/domain/access';
 import {
   registerAccountWithPassword,
   verifyToken as verifyTokenService,
@@ -47,7 +47,7 @@ export async function login(
 ) {
   const accountRepository = repoFactory.getAccountRepository();
 
-  const loginDi: loginWithPasswordDI = {
+  const loginDi = {
     tokenizer: jwtTokenizer,
     encryptor: bCryptEncrypter,
     accountRepository,

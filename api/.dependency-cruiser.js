@@ -193,7 +193,7 @@ module.exports = {
           leave out if you want to exclude neither (recommended!)
     */
     exclude : {
-      path: 'env-vars|logger',
+      path: 'node_modules|ormconfig.ts|env-vars.ts|logger.ts',
       dynamic: true
     },
 

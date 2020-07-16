@@ -11,13 +11,12 @@
     "lint": "eslint . --ext js --ext ts",
     "check-all": "npm run check-types && npm run lint && npm test",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
-    "static-analyze": "depcruise --validate .dependency-cruiser.js src"
+    "static-analyze": "depcruise --validate .dependency-cruiser.js src",
+    "static-deps-graph": "depcruise --validate .dependency-cruiser.js --output-type dot ./src/index.ts | dot -T svg > ./deps-graph.svg"
   },
   "dependencies": {
     "@hapi/boom": "^9.0.0",
     "@hapi/joi": "^17.1.1",
-    "@typescript-eslint/eslint-plugin": "^3.6.1",
-    "@typescript-eslint/parser": "^3.6.1",
     "ajv": "^6.12.2",
     "bcrypt": "^4.0.1",
     "bull-arena": "^2.8.1",
@@ -60,6 +59,8 @@
     "@types/sinon-chai": "^3.2.3",
     "@types/supertest": "^2.0.8",
     "@types/uuid": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^2.15.0",
+    "@typescript-eslint/parser": "^2.15.0",
     "chai": "^4.2.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.9.0",

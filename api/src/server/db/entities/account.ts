@@ -1,6 +1,6 @@
 import { Entity, PrimaryColumn, OneToMany, Column } from 'typeorm';
 
-import { Character } from './game/character';
+import { Character } from './character';
 
 @Entity({ name: 'access_accounts' })
 export class Account {

@@ -4,13 +4,17 @@ import { Account } from '@/domain/access/account/account';
 import { IdentifierProviderService } from '@/domain/shared/identifier-provider.tool';
 
 import { Account as AccountEntity } from '../../entities/account';
-import { Character as CharacterEntity } from '../../entities/game/character';
-import { connection } from '../..';
+import { Character as CharacterEntity } from '../../entities/character';
+import { getDefaultConnection } from '../..';
 
 export const createAccountRepository = (
   IdentifierProviderService: IdentifierProviderService,
-  dbConnection: Connection | EntityManager = connection
+  dbConnection: Connection | EntityManager | null = getDefaultConnection()
 ): AccountRepository => {
+  if (!dbConnection) {
+    throw new Error('Database not ready yet');
+  }
+
   const createAccount = createNewAccount(IdentifierProviderService);
   const accountRepository = dbConnection.getRepository(AccountEntity);
 

@@ -3,7 +3,7 @@ import { decode } from 'jsonwebtoken';
 import testApi from '@/spec/api';
 import { registerAccount } from '@/spec/db';
 import { envVars } from '@/server/core/env-vars';
-import { connection } from '@/server/db';
+import { getDefaultConnection } from '@/server/db';
 import { Account } from '@/server/db/entities/account';
 
 describe('Auth controller', () => {
@@ -38,7 +38,7 @@ describe('Auth controller', () => {
         })
         .expect(status.NO_CONTENT);
 
-      const accounts = await connection.manager.find(Account);
+      const accounts = await getDefaultConnection()!.manager.find(Account);
       accounts.length.should.equal(1);
     });
   });
@@ -56,7 +56,7 @@ describe('Auth controller', () => {
       res.body.tokenType.should.equal('Bearer');
       const decodedToken = decode(res.body.accessToken) as Record<string, any>;
 
-      const accounts = await connection.manager.find(Account, {
+      const accounts = await getDefaultConnection()!.manager.find(Account, {
         email: testEmail,
       });
 

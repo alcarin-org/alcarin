@@ -3,6 +3,7 @@ import { identifierProvider } from '@/server/plugins/shared/uuid-identifier-prov
 import { raceKeyProvider } from '@/server/plugins/game/races/available-race-provider';
 import { createEntityCharacterRepository } from '@/server/db/repository/game/character.repository';
 import { createAccountRepository } from '@/server/db/repository/access/account.repository';
+import { getDefaultConnection } from '@/server/db';
 
 export class RepositoryFactory {
   private static DefaultConnectionInstance: RepositoryFactory;
@@ -19,18 +20,22 @@ export class RepositoryFactory {
   }
 
   getCharacterRepository() {
-    return createEntityCharacterRepository(raceKeyProvider, identifierProvider);
-  }
-
-  public static setDefaultConnection(connection: Connection) {
-    RepositoryFactory.DefaultConnectionInstance = new RepositoryFactory(
-      connection
+    return createEntityCharacterRepository(
+      raceKeyProvider,
+      identifierProvider,
+      this.context
     );
   }
 
   public static get Default() {
     if (!RepositoryFactory.DefaultConnectionInstance) {
-      throw new Error('RepositoryFactory has not been initialized yet');
+      const defaultConnection = getDefaultConnection();
+      if (!defaultConnection) {
+        throw new Error('Database connection has not been initialized yet');
+      }
+      RepositoryFactory.DefaultConnectionInstance = new RepositoryFactory(
+        defaultConnection
+      );
     }
     return RepositoryFactory.DefaultConnectionInstance;
   }

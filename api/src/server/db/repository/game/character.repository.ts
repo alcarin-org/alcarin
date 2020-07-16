@@ -1,4 +1,4 @@
-import { In } from 'typeorm';
+import { Connection, EntityManager, In } from 'typeorm';
 import { Character } from '@/domain/game/character/character';
 import {
   CharacterRepository,
@@ -7,14 +7,19 @@ import {
 import { RaceKeyProvider } from '@/domain/game/tools/character-race-provider.tool';
 import { IdentifierProviderService } from '@/domain/shared/identifier-provider.tool';
 
-import { connection } from '../..';
-import { Character as CharacterEntity } from '../../entities/game/character';
+import { getDefaultConnection } from '../..';
+import { Character as CharacterEntity } from '../../entities/character';
 
 export const createEntityCharacterRepository = <TRaceKey extends string>(
   raceKeyProvider: RaceKeyProvider<TRaceKey>,
-  identifierProviderService: IdentifierProviderService
+  identifierProviderService: IdentifierProviderService,
+  dbConnection: Connection | EntityManager | null = getDefaultConnection()
 ): CharacterRepository<TRaceKey> => {
-  const charRepository = connection.getRepository(CharacterEntity);
+  if (!dbConnection) {
+    throw new Error('Database not ready yet');
+  }
+
+  const charRepository = dbConnection.getRepository(CharacterEntity);
   const createCharacter = createNewCharacter<TRaceKey>(
     identifierProviderService
   );

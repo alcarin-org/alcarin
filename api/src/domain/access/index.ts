@@ -3,7 +3,7 @@ import { canLogin, Account } from './account/account';
 import { Tokenizer } from './tools/tokenizer.tool';
 import { PasswordEncryptor } from './tools/password-encryptor.tool';
 
-export type loginWithPasswordDI = {
+type loginWithPasswordDI = {
   tokenizer: Tokenizer;
   encryptor: PasswordEncryptor;
   accountRepository: AccountRepository;
@@ -25,7 +25,7 @@ export async function loginWithPassword(
   throw 'invalid login data';
 }
 
-export type registerAccountWithPasswordDI = {
+type registerAccountWithPasswordDI = {
   accountRepository: AccountRepository;
   encryptor: PasswordEncryptor;
 };
@@ -41,7 +41,7 @@ export async function registerAccountWithPassword(
   return accountRepository.saveAccount(account);
 }
 
-export type VerifyTokenDI = {
+type VerifyTokenDI = {
   tokenizer: Tokenizer;
 };
 
