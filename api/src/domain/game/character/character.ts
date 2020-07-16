@@ -2,16 +2,14 @@ import { CharacterRaceBehaviour } from './character-race';
 
 export const StartingAge = 20;
 
-export type CharacterRace<TRaceKey> = {
+export interface CharacterRace<TRaceKey> {
   raceKey: TRaceKey;
-};
+}
 
-export type Character<TRaceKey> = {
+export interface Character<TRaceKey> extends CharacterRace<TRaceKey> {
   id: string;
   name: string;
   age: number;
-} & CharacterRace<TRaceKey>;
+}
 
-export type CharacterBehaviour<TRaceKey> = {} & CharacterRaceBehaviour<
-  TRaceKey
->;
+export type CharacterBehaviour<TRaceKey> = CharacterRaceBehaviour<TRaceKey>;
