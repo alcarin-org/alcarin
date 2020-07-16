@@ -34,7 +34,7 @@ export function createJwtTokenizer(): Tokenizer {
 function isTokenPayload(
   payload: string | object | TokenPayloadType
 ): payload is TokenPayloadType {
-  return (<TokenPayloadType>payload).accountId !== undefined;
+  return (payload as TokenPayloadType).accountId !== undefined;
 }
 
 export const jwtTokenizer = createJwtTokenizer();

@@ -6,12 +6,12 @@ import {
 export const humanBehaviour = <
   TRaceKey
 >(): CharacterRaceBehaviour<TRaceKey> => {
-  const introduceYourself = (race: CharacterRace<TRaceKey>): string => {
-    return `I'm proud ${raceName(race)}!`;
+  const raceName = (_race: CharacterRace<TRaceKey>): string => {
+    return `Human`;
   };
 
-  const raceName = (race: CharacterRace<TRaceKey>): string => {
-    return `Human`;
+  const introduceYourself = (race: CharacterRace<TRaceKey>): string => {
+    return `I'm proud ${raceName(race)}!`;
   };
 
   const isRace = (race: CharacterRace<TRaceKey>, raceCandidate: TRaceKey) => {
