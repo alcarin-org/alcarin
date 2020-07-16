@@ -4,7 +4,7 @@ import testApi from '@/spec/api';
 import { registerAccount } from '@/spec/db';
 import { envVars } from '@/server/core/env-vars';
 import { connection } from '@/server/db';
-import { Account } from '@/server/db/entities/access/account';
+import { Account } from '@/server/db/entities/account';
 
 describe('Auth controller', () => {
   const testEmail = 'test@test.com';

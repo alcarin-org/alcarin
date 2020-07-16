@@ -1,6 +1,6 @@
 import { Entity, PrimaryColumn, OneToMany, Column } from 'typeorm';
 
-import { AccountCharacter } from './account-character';
+import { Character } from './game/character';
 
 @Entity({ name: 'access_accounts' })
 export class Account {
@@ -14,11 +14,11 @@ export class Account {
   public passwordHash: string;
 
   @OneToMany(
-    () => AccountCharacter,
+    () => Character,
     character => character.account,
     {
       cascade: true,
     }
   )
-  characters: AccountCharacter[];
+  characters: Character[];
 }

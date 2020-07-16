@@ -1,9 +1,6 @@
-import { AccountRepository } from '@/domain/access/account/account.repository';
-import {
-  createCharacter,
-  createCharacterDI,
-} from '@/domain/game/services/create-character.logic';
-import { addCharacter } from '@/domain/access/account/account';
+import { AccountRepository } from '../access/account/account.repository';
+import { createCharacter, createCharacterDI } from '../game';
+import { addCharacter } from '../access';
 
 export type createCharacterForAccountDI<TRaceKey> = {
   accountRepository: AccountRepository;
@@ -16,10 +13,12 @@ export async function createCharacterForAccount<TRaceKey>(
   race: TRaceKey
 ) {
   const { accountRepository } = di;
+
   const character = await createCharacter(di, name, race);
 
-  let account = await accountRepository.getById(accountId);
-  account = addCharacter(account, character.id);
-  await accountRepository.saveAccount(account);
+  const account = await accountRepository.getById(accountId);
+
+  await accountRepository.saveAccount(addCharacter(account, character));
+
   return character;
 }

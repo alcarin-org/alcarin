@@ -25,12 +25,16 @@
     "express-openapi-validator": "^3.15.1",
     "http-status-codes": "^1.4.0",
     "ioredis": "^4.14.1",
+    "jsonwebtoken": "^8.5.1",
     "morgan": "^1.9.1",
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "pg": "^7.17.1",
     "reflect-metadata": "^0.1.13",
+    "tsconfig-paths": "^3.9.0",
+    "tslib": "^2.0.0",
     "typeorm": "^0.2.22",
+    "typescript": "^3.9.6",
     "uuid": "^8.2.0",
     "winston": "^3.2.1"
   },
@@ -67,8 +71,6 @@
     "sinon-chai": "^3.4.0",
     "supertest": "^4.0.2",
     "ts-mocha": "^7.0.0",
-    "ts-node-dev": "^1.0.0-pre.44",
-    "tsconfig-paths": "^3.9.0",
-    "typescript": "^3.7.4"
+    "ts-node-dev": "^1.0.0-pre.44"
   }
 }

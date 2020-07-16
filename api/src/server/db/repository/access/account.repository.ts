@@ -1,16 +1,18 @@
-import { getRepository } from 'typeorm';
+import { Connection, EntityManager } from 'typeorm';
 import { AccountRepository } from '@/domain/access/account/account.repository';
 import { Account } from '@/domain/access/account/account';
 import { IdentifierProviderService } from '@/domain/shared/identifier-provider.tool';
 
-import { Account as AccountEntity } from '../../entities/access/account';
-import { AccountCharacter as AccountCharacterEntity } from '../../entities/access/account-character';
+import { Account as AccountEntity } from '../../entities/account';
+import { Character as CharacterEntity } from '../../entities/game/character';
+import { connection } from '../..';
 
 export const createAccountRepository = (
-  IdentifierProviderService: IdentifierProviderService
+  IdentifierProviderService: IdentifierProviderService,
+  dbConnection: Connection | EntityManager = connection
 ): AccountRepository => {
   const createAccount = createNewAccount(IdentifierProviderService);
-  const accountRepository = getRepository(AccountEntity);
+  const accountRepository = dbConnection.getRepository(AccountEntity);
 
   async function create(email: string, passwordHash: string) {
     return createAccount(email, passwordHash);
@@ -21,7 +23,7 @@ export const createAccountRepository = (
       { email },
       { relations: ['characters'] }
     );
-    return mapFromEntityToAccount(account);
+    return account;
   }
 
   async function getById(id: string) {
@@ -29,13 +31,13 @@ export const createAccountRepository = (
       { id },
       { relations: ['characters'] }
     );
-    return mapFromEntityToAccount(account);
+    return account;
   }
 
   async function saveAccount(account: Account) {
     const entity = mapFromAccountToEntity(account);
     const newEntity = await accountRepository.save(entity);
-    return mapFromEntityToAccount(newEntity);
+    return newEntity;
   }
 
   return {
@@ -59,15 +61,6 @@ function createNewAccount(
   };
 }
 
-function mapFromEntityToAccount(accountEntity: AccountEntity): Account {
-  return {
-    id: accountEntity.id,
-    email: accountEntity.email,
-    passwordHash: accountEntity.passwordHash,
-    characters: accountEntity.characters.map(el => el.id),
-  };
-}
-
 function mapFromAccountToEntity(account: Account) {
   const accountEntity = new AccountEntity();
   accountEntity.id = account.id;
@@ -80,8 +73,8 @@ function mapFromAccountToEntity(account: Account) {
   return accountEntity;
 }
 
-function mapFromAccountCharacterToEntity(character: string) {
-  const accountEntity = new AccountCharacterEntity();
-  accountEntity.id = character;
+function mapFromAccountCharacterToEntity(character: { id: string }) {
+  const accountEntity = new CharacterEntity();
+  accountEntity.id = character.id;
   return accountEntity;
 }

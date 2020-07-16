@@ -13,5 +13,7 @@ export async function getAccountCharacters<TRaceKey>(
   const { accountRepository, characterRepository } = di;
 
   const account = await accountRepository.getById(accountId);
-  return characterRepository.getMultipleByIds(account.characters);
+  return characterRepository.getMultipleByIds(
+    account.characters.map(c => c.id)
+  );
 }

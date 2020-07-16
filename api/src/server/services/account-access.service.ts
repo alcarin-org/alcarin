@@ -1,54 +1,52 @@
-import {
-  createCharacterForAccount,
-  createCharacterForAccountDI,
-} from '@/domain/services/create-character-for-account.logic';
-import {
-  getAccountCharacters,
-  getAccountCharactersDI,
-} from '@/domain/services/get-characters-for-account.logic';
-import {
-  loginWithPassword,
-  loginWithPasswordDI,
-} from '@/domain/access/account/services/login-with-password.logic';
+import { createCharacterForAccount } from '@/domain/services/create-character-for-account.logic';
+import { getAccountCharacters } from '@/domain/services/get-characters-for-account.logic';
+import { loginWithPassword, loginWithPasswordDI } from '@/domain/access';
 import {
   registerAccountWithPassword,
-  registerAccountWithPasswordDI,
-} from '@/domain/access/services/register-account-with-password.logic';
-
-import {
-  bCryptEncrypter,
-  jwtTokenizer,
-  accountRepository,
-  characterRepository,
-  AvailableRace,
-} from './di-ready-components';
+  verifyToken as verifyTokenService,
+} from '@/domain/access';
+import { bCryptEncrypter } from '@/server/plugins/access/password-encycrypters/bcrypt-encrypter';
+import { jwtTokenizer } from '@/server/plugins/access/tokenizer/jwt-tokenizer-service';
+import { AvailableRace } from '@/server/plugins/game/races/available-race-provider';
+import { RepositoryFactory } from '@/server/repository-factory';
 
 export async function createCharacter(
   accountId: string,
   name: string,
-  raceKey: AvailableRace
+  raceKey: AvailableRace,
+  repoFactory = RepositoryFactory.Default
 ) {
-  const createCharacterDi: createCharacterForAccountDI<AvailableRace> = {
-    accountRepository,
-    characterRepository,
-  };
-  return createCharacterForAccount<AvailableRace>(
-    createCharacterDi,
+  const accountRepository = repoFactory.getAccountRepository();
+  const characterRepository = repoFactory.getCharacterRepository();
+
+  return createCharacterForAccount(
+    { accountRepository, characterRepository },
     accountId,
     name,
     raceKey
   );
 }
 
-export async function getCharacters(accountId: string) {
-  const getCharactersDi: getAccountCharactersDI<AvailableRace> = {
-    accountRepository,
-    characterRepository,
-  };
-  return getAccountCharacters<AvailableRace>(getCharactersDi, accountId);
+export async function getCharacters(
+  accountId: string,
+  repoFactory = RepositoryFactory.Default
+) {
+  const accountRepository = repoFactory.getAccountRepository();
+  const characterRepository = repoFactory.getCharacterRepository();
+
+  return getAccountCharacters<AvailableRace>(
+    { accountRepository, characterRepository },
+    accountId
+  );
 }
 
-export async function login(email: string, password: string) {
+export async function login(
+  email: string,
+  password: string,
+  repoFactory = RepositoryFactory.Default
+) {
+  const accountRepository = repoFactory.getAccountRepository();
+
   const loginDi: loginWithPasswordDI = {
     tokenizer: jwtTokenizer,
     encryptor: bCryptEncrypter,
@@ -57,10 +55,20 @@ export async function login(email: string, password: string) {
   return loginWithPassword(loginDi, email, password);
 }
 
-export async function register(email: string, password: string) {
-  const registerDi: registerAccountWithPasswordDI = {
-    encryptor: bCryptEncrypter,
-    accountRepository,
-  };
-  return registerAccountWithPassword(registerDi, email, password);
+export async function register(
+  email: string,
+  password: string,
+  repoFactory = RepositoryFactory.Default
+) {
+  const accountRepository = repoFactory.getAccountRepository();
+
+  return registerAccountWithPassword(
+    { encryptor: bCryptEncrypter, accountRepository },
+    email,
+    password
+  );
+}
+
+export async function verifyToken(token: string) {
+  return verifyTokenService({ tokenizer: jwtTokenizer }, token);
 }

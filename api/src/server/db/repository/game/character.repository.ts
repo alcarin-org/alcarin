@@ -1,4 +1,4 @@
-import { getRepository, In } from 'typeorm';
+import { In } from 'typeorm';
 import { Character } from '@/domain/game/character/character';
 import {
   CharacterRepository,
@@ -7,17 +7,18 @@ import {
 import { RaceKeyProvider } from '@/domain/game/tools/character-race-provider.tool';
 import { IdentifierProviderService } from '@/domain/shared/identifier-provider.tool';
 
+import { connection } from '../..';
 import { Character as CharacterEntity } from '../../entities/game/character';
 
 export const createEntityCharacterRepository = <TRaceKey extends string>(
   raceKeyProvider: RaceKeyProvider<TRaceKey>,
   identifierProviderService: IdentifierProviderService
 ): CharacterRepository<TRaceKey> => {
-  const charRepository = getRepository(CharacterEntity);
+  const charRepository = connection.getRepository(CharacterEntity);
   const createCharacter = createNewCharacter<TRaceKey>(
     identifierProviderService
   );
-  const entityToModel = mapEntityToModel<TRaceKey>(raceKeyProvider);
+  const entityToModel = getEntityToModelMapper<TRaceKey>(raceKeyProvider);
 
   async function create(payload: CreationCharacterPayload<TRaceKey>) {
     return createCharacter(payload);
@@ -69,7 +70,7 @@ function createNewCharacter<TRaceKey>(
   };
 }
 
-function mapEntityToModel<TRaceKey>(
+function getEntityToModelMapper<TRaceKey>(
   raceKeyProvider: RaceKeyProvider<TRaceKey>
 ) {
   return (characterEntity: CharacterEntity) => {
