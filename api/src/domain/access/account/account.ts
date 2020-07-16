@@ -1,4 +1,4 @@
-import { PasswordEncryptor } from '@/domain/access/tools/password-encryptor.tool';
+import { PasswordEncryptor } from '../tools/password-encryptor.tool';
 
 export interface Account {
   id: string;

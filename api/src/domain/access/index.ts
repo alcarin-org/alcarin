@@ -1,7 +1,7 @@
-import { AccountRepository } from '@/domain/access/account/account.repository';
-import { canLogin } from '@/domain/access/account/account';
-import { Tokenizer } from '@/domain/access/tools/tokenizer.tool';
-import { PasswordEncryptor } from '@/domain/access/tools/password-encryptor.tool';
+import { AccountRepository } from './account/account.repository';
+import { canLogin, Account } from './account/account';
+import { Tokenizer } from './tools/tokenizer.tool';
+import { PasswordEncryptor } from './tools/password-encryptor.tool';
 
 export type loginWithPasswordDI = {
   tokenizer: Tokenizer;
@@ -49,4 +49,14 @@ export async function verifyToken(di: VerifyTokenDI, token: string) {
   const { tokenizer } = di;
   const tokenPayload = await tokenizer.readToken(token);
   return tokenPayload;
+}
+
+export function addCharacter(
+  account: Account,
+  character: { id: string }
+): Account {
+  return {
+    ...account,
+    characters: [...account.characters, character],
+  };
 }

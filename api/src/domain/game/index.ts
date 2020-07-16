@@ -1,5 +1,5 @@
-import { CharacterRepository } from '@/domain/game/character/character.repository';
-import { StartingAge } from '@/domain/game/character/character';
+import { CharacterRepository } from './character/character.repository';
+import { StartingAge } from './character/character';
 
 export type createCharacterDI<TRaceKey> = {
   characterRepository: CharacterRepository<TRaceKey>;
