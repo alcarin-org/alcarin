@@ -8,8 +8,7 @@ import {
 import { bCryptEncrypter } from '@/server/plugins/access/password-encycrypters/bcrypt-encrypter';
 import { jwtTokenizer } from '@/server/plugins/access/tokenizer/jwt-tokenizer-service';
 import { AvailableRace } from '@/server/plugins/game/races/available-race-provider';
-
-import { RepositoryFactory } from '../db';
+import { RepositoryFactory } from '@/server/repository-factory';
 
 export async function createCharacter(
   accountId: string,

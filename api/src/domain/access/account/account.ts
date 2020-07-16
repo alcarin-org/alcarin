@@ -1,13 +1,13 @@
 import { PasswordEncryptor } from '@/domain/access/tools/password-encryptor.tool';
 
-export type Account = {
+export interface Account {
   id: string;
   email: string;
   passwordHash: string;
   characters: {
     id: string;
   }[];
-};
+}
 
 export function canLogin(
   account: Account,

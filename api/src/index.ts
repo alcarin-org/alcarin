@@ -4,12 +4,14 @@ import { validateEnvVars, envVars } from '@/server/core/env-vars';
 import { setupExpressApp } from '@/server/core/setup-express-app';
 import { logger } from '@/server/core/helpers/logger';
 import { createDatabaseConnection } from '@/server/db';
+import { RepositoryFactory } from '@/server/repository-factory';
 
 async function main() {
   try {
     validateEnvVars();
 
-    await createDatabaseConnection();
+    const connection = await createDatabaseConnection();
+    RepositoryFactory.setDefaultConnection(connection);
 
     const app = await setupExpressApp();
 
