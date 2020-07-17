@@ -4,19 +4,17 @@ import {
   CharacterRepository as CharacterRepositoryInterface,
   CreationCharacterPayload,
 } from '@/domain/game/character/character.repository';
-import { RaceKeyProvider } from '@/domain/game/tools/character-race-provider.tool';
+import { AvailableRace } from '@/domain/game/character/race';
 import { IdentifierProviderService } from '@/domain/shared/identifier-provider.tool';
 
 import { getDefaultConnection } from '..';
 import { Character as CharacterEntity } from '../entities/character';
 
-export class CharacterRepository<TRaceKey extends string>
-  implements CharacterRepositoryInterface<TRaceKey> {
+export class CharacterRepository implements CharacterRepositoryInterface {
   charRepository: Repository<CharacterEntity>;
 
   constructor(
     private identifierProviderService: IdentifierProviderService,
-    private raceKeyProvider: RaceKeyProvider<TRaceKey>,
     dbConnection: Connection | EntityManager | null = getDefaultConnection()
   ) {
     if (!dbConnection) {
@@ -26,13 +24,13 @@ export class CharacterRepository<TRaceKey extends string>
     this.charRepository = dbConnection.getRepository(CharacterEntity);
   }
 
-  async createAndSave(payload: CreationCharacterPayload<TRaceKey>) {
+  async createAndSave(payload: CreationCharacterPayload) {
     const character = await this.create(payload);
     await this.save(character);
     return character;
   }
 
-  async create(payload: CreationCharacterPayload<TRaceKey>) {
+  async create(payload: CreationCharacterPayload) {
     return {
       id: this.identifierProviderService.genIdentifier(),
       name: payload.name,
@@ -41,43 +39,52 @@ export class CharacterRepository<TRaceKey extends string>
     };
   }
 
-  async save(character: Character<TRaceKey>) {
+  async save(character: Character) {
     const entityCharacter = await this.charRepository.save(
-      this.mapModelToEntity(character)
+      mapModelToEntity(character)
     );
-    return this.mapEntityToModel(entityCharacter);
+    return mapEntityToModel(entityCharacter);
   }
 
   async getById(id: string) {
     const characterEntity = await this.charRepository.findOneOrFail(id);
-    return this.mapEntityToModel(characterEntity);
+    return mapEntityToModel(characterEntity);
   }
 
   async getMultipleByIds(characterIds: string[]) {
     const entities = await this.charRepository.find({
       where: { id: In(characterIds) },
     });
-    return entities.map(entity => this.mapEntityToModel(entity));
+    return entities.map(entity => mapEntityToModel(entity));
+  }
+}
+
+export function mapEntityToModel(characterEntity: CharacterEntity): Character {
+  return {
+    id: characterEntity.id,
+    raceKey: parseRaceKey(characterEntity.raceKey),
+    name: characterEntity.name,
+    age: characterEntity.age,
+  };
+}
+
+export function mapModelToEntity(character: Character) {
+  const entity = new CharacterEntity();
+  entity.id = character.id;
+  entity.name = character.name;
+  entity.age = character.age;
+  entity.raceKey = character.raceKey.toString();
+
+  return entity;
+}
+
+function parseRaceKey(raceKey: string): AvailableRace {
+  const parsedRace = Object.entries(AvailableRace).find(
+    ([_key, value]) => value == raceKey
+  );
+  if (parsedRace === undefined) {
+    throw new Error(`Invalid race "${raceKey}"`);
   }
 
-  private mapEntityToModel(
-    characterEntity: CharacterEntity
-  ): Character<TRaceKey> {
-    return {
-      id: characterEntity.id,
-      raceKey: this.raceKeyProvider(characterEntity.raceKey),
-      name: characterEntity.name,
-      age: characterEntity.age,
-    };
-  }
-
-  private mapModelToEntity(character: Character<TRaceKey>) {
-    const entity = new CharacterEntity();
-    entity.id = character.id;
-    entity.name = character.name;
-    entity.age = character.age;
-    entity.raceKey = character.raceKey;
-
-    return entity;
-  }
+  return parsedRace[1];
 }

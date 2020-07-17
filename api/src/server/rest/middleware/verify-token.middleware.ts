@@ -1,4 +1,4 @@
-import { verifyToken } from '@/server/services/account-access.service';
+import { verifyToken } from '@/application/account-access.service';
 import { NextFunction, AppRequest, Response } from 'express';
 import boom from '@hapi/boom';
 

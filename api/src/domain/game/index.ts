@@ -1,14 +1,15 @@
 import { CharacterRepository } from './character/character.repository';
 import { StartingAge } from './character/character';
+import { AvailableRace } from './character/race';
 
-export type createCharacterDI<TRaceKey> = {
-  characterRepository: CharacterRepository<TRaceKey>;
+type CreateCharacterDI = {
+  characterRepository: CharacterRepository;
 };
 
-export async function createCharacter<TRaceKey>(
-  di: createCharacterDI<TRaceKey>,
+export async function createCharacter(
+  di: CreateCharacterDI,
   name: string,
-  race: TRaceKey
+  race: AvailableRace
 ) {
   const { characterRepository } = di;
   return await characterRepository.createAndSave({

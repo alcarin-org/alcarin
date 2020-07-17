@@ -5,9 +5,9 @@ import { logger } from '@/server/core/helpers/logger';
 import {
   createCharacter,
   getCharacters,
-} from '@/server/services/account-access.service';
-import { AvailableRace } from '@/server/plugins/game/races/available-race-provider';
+} from '@/application/account-access.service';
 import { Character } from '@/domain/game/character/character';
+import { AvailableRace } from '@/domain/game/character/race';
 
 interface CreateNewCharacterReq {
   body: {
@@ -51,7 +51,7 @@ export const findCharactersForUsers: AppRequestHandler = async (req, res) => {
   }
 };
 
-function mapCharacterToResponse(character: Character<AvailableRace>) {
+function mapCharacterToResponse(character: Character) {
   return {
     name: character.name,
     id: character.id,

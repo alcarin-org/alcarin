@@ -1,5 +1,3 @@
-import { createCharacterForAccount } from '@/domain/services/create-character-for-account.logic';
-import { getAccountCharacters } from '@/domain/services/get-characters-for-account.logic';
 import { loginWithPassword } from '@/domain/access';
 import {
   registerAccountWithPassword,
@@ -7,8 +5,12 @@ import {
 } from '@/domain/access';
 import { bCryptEncrypter } from '@/server/plugins/access/password-encycrypters/bcrypt-encrypter';
 import { jwtTokenizer } from '@/server/plugins/access/tokenizer/jwt-tokenizer-service';
-import { AvailableRace } from '@/server/plugins/game/races/available-race-provider';
 import { RepositoryFactory } from '@/server/repository-factory';
+
+import * as game from '../domain/game';
+import { Character } from '../domain/game/character/character';
+import { AvailableRace } from '../domain/game/character/race';
+import * as access from '../domain/access';
 
 export async function createCharacter(
   accountId: string,
@@ -19,25 +21,28 @@ export async function createCharacter(
   const accountRepository = repoFactory.getAccountRepository();
   const characterRepository = repoFactory.getCharacterRepository();
 
-  return createCharacterForAccount(
-    { accountRepository, characterRepository },
-    accountId,
+  const character = await game.createCharacter(
+    { characterRepository },
     name,
     raceKey
   );
+
+  const account = await accountRepository.getById(accountId);
+
+  await accountRepository.saveAccount(access.addCharacter(account, character));
+
+  return character;
 }
 
 export async function getCharacters(
   accountId: string,
   repoFactory = RepositoryFactory.Default
-) {
+): Promise<Character[]> {
   const accountRepository = repoFactory.getAccountRepository();
-  const characterRepository = repoFactory.getCharacterRepository();
 
-  return getAccountCharacters<AvailableRace>(
-    { accountRepository, characterRepository },
-    accountId
-  );
+  const account = await accountRepository.getByIdWithCharacters(accountId);
+
+  return account.characters;
 }
 
 export async function login(

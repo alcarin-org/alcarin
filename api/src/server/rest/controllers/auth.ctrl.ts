@@ -4,7 +4,7 @@ import status from 'http-status-codes';
 import { QueryFailedError } from 'typeorm';
 import { logger } from '@/server/core/helpers/logger';
 import { envVars } from '@/server/core/env-vars';
-import { login, register } from '@/server/services/account-access.service';
+import { login, register } from '@/application/account-access.service';
 
 interface AuthReq {
   body: {

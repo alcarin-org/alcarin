@@ -1,23 +1,20 @@
 import { Character } from './character';
+import { AvailableRace } from './race';
 
-export interface CreationCharacterPayload<TRaceKey> {
+export interface CreationCharacterPayload {
   name: string;
   age: number;
-  race: TRaceKey;
+  race: AvailableRace;
 }
 
-export interface CharacterRepository<TRaceKey> {
-  create: (
-    payload: CreationCharacterPayload<TRaceKey>
-  ) => Promise<Character<TRaceKey>>;
+export interface CharacterRepository {
+  create: (payload: CreationCharacterPayload) => Promise<Character>;
 
-  save: (character: Character<TRaceKey>) => Promise<Character<TRaceKey>>;
+  save: (character: Character) => Promise<Character>;
 
-  createAndSave: (
-    payload: CreationCharacterPayload<TRaceKey>
-  ) => Promise<Character<TRaceKey>>;
+  createAndSave: (payload: CreationCharacterPayload) => Promise<Character>;
 
-  getById: (id: string) => Promise<Character<TRaceKey>>;
+  getById: (id: string) => Promise<Character>;
 
-  getMultipleByIds: (characters: string[]) => Promise<Character<TRaceKey>[]>;
+  getMultipleByIds: (characters: string[]) => Promise<Character[]>;
 }

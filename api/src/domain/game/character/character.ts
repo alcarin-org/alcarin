@@ -1,15 +1,12 @@
-import { CharacterRaceBehaviour } from './character-race';
+import { CharacterRaceBehaviour, AvailableRace } from './race';
 
 export const StartingAge = 20;
 
-export interface CharacterRace<TRaceKey> {
-  raceKey: TRaceKey;
-}
-
-export interface Character<TRaceKey> extends CharacterRace<TRaceKey> {
+export interface Character {
   id: string;
   name: string;
   age: number;
+  raceKey: AvailableRace;
 }
 
 export type CharacterBehaviour<TRaceKey> = CharacterRaceBehaviour<TRaceKey>;

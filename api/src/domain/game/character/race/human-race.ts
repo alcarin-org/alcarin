@@ -1,11 +1,10 @@
-import {
-  CharacterRaceBehaviour,
-  CharacterRace,
-} from '@/domain/game/character/character-race';
+import { CharacterRaceBehaviour, CharacterRace } from '../race';
 
-export const elfBehaviour = <TRaceKey>(): CharacterRaceBehaviour<TRaceKey> => {
+export const humanBehaviour = <
+  TRaceKey
+>(): CharacterRaceBehaviour<TRaceKey> => {
   const raceName = (_race: CharacterRace<TRaceKey>): string => {
-    return `Elf`;
+    return `Human`;
   };
 
   const introduceYourself = (race: CharacterRace<TRaceKey>): string => {

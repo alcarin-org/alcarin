@@ -10,6 +10,8 @@ import {
 import { Character as CharacterEntity } from '../entities/character';
 import { getDefaultConnection } from '..';
 
+import { mapEntityToModel } from './character.repository';
+
 export class AccountRepository implements AccountRepositoryInterface {
   accountRepository: Repository<AccountEntity>;
 
@@ -42,11 +44,30 @@ export class AccountRepository implements AccountRepositoryInterface {
   }
 
   async getById(id: string) {
+    const account = await this.accountRepository
+      .createQueryBuilder('account')
+      .addSelect('characters.id')
+      .leftJoin('account.characters', 'characters')
+      .where('account.id = :0', [id])
+      .getOne();
+
+    if (!account) {
+      // TODO: add db special error
+      throw new Error('Entity not found');
+    }
+
+    return account;
+  }
+
+  async getByIdWithCharacters(id: string) {
     const account = await this.accountRepository.findOneOrFail(
       { id },
       { relations: [AccountRelations.Characters] }
     );
-    return account;
+    return {
+      ...account,
+      characters: account.characters.map(mapEntityToModel),
+    };
   }
 
   async saveAccount(account: Account) {

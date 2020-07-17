@@ -1,6 +1,5 @@
 import { Connection, EntityManager } from 'typeorm';
 import { identifierProvider } from '@/server/plugins/shared/uuid-identifier-provider/identifier-provider';
-import { raceKeyProvider } from '@/server/plugins/game/races/available-race-provider';
 import { CharacterRepository } from '@/server/db/repository/character.repository';
 import { AccountRepository } from '@/server/db/repository/account.repository';
 import { getDefaultConnection } from '@/server/db';
@@ -20,11 +19,7 @@ export class RepositoryFactory {
   }
 
   getCharacterRepository() {
-    return new CharacterRepository(
-      identifierProvider,
-      raceKeyProvider,
-      this.context
-    );
+    return new CharacterRepository(identifierProvider, this.context);
   }
 
   public static get Default() {
