@@ -1,7 +1,7 @@
-import { Connection, EntityManager, In } from 'typeorm';
+import { Connection, EntityManager, Repository, In } from 'typeorm';
 import { Character } from '@/domain/game/character/character';
 import {
-  CharacterRepository,
+  CharacterRepository as CharacterRepositoryInterface,
   CreationCharacterPayload,
 } from '@/domain/game/character/character.repository';
 import { RaceKeyProvider } from '@/domain/game/tools/character-race-provider.tool';
@@ -10,92 +10,74 @@ import { IdentifierProviderService } from '@/domain/shared/identifier-provider.t
 import { getDefaultConnection } from '..';
 import { Character as CharacterEntity } from '../entities/character';
 
-export const createEntityCharacterRepository = <TRaceKey extends string>(
-  raceKeyProvider: RaceKeyProvider<TRaceKey>,
-  identifierProviderService: IdentifierProviderService,
-  dbConnection: Connection | EntityManager | null = getDefaultConnection()
-): CharacterRepository<TRaceKey> => {
-  if (!dbConnection) {
-    throw new Error('Database not ready yet');
+export class CharacterRepository<TRaceKey extends string>
+  implements CharacterRepositoryInterface<TRaceKey> {
+  charRepository: Repository<CharacterEntity>;
+
+  constructor(
+    private identifierProviderService: IdentifierProviderService,
+    private raceKeyProvider: RaceKeyProvider<TRaceKey>,
+    dbConnection: Connection | EntityManager | null = getDefaultConnection()
+  ) {
+    if (!dbConnection) {
+      throw new Error('Database not ready yet');
+    }
+
+    this.charRepository = dbConnection.getRepository(CharacterEntity);
   }
 
-  const charRepository = dbConnection.getRepository(CharacterEntity);
-  const createCharacter = createNewCharacter<TRaceKey>(
-    identifierProviderService
-  );
-  const entityToModel = getEntityToModelMapper<TRaceKey>(raceKeyProvider);
-
-  async function create(payload: CreationCharacterPayload<TRaceKey>) {
-    return createCharacter(payload);
-  }
-
-  async function save(character: Character<TRaceKey>) {
-    const entityCharacter = await charRepository.save(
-      mapModelToEntity(character)
-    );
-    return entityToModel(entityCharacter);
-  }
-
-  async function createAndSave(payload: CreationCharacterPayload<TRaceKey>) {
-    const character = createCharacter(payload);
-    await save(character);
+  async createAndSave(payload: CreationCharacterPayload<TRaceKey>) {
+    const character = await this.create(payload);
+    await this.save(character);
     return character;
   }
 
-  async function getById(id: string): Promise<Character<TRaceKey>> {
-    const characterEntity = await charRepository.findOneOrFail(id);
-    return entityToModel(characterEntity);
-  }
-  async function getMultipleByIds(characters: string[]) {
-    const entities = await charRepository.find({
-      where: { id: In(characters) },
-    });
-    return entities.map(entityToModel);
-  }
-
-  return {
-    createAndSave,
-    create,
-    getById,
-    getMultipleByIds,
-    save,
-  };
-};
-
-function createNewCharacter<TRaceKey>(
-  IdentifierProviderService: IdentifierProviderService
-) {
-  return (payload: CreationCharacterPayload<TRaceKey>) => {
+  async create(payload: CreationCharacterPayload<TRaceKey>) {
     return {
-      id: IdentifierProviderService.genIdentifier(),
+      id: this.identifierProviderService.genIdentifier(),
       name: payload.name,
       age: payload.age,
       raceKey: payload.race,
     };
-  };
-}
+  }
 
-function getEntityToModelMapper<TRaceKey>(
-  raceKeyProvider: RaceKeyProvider<TRaceKey>
-) {
-  return (characterEntity: CharacterEntity) => {
+  async save(character: Character<TRaceKey>) {
+    const entityCharacter = await this.charRepository.save(
+      this.mapModelToEntity(character)
+    );
+    return this.mapEntityToModel(entityCharacter);
+  }
+
+  async getById(id: string) {
+    const characterEntity = await this.charRepository.findOneOrFail(id);
+    return this.mapEntityToModel(characterEntity);
+  }
+
+  async getMultipleByIds(characterIds: string[]) {
+    const entities = await this.charRepository.find({
+      where: { id: In(characterIds) },
+    });
+    return entities.map(entity => this.mapEntityToModel(entity));
+  }
+
+  private mapEntityToModel(
+    characterEntity: CharacterEntity
+  ): Character<TRaceKey> {
     return {
       id: characterEntity.id,
-      raceKey: raceKeyProvider(characterEntity.raceKey),
+      raceKey: this.raceKeyProvider(characterEntity.raceKey),
       name: characterEntity.name,
       age: characterEntity.age,
     };
-  };
-}
+  }
 
-function mapModelToEntity<TRaceKey extends string>(
-  character: Character<TRaceKey>
-) {
-  const entity = new CharacterEntity();
-  entity.id = character.id;
-  entity.name = character.name;
-  entity.age = character.age;
-  entity.raceKey = character.raceKey;
+  private mapModelToEntity(character: Character<TRaceKey>) {
+    const entity = new CharacterEntity();
+    entity.id = character.id;
+    entity.name = character.name;
+    entity.age = character.age;
+    entity.raceKey = character.raceKey;
 
-  return entity;
+    return entity;
+  }
 }

@@ -1,5 +1,5 @@
-import { Connection, EntityManager } from 'typeorm';
-import { AccountRepository } from '@/domain/access/account/account.repository';
+import { Connection, EntityManager, Repository } from 'typeorm';
+import { AccountRepository as AccountRepositoryInterface } from '@/domain/access/account/account.repository';
 import { Account } from '@/domain/access/account/account';
 import { IdentifierProviderService } from '@/domain/shared/identifier-provider.tool';
 
@@ -10,62 +10,50 @@ import {
 import { Character as CharacterEntity } from '../entities/character';
 import { getDefaultConnection } from '..';
 
-export const createAccountRepository = (
-  IdentifierProviderService: IdentifierProviderService,
-  dbConnection: Connection | EntityManager | null = getDefaultConnection()
-): AccountRepository => {
-  if (!dbConnection) {
-    throw new Error('Database not ready yet');
+export class AccountRepository implements AccountRepositoryInterface {
+  accountRepository: Repository<AccountEntity>;
+
+  constructor(
+    private identifierProviderService: IdentifierProviderService,
+    dbConnection: Connection | EntityManager | null = getDefaultConnection()
+  ) {
+    if (!dbConnection) {
+      throw new Error('Database not ready yet');
+    }
+
+    this.accountRepository = dbConnection.getRepository(AccountEntity);
   }
 
-  const createAccount = createNewAccount(IdentifierProviderService);
-  const accountRepository = dbConnection.getRepository(AccountEntity);
-
-  async function create(email: string, passwordHash: string) {
-    return createAccount(email, passwordHash);
+  async create(email: string, passwordHash: string) {
+    return {
+      id: this.identifierProviderService.genIdentifier(),
+      email,
+      passwordHash,
+      characters: [],
+    };
   }
 
-  async function getByEmail(email: string) {
-    const account = await accountRepository.findOneOrFail(
+  async getByEmail(email: string) {
+    const account = await this.accountRepository.findOneOrFail(
       { email },
       { relations: [AccountRelations.Characters] }
     );
     return account;
   }
 
-  async function getById(id: string) {
-    const account = await accountRepository.findOneOrFail(
+  async getById(id: string) {
+    const account = await this.accountRepository.findOneOrFail(
       { id },
       { relations: [AccountRelations.Characters] }
     );
     return account;
   }
 
-  async function saveAccount(account: Account) {
+  async saveAccount(account: Account) {
     const entity = mapFromAccountToEntity(account);
-    const newEntity = await accountRepository.save(entity);
+    const newEntity = await this.accountRepository.save(entity);
     return newEntity;
   }
-
-  return {
-    getByEmail,
-    create,
-    saveAccount,
-    getById,
-  };
-};
-
-function createNewAccount(
-  identifierProviderService: IdentifierProviderService
-) {
-  return (email: string, passwordHash: string) => {
-    return {
-      id: identifierProviderService.genIdentifier(),
-      email,
-      passwordHash,
-      characters: [],
-    };
-  };
 }
 
 function mapFromAccountToEntity(account: Account) {
