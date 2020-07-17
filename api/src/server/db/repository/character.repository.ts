@@ -7,8 +7,8 @@ import {
 import { RaceKeyProvider } from '@/domain/game/tools/character-race-provider.tool';
 import { IdentifierProviderService } from '@/domain/shared/identifier-provider.tool';
 
-import { getDefaultConnection } from '../..';
-import { Character as CharacterEntity } from '../../entities/character';
+import { getDefaultConnection } from '..';
+import { Character as CharacterEntity } from '../entities/character';
 
 export const createEntityCharacterRepository = <TRaceKey extends string>(
   raceKeyProvider: RaceKeyProvider<TRaceKey>,

@@ -2,6 +2,10 @@ import { Entity, PrimaryColumn, OneToMany, Column } from 'typeorm';
 
 import { Character } from './character';
 
+export const AccountRelations = {
+  Characters: 'characters',
+} as const;
+
 @Entity({ name: 'access_accounts' })
 export class Account {
   @PrimaryColumn('uuid')
@@ -20,5 +24,5 @@ export class Account {
       cascade: true,
     }
   )
-  characters: Character[];
+  [AccountRelations.Characters]: Character[];
 }

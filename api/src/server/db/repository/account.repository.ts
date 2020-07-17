@@ -3,9 +3,12 @@ import { AccountRepository } from '@/domain/access/account/account.repository';
 import { Account } from '@/domain/access/account/account';
 import { IdentifierProviderService } from '@/domain/shared/identifier-provider.tool';
 
-import { Account as AccountEntity } from '../../entities/account';
-import { Character as CharacterEntity } from '../../entities/character';
-import { getDefaultConnection } from '../..';
+import {
+  AccountRelations,
+  Account as AccountEntity,
+} from '../entities/account';
+import { Character as CharacterEntity } from '../entities/character';
+import { getDefaultConnection } from '..';
 
 export const createAccountRepository = (
   IdentifierProviderService: IdentifierProviderService,
@@ -25,7 +28,7 @@ export const createAccountRepository = (
   async function getByEmail(email: string) {
     const account = await accountRepository.findOneOrFail(
       { email },
-      { relations: ['characters'] }
+      { relations: [AccountRelations.Characters] }
     );
     return account;
   }
@@ -33,7 +36,7 @@ export const createAccountRepository = (
   async function getById(id: string) {
     const account = await accountRepository.findOneOrFail(
       { id },
-      { relations: ['characters'] }
+      { relations: [AccountRelations.Characters] }
     );
     return account;
   }

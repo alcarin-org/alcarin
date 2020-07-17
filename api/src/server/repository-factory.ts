@@ -1,8 +1,8 @@
 import { Connection, EntityManager } from 'typeorm';
 import { identifierProvider } from '@/server/plugins/shared/uuid-identifier-provider/identifier-provider';
 import { raceKeyProvider } from '@/server/plugins/game/races/available-race-provider';
-import { createEntityCharacterRepository } from '@/server/db/repository/game/character.repository';
-import { createAccountRepository } from '@/server/db/repository/access/account.repository';
+import { createEntityCharacterRepository } from '@/server/db/repository/character.repository';
+import { createAccountRepository } from '@/server/db/repository/account.repository';
 import { getDefaultConnection } from '@/server/db';
 
 export class RepositoryFactory {
