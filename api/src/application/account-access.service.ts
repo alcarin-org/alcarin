@@ -1,13 +1,11 @@
-import { loginWithPassword } from '@/domain/access';
 import {
   registerAccountWithPassword,
   verifyToken as verifyTokenService,
 } from '@/domain/access';
-
-import * as game from '../domain/game';
-import { Character } from '../domain/game/character/character';
-import { AvailableRace } from '../domain/game/character/race';
-import * as access from '../domain/access';
+import { Character } from '@/domain/game/character/character';
+import { AvailableRace } from '@/domain/game/character/race';
+import * as game from '@/domain/game';
+import * as access from '@/domain/access';
 
 import { bCryptEncrypter } from './plugins/access/password-encycrypters/bcrypt-encrypter';
 import { jwtTokenizer } from './plugins/access/tokenizer/jwt-tokenizer-service';
@@ -17,7 +15,7 @@ export async function createCharacter(
   accountId: string,
   name: string,
   raceKey: AvailableRace,
-  repoFactory = RepositoryFactory.Default
+  repoFactory: RepositoryFactory
 ) {
   const accountRepository = repoFactory.getAccountRepository();
   const characterRepository = repoFactory.getCharacterRepository();
@@ -37,7 +35,7 @@ export async function createCharacter(
 
 export async function getCharacters(
   accountId: string,
-  repoFactory = RepositoryFactory.Default
+  repoFactory: RepositoryFactory
 ): Promise<Character[]> {
   const accountRepository = repoFactory.getAccountRepository();
 
@@ -49,7 +47,7 @@ export async function getCharacters(
 export async function login(
   email: string,
   password: string,
-  repoFactory = RepositoryFactory.Default
+  repoFactory: RepositoryFactory
 ) {
   const accountRepository = repoFactory.getAccountRepository();
 
@@ -58,13 +56,13 @@ export async function login(
     encryptor: bCryptEncrypter,
     accountRepository,
   };
-  return loginWithPassword(loginDi, email, password);
+  return access.loginWithPassword(loginDi, email, password);
 }
 
 export async function register(
   email: string,
   password: string,
-  repoFactory = RepositoryFactory.Default
+  repoFactory: RepositoryFactory
 ) {
   const accountRepository = repoFactory.getAccountRepository();
 

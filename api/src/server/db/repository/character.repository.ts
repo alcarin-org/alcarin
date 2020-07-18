@@ -7,7 +7,6 @@ import {
 import { IdentifierProviderService } from '@/domain/shared/identifier-provider.tool';
 import { AvailableRace } from '@/domain/game/character/race';
 
-import { getDefaultConnection } from '..';
 import { Character as CharacterEntity } from '../entities/character';
 
 export class CharacterRepository<TRaceType>
@@ -17,12 +16,8 @@ export class CharacterRepository<TRaceType>
   constructor(
     private identifierProviderService: IdentifierProviderService,
     private raceParser: RaceParser,
-    dbConnection: Connection | EntityManager | null = getDefaultConnection()
+    dbConnection: Connection | EntityManager
   ) {
-    if (!dbConnection) {
-      throw new Error('Database not ready yet');
-    }
-
     this.charRepository = dbConnection.getRepository(CharacterEntity);
   }
 

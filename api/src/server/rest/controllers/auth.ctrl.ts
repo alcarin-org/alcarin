@@ -5,6 +5,7 @@ import { QueryFailedError } from 'typeorm';
 import { logger } from '@/server/core/helpers/logger';
 import { envVars } from '@/server/core/env-vars';
 import { login, register } from '@/application/account-access.service';
+import { RepositoryFactory } from '@/server/repository-factory';
 
 interface AuthReq {
   body: {
@@ -17,7 +18,7 @@ export const logIn: AppRequestHandler<AuthReq> = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const token = await login(email, password);
+    const token = await login(email, password, RepositoryFactory.Default);
     logger.info(`User "${email}" logged in`);
 
     return res.status(status.OK).send({
@@ -34,7 +35,7 @@ export const signUp: AppRequestHandler<AuthReq> = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    await register(email, password);
+    await register(email, password, RepositoryFactory.Default);
   } catch (err) {
     if (err instanceof QueryFailedError) {
       // we quietly ignore this to not letting know potential attacker that given

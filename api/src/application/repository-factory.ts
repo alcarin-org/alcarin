@@ -1,64 +1,17 @@
-import { Connection, EntityManager } from 'typeorm';
-import { identifierProvider } from '@/application/plugins/shared/uuid-identifier-provider/identifier-provider';
-import {
-  CharacterRepository,
-  RaceParser,
-} from '@/server/db/repository/character.repository';
-import { AccountRepository } from '@/server/db/repository/account.repository';
-import { getDefaultConnection } from '@/server/db';
-import { getAvailableRaces, AvailableRace } from '@/domain/game/character/race';
+import { AccountRepository as DomainAccountRepository } from '@/domain/access/account/account.repository';
+import { Account } from '@/domain/access/account/account';
+import { Character } from '@/domain/game/character/character';
+import { CharacterRepository } from '@/domain/game/character/character.repository';
 
-const availableRaceParser: RaceParser = {
-  parse(raceKey: string) {
-    const parsedRace = getAvailableRaces().find(value => value == raceKey);
-    if (parsedRace === undefined) {
-      throw new Error(`Invalid race "${raceKey}"`);
-    }
+interface AccountWithCharacters extends Account {
+  characters: Character[];
+}
 
-    return parsedRace;
-  },
+interface AccountRepository extends DomainAccountRepository {
+  getByIdWithCharacters(id: string): Promise<AccountWithCharacters>;
+}
 
-  stringify(raceKey: AvailableRace) {
-    return raceKey.toString();
-  },
-};
-
-export class RepositoryFactory {
-  private static DefaultConnectionInstance: RepositoryFactory;
-
-  private constructor(private context: Connection | EntityManager) {}
-
-  static create(context: Connection | EntityManager) {
-    // TODO: add expireable cache
-    return new RepositoryFactory(context);
-  }
-
-  getAccountRepository() {
-    return new AccountRepository(
-      identifierProvider,
-      availableRaceParser,
-      this.context
-    );
-  }
-
-  getCharacterRepository() {
-    return new CharacterRepository(
-      identifierProvider,
-      availableRaceParser,
-      this.context
-    );
-  }
-
-  public static get Default() {
-    if (!RepositoryFactory.DefaultConnectionInstance) {
-      const defaultConnection = getDefaultConnection();
-      if (!defaultConnection) {
-        throw new Error('Database connection has not been initialized yet');
-      }
-      RepositoryFactory.DefaultConnectionInstance = new RepositoryFactory(
-        defaultConnection
-      );
-    }
-    return RepositoryFactory.DefaultConnectionInstance;
-  }
+export abstract class RepositoryFactory {
+  abstract getAccountRepository(): AccountRepository;
+  abstract getCharacterRepository(): CharacterRepository;
 }

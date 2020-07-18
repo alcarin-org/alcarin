@@ -8,9 +8,10 @@ import {
   Account as AccountEntity,
 } from '../entities/account';
 import { Character as CharacterEntity } from '../entities/character';
-import { getDefaultConnection } from '..';
 
 import { RaceParser, mapEntityToModel } from './character.repository';
+
+export type AccountRepositoryClass = AccountRepository;
 
 export class AccountRepository implements AccountRepositoryInterface {
   accountRepository: Repository<AccountEntity>;
@@ -18,12 +19,8 @@ export class AccountRepository implements AccountRepositoryInterface {
   constructor(
     private identifierProviderService: IdentifierProviderService,
     private raceParser: RaceParser,
-    dbConnection: Connection | EntityManager | null = getDefaultConnection()
+    dbConnection: Connection | EntityManager
   ) {
-    if (!dbConnection) {
-      throw new Error('Database not ready yet');
-    }
-
     this.accountRepository = dbConnection.getRepository(AccountEntity);
   }
 
