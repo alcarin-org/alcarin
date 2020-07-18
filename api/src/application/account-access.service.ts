@@ -3,14 +3,15 @@ import {
   registerAccountWithPassword,
   verifyToken as verifyTokenService,
 } from '@/domain/access';
-import { bCryptEncrypter } from '@/server/plugins/access/password-encycrypters/bcrypt-encrypter';
-import { jwtTokenizer } from '@/server/plugins/access/tokenizer/jwt-tokenizer-service';
-import { RepositoryFactory } from '@/server/repository-factory';
 
 import * as game from '../domain/game';
 import { Character } from '../domain/game/character/character';
 import { AvailableRace } from '../domain/game/character/race';
 import * as access from '../domain/access';
+
+import { bCryptEncrypter } from './plugins/access/password-encycrypters/bcrypt-encrypter';
+import { jwtTokenizer } from './plugins/access/tokenizer/jwt-tokenizer-service';
+import { RepositoryFactory } from './repository-factory';
 
 export async function createCharacter(
   accountId: string,

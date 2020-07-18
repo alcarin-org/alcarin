@@ -1,23 +1,15 @@
-import { CharacterRaceBehaviour, CharacterRace } from '../race';
+import { CharacterRaceBehaviour } from '../race';
 
-export const humanBehaviour = <
-  TRaceKey
->(): CharacterRaceBehaviour<TRaceKey> => {
-  const raceName = (_race: CharacterRace<TRaceKey>): string => {
+export const RaceKey = 'human' as const;
+
+type RaceKeyType = typeof RaceKey;
+
+export const humanBehaviour = (): CharacterRaceBehaviour<RaceKeyType> => ({
+  raceName() {
     return `Human`;
-  };
+  },
 
-  const introduceYourself = (race: CharacterRace<TRaceKey>): string => {
-    return `I'm proud ${raceName(race)}!`;
-  };
-
-  const isRace = (race: CharacterRace<TRaceKey>, raceCandidate: TRaceKey) => {
-    return race.raceKey === raceCandidate;
-  };
-
-  return {
-    isRace,
-    introduceYourself,
-    raceName,
-  };
-};
+  introduceYourself() {
+    return `I'm proud ${RaceKey}!`;
+  },
+});

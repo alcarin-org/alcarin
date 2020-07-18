@@ -12,7 +12,7 @@
     "check-all": "npm run check-types && npm run lint && npm test",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
     "static-analyze": "depcruise --validate .dependency-cruiser.js src",
-    "static-deps-graph": "depcruise --validate .dependency-cruiser.js --output-type dot ./src/index.ts | dot -T svg > ./deps-graph.svg"
+    "static-deps-graph": "depcruise --validate .dependency-cruiser.js --output-type dot $MODULE | dot -T svg > ./deps-graph.svg"
   },
   "dependencies": {
     "@hapi/boom": "^9.0.0",

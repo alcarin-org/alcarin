@@ -1,8 +1,27 @@
 import { Connection, EntityManager } from 'typeorm';
-import { identifierProvider } from '@/server/plugins/shared/uuid-identifier-provider/identifier-provider';
-import { CharacterRepository } from '@/server/db/repository/character.repository';
+import { identifierProvider } from '@/application/plugins/shared/uuid-identifier-provider/identifier-provider';
+import {
+  CharacterRepository,
+  RaceParser,
+} from '@/server/db/repository/character.repository';
 import { AccountRepository } from '@/server/db/repository/account.repository';
 import { getDefaultConnection } from '@/server/db';
+import { getAvailableRaces, AvailableRace } from '@/domain/game/character/race';
+
+const availableRaceParser: RaceParser = {
+  parse(raceKey: string) {
+    const parsedRace = getAvailableRaces().find(value => value == raceKey);
+    if (parsedRace === undefined) {
+      throw new Error(`Invalid race "${raceKey}"`);
+    }
+
+    return parsedRace;
+  },
+
+  stringify(raceKey: AvailableRace) {
+    return raceKey.toString();
+  },
+};
 
 export class RepositoryFactory {
   private static DefaultConnectionInstance: RepositoryFactory;
@@ -15,11 +34,19 @@ export class RepositoryFactory {
   }
 
   getAccountRepository() {
-    return new AccountRepository(identifierProvider, this.context);
+    return new AccountRepository(
+      identifierProvider,
+      availableRaceParser,
+      this.context
+    );
   }
 
   getCharacterRepository() {
-    return new CharacterRepository(identifierProvider, this.context);
+    return new CharacterRepository(
+      identifierProvider,
+      availableRaceParser,
+      this.context
+    );
   }
 
   public static get Default() {

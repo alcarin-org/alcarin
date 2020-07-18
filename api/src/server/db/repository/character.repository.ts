@@ -4,17 +4,19 @@ import {
   CharacterRepository as CharacterRepositoryInterface,
   CreationCharacterPayload,
 } from '@/domain/game/character/character.repository';
-import { AvailableRace } from '@/domain/game/character/race';
 import { IdentifierProviderService } from '@/domain/shared/identifier-provider.tool';
+import { AvailableRace } from '@/domain/game/character/race';
 
 import { getDefaultConnection } from '..';
 import { Character as CharacterEntity } from '../entities/character';
 
-export class CharacterRepository implements CharacterRepositoryInterface {
+export class CharacterRepository<TRaceType>
+  implements CharacterRepositoryInterface {
   charRepository: Repository<CharacterEntity>;
 
   constructor(
     private identifierProviderService: IdentifierProviderService,
+    private raceParser: RaceParser,
     dbConnection: Connection | EntityManager | null = getDefaultConnection()
   ) {
     if (!dbConnection) {
@@ -43,26 +45,34 @@ export class CharacterRepository implements CharacterRepositoryInterface {
     const entityCharacter = await this.charRepository.save(
       mapModelToEntity(character)
     );
-    return mapEntityToModel(entityCharacter);
+    return mapEntityToModel(entityCharacter, this.raceParser);
   }
 
   async getById(id: string) {
     const characterEntity = await this.charRepository.findOneOrFail(id);
-    return mapEntityToModel(characterEntity);
+    return mapEntityToModel(characterEntity, this.raceParser);
   }
 
   async getMultipleByIds(characterIds: string[]) {
     const entities = await this.charRepository.find({
       where: { id: In(characterIds) },
     });
-    return entities.map(entity => mapEntityToModel(entity));
+    return entities.map(entity => mapEntityToModel(entity, this.raceParser));
   }
 }
 
-export function mapEntityToModel(characterEntity: CharacterEntity): Character {
+export interface RaceParser {
+  parse(raceKey: string): AvailableRace;
+  stringify(race: AvailableRace): string;
+}
+
+export function mapEntityToModel(
+  characterEntity: CharacterEntity,
+  raceParser: RaceParser
+): Character {
   return {
     id: characterEntity.id,
-    raceKey: parseRaceKey(characterEntity.raceKey),
+    raceKey: raceParser.parse(characterEntity.raceKey),
     name: characterEntity.name,
     age: characterEntity.age,
   };
@@ -76,15 +86,4 @@ export function mapModelToEntity(character: Character) {
   entity.raceKey = character.raceKey.toString();
 
   return entity;
-}
-
-function parseRaceKey(raceKey: string): AvailableRace {
-  const parsedRace = Object.entries(AvailableRace).find(
-    ([_key, value]) => value == raceKey
-  );
-  if (parsedRace === undefined) {
-    throw new Error(`Invalid race "${raceKey}"`);
-  }
-
-  return parsedRace[1];
 }

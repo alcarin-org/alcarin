@@ -10,13 +10,14 @@ import {
 import { Character as CharacterEntity } from '../entities/character';
 import { getDefaultConnection } from '..';
 
-import { mapEntityToModel } from './character.repository';
+import { RaceParser, mapEntityToModel } from './character.repository';
 
 export class AccountRepository implements AccountRepositoryInterface {
   accountRepository: Repository<AccountEntity>;
 
   constructor(
     private identifierProviderService: IdentifierProviderService,
+    private raceParser: RaceParser,
     dbConnection: Connection | EntityManager | null = getDefaultConnection()
   ) {
     if (!dbConnection) {
@@ -66,7 +67,9 @@ export class AccountRepository implements AccountRepositoryInterface {
     );
     return {
       ...account,
-      characters: account.characters.map(mapEntityToModel),
+      characters: account.characters.map(char =>
+        mapEntityToModel(char, this.raceParser)
+      ),
     };
   }
 
