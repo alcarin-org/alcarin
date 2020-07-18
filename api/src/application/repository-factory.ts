@@ -11,7 +11,13 @@ interface AccountRepository extends DomainAccountRepository {
   getByIdWithCharacters(id: string): Promise<AccountWithCharacters>;
 }
 
-export abstract class RepositoryFactory {
-  abstract getAccountRepository(): AccountRepository;
-  abstract getCharacterRepository(): CharacterRepository;
+export interface RepositoryFactory {
+  getAccountRepository(): AccountRepository;
+  getCharacterRepository(): CharacterRepository;
+}
+
+export interface TransactionBoundary {
+  transaction<TResult>(
+    call: (repo: RepositoryFactory) => Promise<TResult>
+  ): Promise<TResult>;
 }

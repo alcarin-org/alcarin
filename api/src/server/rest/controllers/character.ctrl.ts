@@ -8,7 +8,7 @@ import {
 } from '@/application/account-access.service';
 import { Character } from '@/domain/game/character/character';
 import { AvailableRace } from '@/domain/game/character/race';
-import { RepositoryFactory } from '@/server/repository-factory';
+import { TransactionBoundary } from '@/server/repository-factory';
 
 interface CreateNewCharacterReq {
   body: {
@@ -35,7 +35,7 @@ export const createNewCharacter: AppRequestHandler<CreateNewCharacterReq> = asyn
       accountId,
       name,
       race,
-      RepositoryFactory.Default
+      TransactionBoundary.Default
     );
     logger.info(`Character "${name} with race ${race}" created`);
 
@@ -51,7 +51,7 @@ export const findCharactersForUsers: AppRequestHandler = async (req, res) => {
   try {
     const characters = await getCharacters(
       accountId,
-      RepositoryFactory.Default
+      TransactionBoundary.Default
     );
 
     return res.status(status.OK).send(characters.map(mapCharacterToResponse));
