@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import { PasswordEncryptor } from '@/domain/access/tools/password-encryptor.tool';
+import { PasswordEncryptor } from '@/domain/access/account/tools';
 import { envVars } from '@/server/core/env-vars';
 
 const hashCost: number = envVars.BCRYPT_ROUNDS;

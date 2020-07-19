@@ -1,7 +1,6 @@
 import supertest from 'supertest';
 import { Express } from 'express';
 import { setupExpressApp } from '@/server/core/setup-express-app';
-import { TokenType } from '@/server/rest/controllers/auth.ctrl';
 let app: Express;
 
 before(async () => {
@@ -15,7 +14,7 @@ function testApi(token?: string) {
 
     (agent as typeof agent & { set: (h: string, v: string) => void }).set(
       'Authorization',
-      `${TokenType} ${token}`
+      `Bearer ${token}`
     );
   }
 

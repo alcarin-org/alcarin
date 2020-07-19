@@ -1,67 +1,39 @@
-import { UniversePropertyRepo } from '@/server/db';
+import { GameTimeRepository } from './game-time.repository.d';
 
-const GameTimeKey = 'universal.last-saved-game-time';
-const IRLTimeKey = 'universal.last-saved-irl-time';
-const GameTimePauseKey = 'universal.game-time-pause';
-
-export async function getCurrentGameTime() {
-  return getCurrentGameTimeHelper(getCurrentIRLTime());
+export function getCurrentGameTime(repo: GameTimeRepository) {
+  return getCurrentGameTimeHelper(repo, repo.getCurrentIRLTime());
 }
 
-export async function storeCurrentGameTime() {
-  return storeCurrentGameTimeHelper();
+export function storeCurrentGameTime(repo: GameTimeRepository) {
+  return storeCurrentGameTimeHelper(repo);
 }
 
-export async function pauseGameTime() {
-  return storeCurrentGameTimeHelper(true);
+export function pauseGameTime(repo: GameTimeRepository) {
+  return storeCurrentGameTimeHelper(repo, true);
 }
 
-export async function unpauseGameTime() {
-  return storeCurrentGameTimeHelper(false);
+export function unpauseGameTime(repo: GameTimeRepository) {
+  return storeCurrentGameTimeHelper(repo, false);
 }
 
-function getCurrentIRLTime() {
-  return Math.floor(Date.now() / 1000);
-}
-
-async function getCurrentGameTimeHelper(irlTime: number) {
-  const [
-    lastGameTimeRes,
-    lastIRLTimeRes,
-    pausedRes,
-  ] = await UniversePropertyRepo.getMany([
-    GameTimeKey,
-    IRLTimeKey,
-    GameTimePauseKey,
-  ]);
-
-  const lastGameTime = lastGameTimeRes ? parseInt(lastGameTimeRes) : 0;
-  const lastIRLTime = lastIRLTimeRes
-    ? parseInt(lastIRLTimeRes)
-    : getCurrentIRLTime();
-  const isPaused = pausedRes === '1';
-
+async function getCurrentGameTimeHelper(
+  repo: GameTimeRepository,
+  irlTime: number
+) {
+  const { lastGameTime, lastIRLTime, isPaused } = await repo.getTimeInternal();
   return lastGameTime + (isPaused ? 0 : irlTime - lastIRLTime);
 }
 
-async function storeCurrentGameTimeHelper(pause?: boolean) {
-  const currentIRLTime = getCurrentIRLTime();
-  const currentGameTime = await getCurrentGameTimeHelper(currentIRLTime);
+async function storeCurrentGameTimeHelper(
+  repo: GameTimeRepository,
+  pause?: boolean
+) {
+  const currentIRLTime = repo.getCurrentIRLTime();
+  const currentGameTime = await getCurrentGameTimeHelper(repo, currentIRLTime);
 
-  const pauseProperty =
-    pause !== undefined
-      ? [{ key: GameTimePauseKey, value: pause ? '1' : '0' }]
-      : [];
-  const newProperties = [
-    {
-      key: GameTimeKey,
-      value: String(currentGameTime),
-    },
-    {
-      key: IRLTimeKey,
-      value: String(currentIRLTime),
-    },
-    ...pauseProperty,
-  ];
-  return UniversePropertyRepo.setMany(newProperties);
+  return repo.setTimeInternal({
+    lastGameTime: currentGameTime,
+    lastIRLTime: currentIRLTime,
+    isPaused: pause,
+  });
 }

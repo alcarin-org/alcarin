@@ -5,9 +5,10 @@ import { logger } from '@/server/core/helpers/logger';
 import {
   createCharacter,
   getCharacters,
-} from '@/server/services/account-access.service';
-import { AvailableRace } from '@/server/plugins/game/races/available-race-provider';
-import { Character } from '@/domain/game/character/character';
+} from '@/application/account-access.service';
+import { Character } from '@/domain/game/character';
+import { AvailableRace } from '@/domain/game/character/race';
+import { TransactionBoundary } from '@/server/repository-factory';
 
 interface CreateNewCharacterReq {
   body: {
@@ -30,7 +31,12 @@ export const createNewCharacter: AppRequestHandler<CreateNewCharacterReq> = asyn
   const accountId = req.accountId;
 
   try {
-    const character = await createCharacter(accountId, name, race);
+    const character = await createCharacter(
+      accountId,
+      name,
+      race,
+      TransactionBoundary.Default
+    );
     logger.info(`Character "${name} with race ${race}" created`);
 
     return res.status(status.CREATED).send(mapCharacterToResponse(character));
@@ -43,7 +49,10 @@ export const findCharactersForUsers: AppRequestHandler = async (req, res) => {
   const accountId = req.accountId;
 
   try {
-    const characters = await getCharacters(accountId);
+    const characters = await getCharacters(
+      accountId,
+      TransactionBoundary.Default
+    );
 
     return res.status(status.OK).send(characters.map(mapCharacterToResponse));
   } catch (err) {
@@ -51,7 +60,7 @@ export const findCharactersForUsers: AppRequestHandler = async (req, res) => {
   }
 };
 
-function mapCharacterToResponse(character: Character<AvailableRace>) {
+function mapCharacterToResponse(character: Character) {
   return {
     name: character.name,
     id: character.id,

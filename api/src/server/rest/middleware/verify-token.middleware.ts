@@ -1,6 +1,6 @@
-import { verifyToken } from '@/server/services/account-access.service';
+import { verifyToken } from '@/application/account-access.service';
 import { NextFunction, AppRequest, Response } from 'express';
-export const TokenType = 'Bearer';
+import boom from '@hapi/boom';
 
 export async function verifyTokenMiddleware(
   req: AppRequest,
@@ -8,18 +8,20 @@ export async function verifyTokenMiddleware(
   next: NextFunction
 ) {
   const auth = req.headers.authorization;
-  if (
-    auth !== undefined &&
-    auth.substring(0, TokenType.length + 1) === `${TokenType} `
-  ) {
+  if (auth !== undefined) {
+    const [tokenType, token] = auth.split(' ').map(val => val.trim());
+    if (tokenType !== 'Bearer') {
+      return next(boom.unauthorized('Invalid authorization token type'));
+    }
+
     try {
-      const payload = await verifyToken(auth.replace('Bearer ', ''));
+      const payload = await verifyToken(token);
       req.accountId = payload.accountId;
       return next();
     } catch (err) {
-      return res.status(401).json();
+      return next(boom.unauthorized('Invalid authorization token'));
     }
   }
 
-  return res.status(401).json();
+  return next(boom.unauthorized('No authorization token provided'));
 }

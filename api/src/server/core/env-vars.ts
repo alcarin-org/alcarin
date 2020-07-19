@@ -27,6 +27,7 @@ const envVarsSchema = Joi.object({
       'emerg'
     )
     .required(),
+  LOG_SILENT: Joi.bool().required(),
 
   DB_HOST: Joi.string().required(),
   DB_PORT: Joi.number()
@@ -71,6 +72,7 @@ export const envVars = {
   URL_BASE: process.env.URL_BASE || '',
   WEB_BASE_URL: process.env.WEB_BASE_URL || '',
   LOG_LEVEL: process.env.LOG_LEVEL || '',
+  LOG_SILENT: process.env.LOG_SILENT === '1',
 
   DB_HOST: process.env.DB_HOST || '',
   DB_PORT: parseEnvNumber('DB_PORT', 5432),

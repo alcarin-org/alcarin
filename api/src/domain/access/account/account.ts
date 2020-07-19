@@ -1,5 +1,3 @@
-import { PasswordEncryptor } from '../tools/password-encryptor.tool';
-
 export interface Account {
   id: string;
   email: string;
@@ -9,10 +7,9 @@ export interface Account {
   }[];
 }
 
-export function canLogin(
-  account: Account,
-  passwordCandidate: string,
-  encryptor: PasswordEncryptor
-): Promise<boolean> {
-  return encryptor.isPasswordMatch(account.passwordHash, passwordCandidate);
+export function addCharacter(account: Account, character: { id: string }) {
+  return {
+    ...account,
+    characters: [...account.characters, character],
+  };
 }

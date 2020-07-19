@@ -3,12 +3,12 @@ import { createLogger, format, transports, addColors } from 'winston';
 import { envVars } from '../env-vars';
 
 export const CustomLoggerLevels = {
-  debug: 0,
-  info: 1,
-  queue: 2,
-  db: 3,
-  warn: 4,
-  error: 5,
+  debug: 5,
+  info: 4,
+  queue: 3,
+  db: 2,
+  warn: 1,
+  error: 0,
 };
 
 addColors({
@@ -25,7 +25,7 @@ function createWinstonLogger() {
     level: envVars.LOG_LEVEL,
     levels: CustomLoggerLevels,
     format: format.errors({ stack: true }),
-    silent: envVars.NODE_ENV === 'test',
+    silent: envVars.LOG_SILENT,
   });
 
   const errorStackFormat = format.printf(info => {
@@ -37,7 +37,7 @@ function createWinstonLogger() {
   });
 
   const consoleTransport = new transports.Console({
-    level: 'error',
+    level: envVars.LOG_LEVEL,
     format: format.combine(
       format.colorize(),
       format.simple(),

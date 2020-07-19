@@ -7,9 +7,15 @@ module.exports = {
       comment:
         'This dependency is part of a circular relationship. You might want to revise ' +
         'your solution (i.e. use dependency inversion, make sure the modules have a single responsibility) ',
-      from: {},
+      from: {
+        pathNot: [
+          // typeorm entities relations create not real circual deps, cause class
+          // in TS is in same time a type and a value
+          "db\/entities\/.*\.ts"
+        ]
+      },
       to: {
-        circular: true
+        circular: true,
       }
     },
     {
@@ -123,7 +129,7 @@ module.exports = {
         'from.pathNot re of the not-to-dev-dep rule in the dependency-cruiser configuration',
       from: {
         path: '^(src)',
-        pathNot: '\\.spec\\.(js|mjs|cjs|ts|ls|coffee|litcoffee|coffee\\.md)$'
+        pathNot: '(src/spec/.*\\.ts|\\.spec\\.(js|mjs|cjs|ts|ls|coffee|litcoffee|coffee\\.md))$'
       },
       to: {
         dependencyTypes: [
@@ -187,7 +193,7 @@ module.exports = {
           leave out if you want to exclude neither (recommended!)
     */
     exclude : {
-      path: 'env-vars|logger',
+      path: 'node_modules|ormconfig.ts|env-vars.ts|logger.ts',
       dynamic: true
     },
 

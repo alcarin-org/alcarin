@@ -15,7 +15,7 @@ export function boomErrorsHandler(
   error.reformat(!isProduction());
   const { output, data } = error;
   const headers: Headers = output.headers as Headers;
-  Object.keys(headers).map(headerName =>
+  Object.keys(headers).forEach(headerName =>
     res.header(headerName, headers[headerName])
   );
 

@@ -6,7 +6,6 @@ import sinon from 'sinon';
 import { Connection, getConnection } from 'typeorm';
 import { createDatabaseConnection } from '@/server/db';
 import { MainScheduler, redis as queueRedis } from '@/server/queue';
-import { RepositoryFactory } from '@/server/repository-factory';
 import { redis } from '@/server/queue/redis';
 import { envVars } from '@/server/core/env-vars';
 
@@ -15,10 +14,9 @@ chai.should();
 
 before(async () => {
   await createTestDatabase();
-  const connection = await createDatabaseConnection({
+  await createDatabaseConnection({
     migrationsRun: true,
   });
-  RepositoryFactory.setDefaultConnection(connection);
 });
 
 beforeEach(async () => {

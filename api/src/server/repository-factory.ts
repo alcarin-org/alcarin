@@ -1,10 +1,36 @@
 import { Connection, EntityManager } from 'typeorm';
-import { identifierProvider } from '@/server/plugins/shared/uuid-identifier-provider/identifier-provider';
-import { raceKeyProvider } from '@/server/plugins/game/races/available-race-provider';
-import { createEntityCharacterRepository } from '@/server/db/repository/game/character.repository';
-import { createAccountRepository } from '@/server/db/repository/access/account.repository';
+import { identifierProvider } from '@/application/plugins/shared/uuid-identifier-provider/identifier-provider';
+import { getDefaultConnection } from '@/server/db';
+import {
+  CharacterRepository,
+  RaceParser,
+} from '@/server/db/repository/character.repository';
+import { AccountRepository } from '@/server/db/repository/account.repository';
+import { GameTimeRepository } from '@/server/db/repository/universe-property/game-time.repository';
+import { AvailableRace } from '@/domain/game/character/race';
+import { getAvailableRaces } from '@/domain/game/character';
+import {
+  RepositoryFactory as ApplicationRepositoryFactory,
+  TransactionBoundary as ApplicationTransactionBoundary,
+} from '@/application/repository-factory';
 
-export class RepositoryFactory {
+const availableRaceParser: RaceParser = {
+  parse(raceKey: string) {
+    // potential problem: we using domain code directly here is it a problem, or not?
+    const parsedRace = getAvailableRaces().find(value => value == raceKey);
+    if (parsedRace === undefined) {
+      throw new Error(`Invalid race "${raceKey}"`);
+    }
+
+    return parsedRace;
+  },
+
+  stringify(raceKey: AvailableRace) {
+    return raceKey.toString();
+  },
+};
+
+export class RepositoryFactory implements ApplicationRepositoryFactory {
   private static DefaultConnectionInstance: RepositoryFactory;
 
   private constructor(private context: Connection | EntityManager) {}
@@ -15,23 +41,55 @@ export class RepositoryFactory {
   }
 
   getAccountRepository() {
-    return createAccountRepository(identifierProvider, this.context);
+    return new AccountRepository(
+      identifierProvider,
+      availableRaceParser,
+      this.context
+    );
   }
 
   getCharacterRepository() {
-    return createEntityCharacterRepository(raceKeyProvider, identifierProvider);
+    return new CharacterRepository(
+      identifierProvider,
+      availableRaceParser,
+      this.context
+    );
   }
 
-  public static setDefaultConnection(connection: Connection) {
-    RepositoryFactory.DefaultConnectionInstance = new RepositoryFactory(
-      connection
-    );
+  getGameTimeRepository() {
+    return new GameTimeRepository(this.context);
   }
 
   public static get Default() {
     if (!RepositoryFactory.DefaultConnectionInstance) {
-      throw new Error('RepositoryFactory has not been initialized yet');
+      const defaultConnection = getDefaultConnection();
+      if (!defaultConnection) {
+        throw new Error('Database connection has not been initialized yet');
+      }
+      RepositoryFactory.DefaultConnectionInstance = new RepositoryFactory(
+        defaultConnection
+      );
     }
     return RepositoryFactory.DefaultConnectionInstance;
+  }
+}
+
+export class TransactionBoundary implements ApplicationTransactionBoundary {
+  private static instance: TransactionBoundary;
+
+  public static get Default() {
+    return new TransactionBoundary();
+  }
+
+  async transaction<TResult>(
+    call: (repo: RepositoryFactory) => Promise<TResult>
+  ): Promise<TResult> {
+    const defaultConnection = getDefaultConnection();
+    if (!defaultConnection) {
+      throw new Error('Database connection has not been initialized yet');
+    }
+    return defaultConnection.transaction(async entityManager =>
+      call(RepositoryFactory.create(entityManager))
+    );
   }
 }

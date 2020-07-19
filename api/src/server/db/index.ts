@@ -1,15 +1,20 @@
 import { Connection, createConnection, ConnectionOptions } from 'typeorm';
 import ormconfig from '@/../ormconfig';
 
-import { UniversePropertyRepository } from './repository/game/universe-property-repository';
+import { UniversePropertyRepository } from './repository/universe-property-repository';
 
 type ReposType = {
   UniversePropertyRepo: UniversePropertyRepository;
 };
 
-export let connection: Connection;
+let connection: Connection | null = null;
+
 export let UniversePropertyRepo: UniversePropertyRepository;
 export let Repos: ReposType;
+
+export function getDefaultConnection() {
+  return connection;
+}
 
 export async function createDatabaseConnection(
   options?: Partial<ConnectionOptions>
