@@ -1,11 +1,7 @@
-import {
-  registerAccountWithPassword,
-  verifyToken as verifyTokenService,
-} from '@/domain/access';
-import { Character } from '@/domain/game/character/character';
+import { Character } from '@/domain/game/character';
 import { AvailableRace } from '@/domain/game/character/race';
-import * as game from '@/domain/game';
-import * as access from '@/domain/access';
+import * as characterContext from '@/domain/game/character';
+import { auth, addCharacter } from '@/domain/access/account';
 
 import { bCryptEncrypter } from './plugins/access/password-encycrypters/bcrypt-encrypter';
 import { jwtTokenizer } from './plugins/access/tokenizer/jwt-tokenizer-service';
@@ -21,7 +17,7 @@ export async function createCharacter(
     const accountRepository = repoFactory.getAccountRepository();
     const characterRepository = repoFactory.getCharacterRepository();
 
-    const character = await game.createCharacter(
+    const character = await characterContext.createCharacter(
       { characterRepository },
       name,
       raceKey
@@ -29,9 +25,7 @@ export async function createCharacter(
 
     const account = await accountRepository.getById(accountId);
 
-    await accountRepository.saveAccount(
-      access.addCharacter(account, character)
-    );
+    await accountRepository.saveAccount(addCharacter(account, character));
 
     return character;
   });
@@ -63,7 +57,7 @@ export async function login(
       encryptor: bCryptEncrypter,
       accountRepository,
     };
-    return access.loginWithPassword(loginDi, email, password);
+    return auth.loginWithPassword(loginDi, email, password);
   });
 }
 
@@ -75,7 +69,7 @@ export async function register(
   return boundary.transaction(repoFactory => {
     const accountRepository = repoFactory.getAccountRepository();
 
-    return registerAccountWithPassword(
+    return auth.registerAccountWithPassword(
       { encryptor: bCryptEncrypter, accountRepository },
       email,
       password
@@ -84,5 +78,5 @@ export async function register(
 }
 
 export async function verifyToken(token: string) {
-  return verifyTokenService({ tokenizer: jwtTokenizer }, token);
+  return auth.verifyToken({ tokenizer: jwtTokenizer }, token);
 }

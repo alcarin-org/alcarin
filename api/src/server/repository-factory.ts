@@ -1,12 +1,14 @@
 import { Connection, EntityManager } from 'typeorm';
 import { identifierProvider } from '@/application/plugins/shared/uuid-identifier-provider/identifier-provider';
+import { getDefaultConnection } from '@/server/db';
 import {
   CharacterRepository,
   RaceParser,
 } from '@/server/db/repository/character.repository';
 import { AccountRepository } from '@/server/db/repository/account.repository';
-import { getDefaultConnection } from '@/server/db';
-import { getAvailableRaces, AvailableRace } from '@/domain/game/character/race';
+import { GameTimeRepository } from '@/server/db/repository/universe-property/game-time.repository';
+import { AvailableRace } from '@/domain/game/character/race';
+import { getAvailableRaces } from '@/domain/game/character';
 import {
   RepositoryFactory as ApplicationRepositoryFactory,
   TransactionBoundary as ApplicationTransactionBoundary,
@@ -14,6 +16,7 @@ import {
 
 const availableRaceParser: RaceParser = {
   parse(raceKey: string) {
+    // potential problem: we using domain code directly here is it a problem, or not?
     const parsedRace = getAvailableRaces().find(value => value == raceKey);
     if (parsedRace === undefined) {
       throw new Error(`Invalid race "${raceKey}"`);
@@ -51,6 +54,10 @@ export class RepositoryFactory implements ApplicationRepositoryFactory {
       availableRaceParser,
       this.context
     );
+  }
+
+  getGameTimeRepository() {
+    return new GameTimeRepository(this.context);
   }
 
   public static get Default() {

@@ -1,5 +1,5 @@
 import { Connection, EntityManager, Repository, In } from 'typeorm';
-import { Character } from '@/domain/game/character/character';
+import { Character } from '@/domain/game/character';
 import {
   CharacterRepository as CharacterRepositoryInterface,
   CreationCharacterPayload,

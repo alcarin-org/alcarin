@@ -1,6 +1,6 @@
 import { Connection, EntityManager, Repository } from 'typeorm';
 import { AccountRepository as AccountRepositoryInterface } from '@/domain/access/account/account.repository';
-import { Account } from '@/domain/access/account/account';
+import { Account } from '@/domain/access/account';
 import { IdentifierProviderService } from '@/domain/shared/identifier-provider.tool';
 
 import {

@@ -6,7 +6,7 @@ import {
   createCharacter,
   getCharacters,
 } from '@/application/account-access.service';
-import { Character } from '@/domain/game/character/character';
+import { Character } from '@/domain/game/character';
 import { AvailableRace } from '@/domain/game/character/race';
 import { TransactionBoundary } from '@/server/repository-factory';
 

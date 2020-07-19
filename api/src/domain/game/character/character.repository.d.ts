@@ -1,5 +1,6 @@
-import { Character } from './character';
 import { AvailableRace } from './race';
+
+import { Character } from '.';
 
 export interface CreationCharacterPayload {
   name: string;

@@ -1,7 +1,14 @@
-import { AccountRepository } from './account/account.repository';
-import { canLogin, Account } from './account/account';
-import { Tokenizer } from './tools/tokenizer.tool';
-import { PasswordEncryptor } from './tools/password-encryptor.tool';
+import { AccountRepository } from './account.repository';
+import { Tokenizer, PasswordEncryptor } from './tools';
+import { Account } from './account';
+
+function canLogin(
+  account: Account,
+  passwordCandidate: string,
+  encryptor: PasswordEncryptor
+): Promise<boolean> {
+  return encryptor.isPasswordMatch(account.passwordHash, passwordCandidate);
+}
 
 type loginWithPasswordDI = {
   tokenizer: Tokenizer;
@@ -22,7 +29,7 @@ export async function loginWithPassword(
     });
   }
 
-  throw 'invalid login data';
+  throw new Error('invalid login data');
 }
 
 type registerAccountWithPasswordDI = {
@@ -49,14 +56,4 @@ export async function verifyToken(di: VerifyTokenDI, token: string) {
   const { tokenizer } = di;
   const tokenPayload = await tokenizer.readToken(token);
   return tokenPayload;
-}
-
-export function addCharacter(
-  account: Account,
-  character: { id: string }
-): Account {
-  return {
-    ...account,
-    characters: [...account.characters, character],
-  };
 }
