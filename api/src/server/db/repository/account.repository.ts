@@ -1,13 +1,13 @@
 import { Connection, EntityManager, Repository } from 'typeorm';
-import { AccountRepository as AccountRepositoryInterface } from '@/domain/access/account/account.repository';
-import { Account } from '@/domain/access/account';
-import { IdentifierProviderService } from '@/domain/shared/identifier-provider.tool';
+import { AccountRepository as AccountRepositoryInterface } from '@/../../../../alcarin/account/domain/account.repository';
+import { Account } from '@/../../../../alcarin/account/domain';
+import { IdentifierProviderService } from '@/../../../../alcarin/shared/application/identifier-provider.tool';
 
 import {
   AccountRelations,
   Account as AccountEntity,
-} from '../entities/account';
-import { Character as CharacterEntity } from '../entities/character';
+} from '../../../../alcarin/shared/infrastructure/typeorm/entities/account';
+import { Character as CharacterEntity } from '../../../../alcarin/shared/infrastructure/typeorm/entities/character';
 
 import { RaceParser, mapEntityToModel } from './character.repository';
 

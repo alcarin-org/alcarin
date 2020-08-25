@@ -1,6 +1,6 @@
 import supertest from 'supertest';
 import { Express } from 'express';
-import { setupExpressApp } from '@/server/core/setup-express-app';
+import { setupExpressApp } from '@/../../alcarin/server/core/setup-express-app';
 let app: Express;
 
 before(async () => {

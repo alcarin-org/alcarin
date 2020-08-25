@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { characterRouter, authRouter, testRouter } from '@/server/rest/routes';
+import { characterRouter, authRouter, testRouter } from '../../rest/routes';
 
 export function setupRoutes() {
   const mainRouter = Router();

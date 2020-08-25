@@ -2,7 +2,7 @@ import { Connection, EntityManager } from 'typeorm';
 import {
   GameTimeRepository as DomainGameTimeRepository,
   GameTimeInternal,
-} from '@/domain/game/game-time/game-time.repository';
+} from '@/../../../../../alcarin/game-time/domain/game-time.repository';
 
 import { UniversePropertyRepository } from '../universe-property-repository';
 

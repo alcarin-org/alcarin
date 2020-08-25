@@ -1,7 +1,7 @@
 import { ConnectionOptions } from 'typeorm';
-import { SnakeCaseNamingStrategy } from '@/server/db/snake-case-naming-strategy';
-import { DbLogger } from '@/server/db/db-logger';
-import { envVars } from '@/server/core/env-vars';
+import { SnakeCaseNamingStrategy } from '@/src/server/db/snake-case-naming-strategy';
+import { DbLogger } from '@/src/server/db/db-logger';
+import { envVars } from '@/src/server/core/env-vars';
 
 const ormconfig: ConnectionOptions = {
   type: 'postgres',

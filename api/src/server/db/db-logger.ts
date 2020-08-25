@@ -1,5 +1,5 @@
 import { Logger } from 'typeorm';
-import { logger } from '@/server/core/helpers/logger';
+import { logger } from '../core/helpers/logger';
 
 export class DbLogger implements Logger {
   logQuery(query: string, parameters?: string[]) {

@@ -14,12 +14,13 @@
     "target": "es6",
     "lib": ["es2019"],
     "moduleResolution": "node",
-    "typeRoots": ["src/server/core/types", "./node_modules/@types"],
+    "typeRoots": [
+      "src/server/core/types", "./node_modules/@types"],
     "strictPropertyInitialization": false,
 
     "paths": {
-        "@/*": ["./src/*"]
+        "@/*": ["./*"]
     }
   },
-  "include": ["src/**/*.ts", "bin/**/*.ts"]
+  "include": ["alcarin/**/*.ts","src/**/*.ts", "bin/**/*.ts"]
 }

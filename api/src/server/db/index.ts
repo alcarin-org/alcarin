@@ -1,5 +1,5 @@
 import { Connection, createConnection, ConnectionOptions } from 'typeorm';
-import ormconfig from '@/../ormconfig';
+import ormconfig from '../../../ormconfig';
 
 import { UniversePropertyRepository } from './repository/universe-property-repository';
 

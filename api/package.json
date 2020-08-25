@@ -4,7 +4,7 @@
   "scripts": {
     "start": "ts-node-dev -r tsconfig-paths/register --no-notify --watch openapi.yml --respawn --transpileOnly -- ./src/index.ts",
     "queue": "ts-node-dev --no-notify --respawn --transpileOnly -- ./src/queue/run.ts",
-    "cli": "node -r ts-node/register --experimental-repl-await bin/cli.ts",
+    "cli": "node -r ts-node/register --experimental-repl-await src/cli/cli.ts",
     "test": "env $(cat .env.test | xargs) mocha -r tsconfig-paths/register -r ts-node/register --timeout 10000 --paths 'src/index.spec.ts' 'src/**/*.spec.ts'",
     "test:watch": "npm test -- --watch --watch-files 'src/**/*.ts,./openapi.yml'",
     "check-types": "tsc --noEmit",

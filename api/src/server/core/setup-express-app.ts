@@ -3,8 +3,8 @@ import logger from 'morgan';
 import passport from 'passport';
 import cors from 'cors';
 
-import { queueUiRouter } from '../queue/ui';
-import { boomErrorsHandler } from '../rest/middleware/boom-errors-handler.middleware';
+import { queueUiRouter } from '../../../alcarin/shared/queue/ui';
+import { boomErrorsHandler } from '../../rest/middleware/boom-errors-handler.middleware';
 
 import { envVars } from './env-vars';
 import { handleValidationError, openApiValidator } from './openapi';

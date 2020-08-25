@@ -1,13 +1,13 @@
 import { Connection, EntityManager, Repository, In } from 'typeorm';
-import { Character } from '@/domain/game/character';
+import { Character } from '@/../../../../alcarin/character/domain';
 import {
   CharacterRepository as CharacterRepositoryInterface,
   CreationCharacterPayload,
-} from '@/domain/game/character/character.repository';
-import { IdentifierProviderService } from '@/domain/shared/identifier-provider.tool';
-import { AvailableRace } from '@/domain/game/character/race';
+} from '@/../../../../alcarin/character/domain/character.repository';
+import { IdentifierProviderService } from '@/../../../../alcarin/shared/application/identifier-provider.tool';
+import { AvailableRace } from '@/../../../../alcarin/character/domain/race';
 
-import { Character as CharacterEntity } from '../entities/character';
+import { Character as CharacterEntity } from '../../../../alcarin/shared/infrastructure/typeorm/entities/character';
 
 export class CharacterRepository<TRaceType>
   implements CharacterRepositoryInterface {

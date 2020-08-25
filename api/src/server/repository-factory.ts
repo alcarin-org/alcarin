@@ -1,18 +1,18 @@
 import { Connection, EntityManager } from 'typeorm';
-import { identifierProvider } from '@/application/plugins/shared/uuid-identifier-provider/identifier-provider';
-import { getDefaultConnection } from '@/server/db';
+import { identifierProvider } from '@/../../alcarin/shared/infrastructure/uuid-identifier-provider/identifier-provider';
+import { getDefaultConnection } from './db';
 import {
   CharacterRepository,
   RaceParser,
-} from '@/server/db/repository/character.repository';
-import { AccountRepository } from '@/server/db/repository/account.repository';
-import { GameTimeRepository } from '@/server/db/repository/universe-property/game-time.repository';
-import { AvailableRace } from '@/domain/game/character/race';
-import { getAvailableRaces } from '@/domain/game/character';
+} from './db/repository/character.repository';
+import { AccountRepository } from './db/repository/account.repository';
+import { GameTimeRepository } from './db/repository/universe-property/game-time.repository';
+import { AvailableRace } from '@/../../alcarin/character/domain/race';
+import { getAvailableRaces } from '@/../../alcarin/character/domain';
 import {
   RepositoryFactory as ApplicationRepositoryFactory,
   TransactionBoundary as ApplicationTransactionBoundary,
-} from '@/application/repository-factory';
+} from '../application/repository-factory';
 
 const availableRaceParser: RaceParser = {
   parse(raceKey: string) {

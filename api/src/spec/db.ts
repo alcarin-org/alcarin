@@ -1,5 +1,5 @@
 import { register, login } from '@/application/account-access.service';
-import { TransactionBoundary } from '@/server/repository-factory';
+import { TransactionBoundary } from '@/../../alcarin/server/repository-factory';
 
 export async function registerAccount(email: string, password = 'pass123') {
   return register(email, password, TransactionBoundary.Default);
