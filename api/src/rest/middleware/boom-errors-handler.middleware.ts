@@ -1,8 +1,8 @@
 import { Boom, boomify } from '@hapi/boom';
 import { NextFunction, AppRequest, Response } from 'express';
 
-import { logger } from '../../server/core/helpers/logger';
-import { isProduction } from '../../server/core/env-vars';
+import { logger } from '../../helpers/logger';
+import { isProduction } from '../../server/env-vars';
 
 type Headers = Record<string, string>;
 

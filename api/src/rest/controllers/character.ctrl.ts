@@ -1,19 +1,15 @@
 import { AppRequestHandler } from 'express';
 import boom from '@hapi/boom';
 import status from 'http-status-codes';
-import { logger } from '../../server/core/helpers/logger';
-import {
-  createCharacter,
-  getCharacters,
-} from '../../../application/account-access.service';
-import { Character } from '@/../../../../alcarin/character/domain';
-import { AvailableRace } from '@/../../../../alcarin/character/domain/race';
-import { TransactionBoundary } from '../../server/repository-factory';
+import { charactersModule } from 'src/module-storage';
+import { AvailableRacesKey } from 'alcarin/game/characters/plugins/races/index';
+
+import { logger } from '../../helpers/logger';
 
 interface CreateNewCharacterReq {
   body: {
     name: string;
-    race: AvailableRace;
+    race: AvailableRacesKey;
   };
 }
 
@@ -31,15 +27,10 @@ export const createNewCharacter: AppRequestHandler<CreateNewCharacterReq> = asyn
   const accountId = req.accountId;
 
   try {
-    const character = await createCharacter(
-      accountId,
-      name,
-      race,
-      TransactionBoundary.Default
-    );
+    const id = await charactersModule.createCharacter(accountId, name, race);
     logger.info(`Character "${name} with race ${race}" created`);
 
-    return res.status(status.CREATED).send(mapCharacterToResponse(character));
+    return res.status(status.CREATED).send(id);
   } catch (err) {
     throw boom.badRequest(err.message);
   }
@@ -49,21 +40,9 @@ export const findCharactersForUsers: AppRequestHandler = async (req, res) => {
   const accountId = req.accountId;
 
   try {
-    const characters = await getCharacters(
-      accountId,
-      TransactionBoundary.Default
-    );
-
-    return res.status(status.OK).send(characters.map(mapCharacterToResponse));
+    const characters = await charactersModule.getCharactersForOwner(accountId);
+    return res.status(status.OK).send(characters);
   } catch (err) {
     throw boom.badRequest(err.message);
   }
 };
-
-function mapCharacterToResponse(character: Character) {
-  return {
-    name: character.name,
-    id: character.id,
-    race: character.raceKey,
-  };
-}

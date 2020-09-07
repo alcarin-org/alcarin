@@ -1,6 +1,7 @@
 import { AppRequestHandler } from 'express';
 import status from 'http-status-codes';
-import { logger } from '../../server/core/helpers/logger';
+
+import { logger } from '../../helpers/logger';
 
 export type ProcessPubSubMessageRequest = {
   body: {

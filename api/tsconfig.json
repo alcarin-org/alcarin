@@ -15,11 +15,12 @@
     "lib": ["es2019"],
     "moduleResolution": "node",
     "typeRoots": [
-      "src/server/core/types", "./node_modules/@types"],
+      "src/server/types", "./node_modules/@types"],
     "strictPropertyInitialization": false,
 
     "paths": {
-        "@/*": ["./*"]
+        "src": ["./src/*"],
+        "alcarin": ["./alcarin/*"]
     }
   },
   "include": ["alcarin/**/*.ts","src/**/*.ts", "bin/**/*.ts"]

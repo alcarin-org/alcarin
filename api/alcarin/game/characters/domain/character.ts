@@ -1,28 +1,16 @@
-import { AvailableRace, CharacterRaceBehaviour } from './race';
-import { CharacterRepository } from './character.repository';
-
-export const StartingAge = 20;
+import { RaceBehaviour, RaceModel } from './race';
 
 export interface Character {
   id: string;
   name: string;
-  age: number;
-  raceKey: AvailableRace;
+  owner: Owner;
+  bornAt: number;
+  raceBehaviour: RaceBehaviour;
+  raceModel: RaceModel;
 }
 
-export type CharacterBehaviour<TRaceKey> = CharacterRaceBehaviour<TRaceKey>;
-
-type CreateCharacterDI = { characterRepository: CharacterRepository };
-
-export async function createCharacter(
-  di: CreateCharacterDI,
-  name: string,
-  race: AvailableRace
-) {
-  const { characterRepository } = di;
-  return await characterRepository.createAndSave({
-    name,
-    age: StartingAge,
-    race,
-  });
+export interface CharacterCandidate {
+  name: string;
+  owner: Owner;
+  bornAt: number;
 }

@@ -1,6 +1,6 @@
 import { NextFunction, AppRequest, Response } from 'express';
 import boom from '@hapi/boom';
-import { verifyToken } from '@/alcarin/authorization';
+import { accountModule } from 'src/module-storage';
 
 export async function verifyTokenMiddleware(
   req: AppRequest,
@@ -15,8 +15,7 @@ export async function verifyTokenMiddleware(
     }
 
     try {
-      const payload = await verifyToken(token);
-      req.accountId = payload.accountId;
+      req.accountId = await accountModule.isSessionValid(token);
       return next();
     } catch (err) {
       return next(boom.unauthorized('Invalid authorization token'));

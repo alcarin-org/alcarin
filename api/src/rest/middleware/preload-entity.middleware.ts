@@ -3,8 +3,8 @@ import { RequestHandler } from 'express';
 import async from 'express-async-handler';
 import { EntityManager, ObjectType } from 'typeorm';
 
-import { getDefaultConnection } from '../../server/db';
-import { isProduction } from '../../server/core/env-vars';
+import { getDefaultConnection } from '../../db';
+import { isProduction } from '../../server/env-vars';
 
 const errorMessage = isProduction()
   ? () => ''

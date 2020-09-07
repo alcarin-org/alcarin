@@ -1,106 +1,77 @@
-import { DomainError } from '@/alcarin/shared/domain/domain-error';
+import { PasswordEncryptor } from '../domain/password-encrypter';
+import { createWithSpecification } from '../domain/account-with-password-specification';
+import { changePasswordHash, isPasswordMatch } from '../domain/account';
+import { Accounts } from '../domain/accounts';
+import { Tokenizer } from '../domain/tokenizer';
 
-import { Accounts } from '../domain/accounts.repository';
-import { createAccountWithPassword } from '../domain/account-creation.service';
-import {
-  createGodCharacterInAccount,
-  createNormalCharacterInAccount,
-} from '../domain/character-creation.service';
-import { addCharacter } from '../domain/account.aggregate';
-import { Race } from '../../shared/domain/race.vo';
-import { Characters } from '../domain/characters.module';
-
-import { AccountQueries } from './query/account-queries';
+import { InvalidLoginData } from './errors/invalid-login-data';
+import { BearerToken } from './model/bearer-token';
 
 export function AccountsService(
-  accountQueries: AccountQueries,
   accountsRepository: Accounts,
-  charactersModule: Characters
+  passwordEncrypter: PasswordEncryptor,
+  tokenizer: Tokenizer
 ) {
-  async function getAccountByEmail(email: string) {
-    return accountQueries.lookForLogInAbleAccountByEmail(email);
+  async function loginWithPassword(email: string, password: string) {
+    const account = await accountsRepository.getByEmail(email);
+    if (!account) {
+      throw new InvalidLoginData();
+    }
+
+    if (await isPasswordMatch(account, passwordEncrypter, password)) {
+      return new BearerToken(
+        await tokenizer.createBearerToken({
+          accountId: account.id,
+          isAdmin: account.isAdmin,
+        })
+      );
+    }
+    throw new InvalidLoginData();
   }
 
-  async function getAccountById(email: string) {
-    return accountQueries.lookForLogInAbleAccountById(email);
+  async function isSessionValid(token: string) {
+    try {
+      const tokenPayload = await tokenizer.readToken(token);
+      const account = await accountsRepository.getById(tokenPayload.accountId);
+      if (account === null) {
+        throw new Error('session unrecognized');
+      }
+
+      return tokenPayload.accountId;
+    } catch (e) {
+      throw new Error('session unrecognized');
+    }
   }
 
-  async function getAccountWithCharacters(accountId: string) {
-    return accountQueries.loadAccountWithCharacter(accountId);
-  }
+  async function changePassword(email: string, passwordCandidate: string) {
+    let account = await accountsRepository.getByEmail(email);
 
-  async function createAccount(email: string, passwordHash: string) {
-    const account = await createAccountWithPassword(
+    if (!account) {
+      throw new InvalidLoginData();
+    }
+
+    account = await changePasswordHash(
+      account,
+      passwordEncrypter,
+      passwordCandidate
+    );
+    await accountsRepository.save(account);
+  }
+  async function registerWithPassword(email: string, passwordHash: string) {
+    const account = await createWithSpecification(
       accountsRepository,
+      passwordEncrypter,
       email,
       passwordHash
     );
+
     return accountsRepository.save(account);
-  }
-
-  async function selfCreateNormalCharacter(
-    accountId: string,
-    name: string,
-    race: Race
-  ) {
-    let account = await accountsRepository.getById(accountId);
-    account = await createNormalCharacterInAccount(
-      charactersModule,
-      account,
-      account,
-      name,
-      race
-    );
-    return accountsRepository.save(account);
-  }
-
-  async function createNormalCharacterFor(
-    creatorId: string,
-    receiverId: string,
-    name: string,
-    race: Race
-  ) {
-    const creator = await accountsRepository.getById(creatorId);
-    let receiver = await accountsRepository.getById(receiverId);
-    receiver = await createNormalCharacterInAccount(
-      charactersModule,
-      creator,
-      receiver,
-      name,
-      race
-    );
-    return accountsRepository.save(receiver);
-  }
-
-  async function selfCreateGodCharacter(
-    accountId: string,
-    name: string,
-    race: Race
-  ) {
-    let account = await accountsRepository.getById(accountId);
-    const character = await createGodCharacterInAccount(
-      charactersModule,
-      account,
-      account,
-      name,
-      race
-    );
-    account = addCharacter(account, character);
-    return accountsRepository.save(account);
-  }
-
-  async function changePassword(email: string, password: string) {
-    throw new DomainError('not implemented yet');
   }
 
   return {
-    queryAccountByEmail: getAccountByEmail,
-    queryAccountById: getAccountById,
-    queryAccountWithCharacters: getAccountWithCharacters,
+    loginWithPassword,
+    isSessionValid,
     changePassword,
-    createAccount,
-    selfCreateNormalCharacter,
-    createNormalCharacterFor,
-    selfCreateGodCharacter,
+    registerWithPassword,
   };
 }
