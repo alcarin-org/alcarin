@@ -4,10 +4,10 @@ import chai from 'chai';
 import sinonChai from 'sinon-chai';
 import sinon from 'sinon';
 import { Connection, getConnection } from 'typeorm';
-import { createDatabaseConnection } from '@/server/db';
-import { MainScheduler, redis as queueRedis } from '@/server/queue';
-import { redis } from '@/server/queue/redis';
-import { envVars } from '@/server/core/env-vars';
+import { createDatabaseConnection } from '@/./server/db';
+import { MainScheduler, redis as queueRedis } from '@/../alcarin/shared/queue';
+import { redis } from '@/../alcarin/shared/queue/redis';
+import { envVars } from '@/./server/core/env-vars';
 
 chai.use(sinonChai);
 chai.should();
