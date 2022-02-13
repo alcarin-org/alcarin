@@ -15,7 +15,7 @@
   "dependencies": {
     "@hapi/boom": "^9.0.0",
     "@hapi/joi": "^17.1.1",
-    "ajv": "^6.12.2",
+    "ajv": "^6.12.3",
     "bcrypt": "^4.0.1",
     "bull-arena": "^2.8.1",
     "bullmq": "^1.6.8",
